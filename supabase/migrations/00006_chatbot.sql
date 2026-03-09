@@ -27,7 +27,7 @@ ALTER TABLE public.chatbot_conversations ENABLE ROW LEVEL SECURITY;
 
 -- Business members can read all conversations
 CREATE POLICY "chatbot_conversations_rw_business_member" ON public.chatbot_conversations
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- Public insert for customers starting conversations
 CREATE POLICY "chatbot_conversations_public_insert" ON public.chatbot_conversations
@@ -56,7 +56,7 @@ CREATE POLICY "chatbot_messages_via_conversation" ON public.chatbot_messages
   FOR ALL USING (
     conversation_id IN (
       SELECT id FROM public.chatbot_conversations
-      WHERE business_id IN (SELECT auth.user_business_ids())
+      WHERE business_id IN (SELECT public.user_business_ids())
     )
   );
 

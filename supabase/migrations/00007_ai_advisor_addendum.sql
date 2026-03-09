@@ -36,7 +36,7 @@ CREATE TRIGGER trg_advisor_rules_updated_at
 ALTER TABLE public.advisor_rules ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "advisor_rules_rw_business_member" ON public.advisor_rules
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: advisor_daily_analysis
@@ -60,7 +60,7 @@ CREATE INDEX idx_advisor_daily_analysis_date ON public.advisor_daily_analysis (b
 ALTER TABLE public.advisor_daily_analysis ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "advisor_daily_analysis_rw_business_member" ON public.advisor_daily_analysis
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: product_health_scores
@@ -88,7 +88,7 @@ CREATE INDEX idx_product_health_scores_business_date ON public.product_health_sc
 ALTER TABLE public.product_health_scores ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "product_health_scores_rw_business_member" ON public.product_health_scores
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: knowledge_gap_queries
@@ -119,4 +119,4 @@ CREATE TRIGGER trg_knowledge_gap_queries_updated_at
 ALTER TABLE public.knowledge_gap_queries ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "knowledge_gap_queries_rw_business_member" ON public.knowledge_gap_queries
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));

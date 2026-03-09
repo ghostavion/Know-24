@@ -36,7 +36,7 @@ CREATE TRIGGER trg_support_tickets_updated_at
 ALTER TABLE public.support_tickets ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "support_tickets_rw_business_member" ON public.support_tickets
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- Public insert policy for storefront contact forms
 CREATE POLICY "support_tickets_public_insert" ON public.support_tickets
@@ -62,7 +62,7 @@ CREATE POLICY "ticket_replies_via_ticket" ON public.support_ticket_replies
   FOR ALL USING (
     ticket_id IN (
       SELECT id FROM public.support_tickets
-      WHERE business_id IN (SELECT auth.user_business_ids())
+      WHERE business_id IN (SELECT public.user_business_ids())
     )
   );
 
@@ -88,4 +88,4 @@ CREATE INDEX idx_usage_events_type ON public.usage_events (event_type);
 ALTER TABLE public.usage_events ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "usage_events_rw_business_member" ON public.usage_events
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));

@@ -50,7 +50,7 @@ Output as JSON with this exact structure:
 
     const { error: updateError } = await supabase
       .from("products")
-      .update({ content_json: contentJson, status: "review" })
+      .update({ content: contentJson, status: "review" })
       .eq("id", productId)
       .eq("business_id", businessId);
 

@@ -31,7 +31,7 @@ CREATE TRIGGER trg_social_posts_updated_at
 ALTER TABLE public.social_posts ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "social_posts_rw_business_member" ON public.social_posts
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: email_sequences
@@ -61,7 +61,7 @@ CREATE TRIGGER trg_email_sequences_updated_at
 ALTER TABLE public.email_sequences ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "email_sequences_rw_business_member" ON public.email_sequences
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: email_sequence_sends
@@ -85,7 +85,7 @@ CREATE INDEX idx_email_sequence_sends_recipient_email ON public.email_sequence_s
 ALTER TABLE public.email_sequence_sends ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "email_sequence_sends_rw_business_member" ON public.email_sequence_sends
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: referral_links
@@ -115,7 +115,7 @@ CREATE TRIGGER trg_referral_links_updated_at
 ALTER TABLE public.referral_links ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "referral_links_rw_business_member" ON public.referral_links
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: referral_conversions
@@ -145,4 +145,4 @@ CREATE TRIGGER trg_referral_conversions_updated_at
 ALTER TABLE public.referral_conversions ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "referral_conversions_rw_business_member" ON public.referral_conversions
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));

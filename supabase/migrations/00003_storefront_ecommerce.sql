@@ -31,7 +31,7 @@ CREATE TRIGGER trg_email_subscribers_updated_at
 ALTER TABLE public.email_subscribers ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "email_subscribers_rw_business_member" ON public.email_subscribers
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: storefront_testimonials
@@ -60,7 +60,7 @@ CREATE TRIGGER trg_storefront_testimonials_updated_at
 ALTER TABLE public.storefront_testimonials ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "storefront_testimonials_rw_business_member" ON public.storefront_testimonials
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Public read policies for anonymous storefront access

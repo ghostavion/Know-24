@@ -205,7 +205,7 @@ CREATE TRIGGER trg_org_members_updated_at
 ALTER TABLE public.organization_members ENABLE ROW LEVEL SECURITY;
 
 -- Helper function: return all org IDs the current user belongs to
-CREATE OR REPLACE FUNCTION auth.user_org_ids()
+CREATE OR REPLACE FUNCTION public.user_org_ids()
 RETURNS SETOF UUID LANGUAGE sql STABLE SECURITY DEFINER AS $$
   SELECT o.id
   FROM public.organizations o
@@ -216,7 +216,7 @@ RETURNS SETOF UUID LANGUAGE sql STABLE SECURITY DEFINER AS $$
 $$;
 
 CREATE POLICY "orgs_select_member" ON public.organizations
-  FOR SELECT USING (id IN (SELECT auth.user_org_ids()));
+  FOR SELECT USING (id IN (SELECT public.user_org_ids()));
 
 CREATE POLICY "orgs_update_owner" ON public.organizations
   FOR UPDATE USING (
@@ -224,7 +224,7 @@ CREATE POLICY "orgs_update_owner" ON public.organizations
   );
 
 CREATE POLICY "org_members_select" ON public.organization_members
-  FOR SELECT USING (organization_id IN (SELECT auth.user_org_ids()));
+  FOR SELECT USING (organization_id IN (SELECT public.user_org_ids()));
 
 -- ============================================================
 -- Table: businesses
@@ -267,22 +267,22 @@ CREATE TRIGGER trg_businesses_updated_at
 ALTER TABLE public.businesses ENABLE ROW LEVEL SECURITY;
 
 -- Helper function: return all business IDs accessible to current user
-CREATE OR REPLACE FUNCTION auth.user_business_ids()
+CREATE OR REPLACE FUNCTION public.user_business_ids()
 RETURNS SETOF UUID LANGUAGE sql STABLE SECURITY DEFINER AS $$
   SELECT b.id
   FROM public.businesses b
-  WHERE b.organization_id IN (SELECT auth.user_org_ids())
+  WHERE b.organization_id IN (SELECT public.user_org_ids())
     AND b.deleted_at IS NULL
 $$;
 
 CREATE POLICY "businesses_select_member" ON public.businesses
-  FOR SELECT USING (id IN (SELECT auth.user_business_ids()));
+  FOR SELECT USING (id IN (SELECT public.user_business_ids()));
 
 CREATE POLICY "businesses_insert_member" ON public.businesses
-  FOR INSERT WITH CHECK (organization_id IN (SELECT auth.user_org_ids()));
+  FOR INSERT WITH CHECK (organization_id IN (SELECT public.user_org_ids()));
 
 CREATE POLICY "businesses_update_member" ON public.businesses
-  FOR UPDATE USING (id IN (SELECT auth.user_business_ids()));
+  FOR UPDATE USING (id IN (SELECT public.user_business_ids()));
 
 CREATE POLICY "businesses_delete_owner" ON public.businesses
   FOR DELETE USING (
@@ -365,7 +365,7 @@ CREATE TRIGGER trg_products_updated_at
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "products_rw_business_member" ON public.products
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: knowledge_items
@@ -407,7 +407,7 @@ CREATE TRIGGER trg_knowledge_items_updated_at
 ALTER TABLE public.knowledge_items ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "knowledge_items_business_member" ON public.knowledge_items
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: knowledge_chunks
@@ -433,7 +433,7 @@ CREATE INDEX idx_knowledge_chunks_embedding ON public.knowledge_chunks
 ALTER TABLE public.knowledge_chunks ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "knowledge_chunks_business_member" ON public.knowledge_chunks
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: storefronts
@@ -480,7 +480,7 @@ CREATE TRIGGER trg_storefronts_updated_at
 ALTER TABLE public.storefronts ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "storefronts_rw_business_member" ON public.storefronts
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: customers
@@ -539,7 +539,7 @@ CREATE TRIGGER trg_orders_updated_at
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "orders_rw_business_member" ON public.orders
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: blog_posts
@@ -578,7 +578,7 @@ CREATE TRIGGER trg_blog_posts_updated_at
 ALTER TABLE public.blog_posts ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "blog_posts_rw_business_member" ON public.blog_posts
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: activity_log
@@ -599,7 +599,7 @@ CREATE INDEX idx_activity_log_business_id ON public.activity_log (business_id, c
 ALTER TABLE public.activity_log ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "activity_log_rw_business_member" ON public.activity_log
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: scout_scans
@@ -622,7 +622,7 @@ CREATE INDEX idx_scout_scans_business_id ON public.scout_scans (business_id, cre
 ALTER TABLE public.scout_scans ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "scout_scans_rw_business_member" ON public.scout_scans
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: scout_opportunities
@@ -656,7 +656,7 @@ CREATE TRIGGER trg_scout_opportunities_updated_at
 ALTER TABLE public.scout_opportunities ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "scout_opportunities_rw_business_member" ON public.scout_opportunities
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
 
 -- ============================================================
 -- Table: advisor_items (Level 2 Addendum)
@@ -667,11 +667,11 @@ CREATE TABLE public.advisor_items (
   business_id       UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   category          advisor_category NOT NULL,
   priority          advisor_priority NOT NULL DEFAULT 'medium',
-  headline          TEXT NOT NULL,
-  context_summary   TEXT,
+  title             TEXT NOT NULL,
+  summary           TEXT,
   context_data      JSONB NOT NULL DEFAULT '{}',
   action_type       advisor_action_type,
-  draft_content     JSONB NOT NULL DEFAULT '{}',
+  action_payload    JSONB NOT NULL DEFAULT '{}',
   status            advisor_item_status NOT NULL DEFAULT 'pending',
   snoozed_until     TIMESTAMPTZ,
   approved_at       TIMESTAMPTZ,
@@ -703,4 +703,42 @@ CREATE TRIGGER trg_advisor_items_updated_at
 ALTER TABLE public.advisor_items ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "advisor_items_rw_business_member" ON public.advisor_items
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
+
+-- ============================================================
+-- RPC: match_knowledge_chunks (pgvector similarity search)
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.match_knowledge_chunks(
+  query_embedding TEXT,
+  match_business_id UUID,
+  match_threshold FLOAT DEFAULT 0.7,
+  match_count INT DEFAULT 5,
+  scope_ids UUID[] DEFAULT NULL
+)
+RETURNS TABLE (
+  id UUID,
+  content TEXT,
+  similarity FLOAT,
+  knowledge_item_id UUID,
+  source_title TEXT
+)
+LANGUAGE plpgsql STABLE AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    kc.id,
+    kc.content,
+    1 - (kc.embedding <=> query_embedding::vector) AS similarity,
+    kc.knowledge_item_id,
+    ki.source_title
+  FROM public.knowledge_chunks kc
+  JOIN public.knowledge_items ki ON ki.id = kc.knowledge_item_id
+  WHERE kc.business_id = match_business_id
+    AND kc.embedding IS NOT NULL
+    AND 1 - (kc.embedding <=> query_embedding::vector) > match_threshold
+    AND (scope_ids IS NULL OR kc.knowledge_item_id = ANY(scope_ids))
+  ORDER BY kc.embedding <=> query_embedding::vector
+  LIMIT match_count;
+END;
+$$;

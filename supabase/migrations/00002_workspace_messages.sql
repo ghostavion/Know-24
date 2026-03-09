@@ -22,4 +22,4 @@ CREATE INDEX idx_workspace_messages_created ON public.ai_workspace_messages(busi
 ALTER TABLE public.ai_workspace_messages ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "workspace_messages_rw_business_member" ON public.ai_workspace_messages
-  FOR ALL USING (business_id IN (SELECT auth.user_business_ids()));
+  FOR ALL USING (business_id IN (SELECT public.user_business_ids()));
