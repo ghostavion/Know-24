@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Sparkles, Package, Globe, Plus, Megaphone, Search } from "lucide-react";
+import { Sparkles, Package, Globe, Plus, Megaphone, Search, Headset, BarChart3 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,12 @@ import { WorkspaceChat } from "@/components/workspace/WorkspaceChat";
 import { ProductSlideOver } from "@/components/dashboard/ProductSlideOver";
 import { MarketingSlideOver } from "@/components/marketing/MarketingSlideOver";
 import { ScoutPanel } from "@/components/scout/ScoutPanel";
+import { OperationsSlideOver } from "@/components/operations/OperationsSlideOver";
+import { SalesSlideOver } from "@/components/sales/SalesSlideOver";
 import type { DashboardBusiness } from "@/types/workspace";
 
 interface ActiveSlideOver {
-  type: "workspace" | "products" | "marketing" | "scout";
+  type: "workspace" | "products" | "marketing" | "scout" | "operations" | "sales";
   businessId: string;
   businessName: string;
 }
@@ -42,7 +44,7 @@ const StatusIndicator = ({ status }: StatusIndicatorProps) => {
 
 interface BusinessCardProps {
   business: DashboardBusiness;
-  onOpenSlideOver: (type: "workspace" | "products" | "marketing" | "scout", business: DashboardBusiness) => void;
+  onOpenSlideOver: (type: "workspace" | "products" | "marketing" | "scout" | "operations" | "sales", business: DashboardBusiness) => void;
 }
 
 const BusinessCard = ({ business, onOpenSlideOver }: BusinessCardProps) => {
@@ -117,6 +119,22 @@ const BusinessCard = ({ business, onOpenSlideOver }: BusinessCardProps) => {
           <Search className="size-4" />
           Scout
         </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onOpenSlideOver("operations", business)}
+        >
+          <Headset className="size-4" />
+          Operations
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onOpenSlideOver("sales", business)}
+        >
+          <BarChart3 className="size-4" />
+          Sales
+        </Button>
         {business.storefrontUrl && (
           <a
             href={`/s/${business.slug}`}
@@ -171,7 +189,7 @@ export default function DashboardPage() {
   }, [fetchBusinesses]);
 
   const handleOpenSlideOver = (
-    type: "workspace" | "products" | "marketing" | "scout",
+    type: "workspace" | "products" | "marketing" | "scout" | "operations" | "sales",
     business: DashboardBusiness
   ) => {
     setActiveSlideOver({
@@ -293,6 +311,38 @@ export default function DashboardPage() {
       >
         {activeSlideOver?.type === "scout" && (
           <ScoutPanel businessId={activeSlideOver.businessId} />
+        )}
+      </SlideOverPanel>
+
+      {/* Operations Slide-Over */}
+      <SlideOverPanel
+        open={activeSlideOver?.type === "operations"}
+        onClose={handleCloseSlideOver}
+        title="Operations"
+        subtitle={activeSlideOver?.businessName}
+        width="wide"
+      >
+        {activeSlideOver?.type === "operations" && (
+          <OperationsSlideOver
+            businessId={activeSlideOver.businessId}
+            businessName={activeSlideOver.businessName}
+          />
+        )}
+      </SlideOverPanel>
+
+      {/* Sales Slide-Over */}
+      <SlideOverPanel
+        open={activeSlideOver?.type === "sales"}
+        onClose={handleCloseSlideOver}
+        title="Sales & Analytics"
+        subtitle={activeSlideOver?.businessName}
+        width="wide"
+      >
+        {activeSlideOver?.type === "sales" && (
+          <SalesSlideOver
+            businessId={activeSlideOver.businessId}
+            businessName={activeSlideOver.businessName}
+          />
         )}
       </SlideOverPanel>
     </div>
