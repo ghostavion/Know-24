@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Sparkles, Package, Globe, Plus, Megaphone } from "lucide-react";
+import { Sparkles, Package, Globe, Plus, Megaphone, Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,11 @@ import { SlideOverPanel } from "@/components/shared/SlideOverPanel";
 import { WorkspaceChat } from "@/components/workspace/WorkspaceChat";
 import { ProductSlideOver } from "@/components/dashboard/ProductSlideOver";
 import { MarketingSlideOver } from "@/components/marketing/MarketingSlideOver";
+import { ScoutPanel } from "@/components/scout/ScoutPanel";
 import type { DashboardBusiness } from "@/types/workspace";
 
 interface ActiveSlideOver {
-  type: "workspace" | "products" | "marketing";
+  type: "workspace" | "products" | "marketing" | "scout";
   businessId: string;
   businessName: string;
 }
@@ -41,7 +42,7 @@ const StatusIndicator = ({ status }: StatusIndicatorProps) => {
 
 interface BusinessCardProps {
   business: DashboardBusiness;
-  onOpenSlideOver: (type: "workspace" | "products" | "marketing", business: DashboardBusiness) => void;
+  onOpenSlideOver: (type: "workspace" | "products" | "marketing" | "scout", business: DashboardBusiness) => void;
 }
 
 const BusinessCard = ({ business, onOpenSlideOver }: BusinessCardProps) => {
@@ -108,6 +109,14 @@ const BusinessCard = ({ business, onOpenSlideOver }: BusinessCardProps) => {
           <Megaphone className="size-4" />
           Marketing
         </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onOpenSlideOver("scout", business)}
+        >
+          <Search className="size-4" />
+          Scout
+        </Button>
         {business.storefrontUrl && (
           <a
             href={`/s/${business.slug}`}
@@ -162,7 +171,7 @@ export default function DashboardPage() {
   }, [fetchBusinesses]);
 
   const handleOpenSlideOver = (
-    type: "workspace" | "products" | "marketing",
+    type: "workspace" | "products" | "marketing" | "scout",
     business: DashboardBusiness
   ) => {
     setActiveSlideOver({
@@ -271,6 +280,19 @@ export default function DashboardPage() {
             businessId={activeSlideOver.businessId}
             businessName={activeSlideOver.businessName}
           />
+        )}
+      </SlideOverPanel>
+
+      {/* Scout Slide-Over */}
+      <SlideOverPanel
+        open={activeSlideOver?.type === "scout"}
+        onClose={handleCloseSlideOver}
+        title="Scout"
+        subtitle={activeSlideOver?.businessName}
+        width="wide"
+      >
+        {activeSlideOver?.type === "scout" && (
+          <ScoutPanel businessId={activeSlideOver.businessId} />
         )}
       </SlideOverPanel>
     </div>
