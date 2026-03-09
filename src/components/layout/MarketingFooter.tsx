@@ -19,8 +19,9 @@ const footerSections = [
   {
     title: "Company",
     links: [
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
+      { label: "Privacy Policy", href: "/legal/privacy" },
+      { label: "Terms of Service", href: "/legal/terms" },
+      { label: "Cookies", href: "/legal/cookies" },
     ],
   },
 ];
