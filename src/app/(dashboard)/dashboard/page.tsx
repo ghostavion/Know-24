@@ -2,17 +2,18 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { Sparkles, Package, Globe, Plus } from "lucide-react";
+import { Sparkles, Package, Globe, Plus, Megaphone } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SlideOverPanel } from "@/components/shared/SlideOverPanel";
 import { WorkspaceChat } from "@/components/workspace/WorkspaceChat";
 import { ProductSlideOver } from "@/components/dashboard/ProductSlideOver";
+import { MarketingSlideOver } from "@/components/marketing/MarketingSlideOver";
 import type { DashboardBusiness } from "@/types/workspace";
 
 interface ActiveSlideOver {
-  type: "workspace" | "products";
+  type: "workspace" | "products" | "marketing";
   businessId: string;
   businessName: string;
 }
@@ -40,7 +41,7 @@ const StatusIndicator = ({ status }: StatusIndicatorProps) => {
 
 interface BusinessCardProps {
   business: DashboardBusiness;
-  onOpenSlideOver: (type: "workspace" | "products", business: DashboardBusiness) => void;
+  onOpenSlideOver: (type: "workspace" | "products" | "marketing", business: DashboardBusiness) => void;
 }
 
 const BusinessCard = ({ business, onOpenSlideOver }: BusinessCardProps) => {
@@ -99,6 +100,14 @@ const BusinessCard = ({ business, onOpenSlideOver }: BusinessCardProps) => {
           <Package className="size-4" />
           Products
         </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onOpenSlideOver("marketing", business)}
+        >
+          <Megaphone className="size-4" />
+          Marketing
+        </Button>
         {business.storefrontUrl && (
           <a
             href={`/s/${business.slug}`}
@@ -153,7 +162,7 @@ export default function DashboardPage() {
   }, [fetchBusinesses]);
 
   const handleOpenSlideOver = (
-    type: "workspace" | "products",
+    type: "workspace" | "products" | "marketing",
     business: DashboardBusiness
   ) => {
     setActiveSlideOver({
@@ -243,6 +252,22 @@ export default function DashboardPage() {
       >
         {activeSlideOver?.type === "products" && (
           <ProductSlideOver
+            businessId={activeSlideOver.businessId}
+            businessName={activeSlideOver.businessName}
+          />
+        )}
+      </SlideOverPanel>
+
+      {/* Marketing Slide-Over */}
+      <SlideOverPanel
+        open={activeSlideOver?.type === "marketing"}
+        onClose={handleCloseSlideOver}
+        title="Marketing Suite"
+        subtitle={activeSlideOver?.businessName}
+        width="wide"
+      >
+        {activeSlideOver?.type === "marketing" && (
+          <MarketingSlideOver
             businessId={activeSlideOver.businessId}
             businessName={activeSlideOver.businessName}
           />
