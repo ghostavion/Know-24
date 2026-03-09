@@ -1,6 +1,18 @@
+import { currentUser } from "@clerk/nextjs/server";
 import { Settings } from "lucide-react";
+import { SettingsForm } from "@/components/settings/SettingsForm";
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const user = await currentUser();
+
+  const userData = {
+    firstName: user?.firstName ?? null,
+    lastName: user?.lastName ?? null,
+    emailAddress:
+      user?.emailAddresses?.[0]?.emailAddress ?? "unknown@example.com",
+    imageUrl: user?.imageUrl ?? "",
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -8,15 +20,7 @@ export default function SettingsPage() {
         <h1 className="text-2xl font-semibold text-foreground">Settings</h1>
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-base font-semibold text-foreground">Profile</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Manage your account settings and preferences.
-        </p>
-        <div className="mt-4 text-sm text-muted-foreground">
-          Settings will be available once your first business is created.
-        </div>
-      </div>
+      <SettingsForm user={userData} />
     </div>
   );
 }
