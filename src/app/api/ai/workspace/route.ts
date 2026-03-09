@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { streamText, convertToModelMessages, stepCountIs, type UIMessage } from "ai";
 import { createServiceClient } from "@/lib/supabase/server";
-import { primaryModel } from "@/lib/ai/providers";
+import { primaryModel, logLLMCall } from "@/lib/ai/providers";
 import { getWorkspaceTools } from "@/lib/ai/tools/workspace-tools";
 import type { ApiResponse } from "@/types/api";
 
@@ -112,12 +112,24 @@ You can help the creator manage their business. You have tools to:
 Be concise, helpful, and proactive. When the creator asks to do something, use the appropriate tool. Always confirm actions taken.`;
 
     // Stream the response
+    const startTime = Date.now();
     const result = streamText({
       model: primaryModel,
       system: systemPrompt,
       messages: await convertToModelMessages(messages as UIMessage[]),
       tools: getWorkspaceTools(businessId),
       stopWhen: stepCountIs(3),
+      onFinish: ({ usage }) => {
+        logLLMCall({
+          businessId,
+          userId,
+          model: "gpt-4o",
+          feature: "workspace",
+          inputTokens: usage.inputTokens ?? 0,
+          outputTokens: usage.outputTokens ?? 0,
+          durationMs: Date.now() - startTime,
+        });
+      },
     });
 
     return result.toUIMessageStreamResponse();

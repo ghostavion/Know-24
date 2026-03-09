@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Users,
   Building2,
@@ -5,6 +6,9 @@ import {
   ShoppingCart,
   DollarSign,
   Globe,
+  BrainCircuit,
+  AlertCircle,
+  ArrowRight,
 } from "lucide-react";
 import { createServiceClient } from "@/lib/supabase/server";
 import { AdminHealthPanel } from "@/components/admin/AdminHealthPanel";
@@ -54,6 +58,8 @@ export default async function AdminOverviewPage() {
     ordersTotal,
     ordersRevenue,
     storefrontsTotal,
+    llmCallsResult,
+    recentErrorsResult,
   ] = await Promise.all([
     supabase.from("users").select("*", { count: "exact", head: true }),
     supabase
@@ -76,6 +82,17 @@ export default async function AdminOverviewPage() {
       .select("amount_cents")
       .eq("status", "completed"),
     supabase.from("storefronts").select("*", { count: "exact", head: true }),
+    supabase
+      .from("platform_logs")
+      .select("*", { count: "exact", head: true })
+      .eq("event_category", "LLM")
+      .gte("timestamp", sevenDaysAgo),
+    supabase
+      .from("platform_logs")
+      .select("id, timestamp, event_type, error_message, status")
+      .eq("status", "error")
+      .order("timestamp", { ascending: false })
+      .limit(5),
   ]);
 
   const totalRevenueCents = (ordersRevenue.data ?? []).reduce(
@@ -127,7 +144,21 @@ export default async function AdminOverviewPage() {
       subtitle: "published storefronts",
       icon: Globe,
     },
+    {
+      label: "LLM Calls (7d)",
+      value: llmCallsResult.count ?? 0,
+      subtitle: "AI API calls this week",
+      icon: BrainCircuit,
+    },
   ];
+
+  const recentErrors = (recentErrorsResult.data ?? []) as Array<{
+    id: string;
+    timestamp: string;
+    event_type: string;
+    error_message: string | null;
+    status: string;
+  }>;
 
   return (
     <div className="space-y-8">
@@ -151,6 +182,69 @@ export default async function AdminOverviewPage() {
           Service Health
         </h3>
         <AdminHealthPanel />
+      </div>
+
+      {/* Recent errors */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-red-500" />
+            Recent Errors
+          </h3>
+          <Link
+            href="/admin/logs?status=error"
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View all <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+        {recentErrors.length === 0 ? (
+          <p className="text-sm text-muted-foreground py-4 text-center">No recent errors</p>
+        ) : (
+          <div className="space-y-2">
+            {recentErrors.map((err) => (
+              <div
+                key={err.id}
+                className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900/30 dark:bg-red-900/10"
+              >
+                <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-foreground">{err.event_type}</p>
+                  {err.error_message && (
+                    <p className="mt-0.5 text-xs text-muted-foreground truncate">{err.error_message}</p>
+                  )}
+                </div>
+                <span className="shrink-0 text-xs text-muted-foreground whitespace-nowrap">
+                  {new Date(err.timestamp).toLocaleString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Quick links */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: "Platform Logs", href: "/admin/logs", desc: "Browse all events" },
+          { label: "Analytics", href: "/admin/analytics", desc: "Revenue & growth" },
+          { label: "LLM Usage", href: "/admin/llm", desc: "Token costs & trends" },
+          { label: "Live Feed", href: "/admin/feed", desc: "Real-time stream" },
+        ].map((link) => (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="group rounded-xl border border-border bg-card p-4 transition-colors hover:bg-accent"
+          >
+            <p className="text-sm font-semibold text-foreground group-hover:text-foreground">{link.label}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{link.desc}</p>
+          </Link>
+        ))}
       </div>
     </div>
   );

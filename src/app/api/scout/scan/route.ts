@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { runScan } from "@/lib/scout/orchestrator";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import type { ApiResponse } from "@/types/api";
 
 // ---------------------------------------------------------------------------
@@ -162,6 +163,20 @@ export async function POST(
           error_message: err instanceof Error ? err.message : "Unknown error",
         })
         .eq("id", scan.id);
+    });
+
+    logPlatformEvent({
+      event_category: "DATA",
+      event_type: "scout.scan.triggered",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: businessId,
+      payload: {
+        scan_id: scan.id,
+        platforms,
+        scans_used: org.scout_scans_used_this_month + 1,
+        scans_ceiling: org.scout_scans_ceiling,
+      },
     });
 
     return NextResponse.json({

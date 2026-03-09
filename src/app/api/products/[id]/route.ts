@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import type { ApiResponse } from "@/types/api";
 
 const updateProductSchema = z.object({
@@ -105,6 +106,18 @@ export async function PATCH(
       );
     }
 
+    logPlatformEvent({
+      event_category: "DATA",
+      event_type: "product.updated",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: (updatedProduct as ProductRow).business_id,
+      payload: {
+        product_id: productId,
+        updated_fields: Object.keys(parsed.data),
+      },
+    });
+
     return NextResponse.json({ data: updatedProduct as ProductRow });
   } catch {
     return NextResponse.json(
@@ -165,6 +178,15 @@ export async function DELETE(
         { status: 500 }
       );
     }
+
+    logPlatformEvent({
+      event_category: "DATA",
+      event_type: "product.deleted",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: (product as unknown as { business_id: string }).business_id,
+      payload: { product_id: productId },
+    });
 
     return NextResponse.json({ data: { id: productId, deleted: true } });
   } catch {

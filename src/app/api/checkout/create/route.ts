@@ -3,6 +3,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import type { ApiResponse } from "@/types/api";
 
 const checkoutSchema = z.object({
@@ -248,6 +249,20 @@ export async function POST(
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
+
+    logPlatformEvent({
+      event_category: "DATA",
+      event_type: "checkout.created",
+      status: "success",
+      business_id: businessId,
+      payload: {
+        session_id: session.id,
+        product_id: typedProduct.id,
+        customer_email: customerEmail,
+        amount_cents: typedProduct.price_cents,
+        platform_fee_cents: platformFeeCents,
+      },
+    });
 
     // 9. Return session data
     return NextResponse.json({

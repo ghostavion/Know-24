@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import type { ApiResponse } from "@/types/api";
 import type { DashboardBusiness } from "@/types/workspace";
 
@@ -81,6 +82,14 @@ export async function GET(): Promise<NextResponse<ApiResponse<DashboardBusiness[
         : null,
       createdAt: b.created_at,
     }));
+
+    logPlatformEvent({
+      event_category: "DATA",
+      event_type: "businesses.listed",
+      clerk_user_id: userId,
+      status: "success",
+      payload: { count: businesses.length },
+    });
 
     return NextResponse.json({ data: businesses });
   } catch {

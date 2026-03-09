@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getProductGenerationQueue } from "@/lib/queue/queues";
 import { PRODUCT_TYPES } from "@/lib/constants/product-types";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import type { ApiResponse } from "@/types/api";
 
 const buildSchema = z.object({
@@ -147,6 +148,19 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Build
         { status: 500 }
       );
     }
+
+    logPlatformEvent({
+      event_category: "DATA",
+      event_type: "setup.build.queued",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: businessId,
+      payload: {
+        product_count: queuedProducts.length,
+        product_types: productTypes,
+        product_ids: queuedProducts.map((p) => p.id),
+      },
+    });
 
     return NextResponse.json({
       data: { products: queuedProducts },

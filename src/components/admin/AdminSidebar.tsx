@@ -10,6 +10,11 @@ import {
   Server,
   ArrowLeft,
   Shield,
+  ScrollText,
+  BarChart3,
+  BrainCircuit,
+  Radio,
+  LifeBuoy,
 } from "lucide-react";
 
 const navItems = [
@@ -17,6 +22,11 @@ const navItems = [
   { label: "Users", href: "/admin/users", icon: Users },
   { label: "Activity", href: "/admin/activity", icon: Activity },
   { label: "Services", href: "/admin/services", icon: Server },
+  { label: "Platform Logs", href: "/admin/logs", icon: ScrollText },
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+  { label: "LLM Usage", href: "/admin/llm", icon: BrainCircuit },
+  { label: "Live Feed", href: "/admin/feed", icon: Radio },
+  { label: "Support", href: "/admin/support", icon: LifeBuoy },
 ];
 
 export function AdminSidebar() {

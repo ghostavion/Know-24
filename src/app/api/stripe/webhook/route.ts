@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
 
 export async function POST(
   request: NextRequest
@@ -36,26 +37,59 @@ export async function POST(
   try {
     switch (event.type) {
       case "checkout.session.completed": {
-        await handleCheckoutCompleted(
-          event.data.object as Stripe.Checkout.Session,
-          supabase
-        );
+        const session = event.data.object as Stripe.Checkout.Session;
+        await handleCheckoutCompleted(session, supabase);
+
+        logPlatformEvent({
+          event_category: "DATA",
+          event_type: "stripe.checkout.completed",
+          status: "success",
+          business_id: session.metadata?.business_id ?? null,
+          payload: {
+            stripe_event_id: event.id,
+            product_id: session.metadata?.product_id,
+            amount_total: session.amount_total,
+            currency: session.currency,
+          },
+        });
         break;
       }
 
       case "account.updated": {
-        await handleAccountUpdated(
-          event.data.object as Stripe.Account,
-          supabase
-        );
+        const account = event.data.object as Stripe.Account;
+        await handleAccountUpdated(account, supabase);
+
+        logPlatformEvent({
+          event_category: "DATA",
+          event_type: "stripe.account.updated",
+          status: "success",
+          payload: {
+            stripe_event_id: event.id,
+            stripe_account_id: account.id,
+            charges_enabled: account.charges_enabled,
+            payouts_enabled: account.payouts_enabled,
+          },
+        });
         break;
       }
 
       case "charge.refunded": {
-        await handleChargeRefunded(
-          event.data.object as Stripe.Charge,
-          supabase
-        );
+        const charge = event.data.object as Stripe.Charge;
+        await handleChargeRefunded(charge, supabase);
+
+        logPlatformEvent({
+          event_category: "DATA",
+          event_type: "stripe.charge.refunded",
+          status: "success",
+          payload: {
+            stripe_event_id: event.id,
+            payment_intent_id:
+              typeof charge.payment_intent === "string"
+                ? charge.payment_intent
+                : charge.payment_intent?.id ?? null,
+            amount_refunded: charge.amount_refunded,
+          },
+        });
         break;
       }
     }

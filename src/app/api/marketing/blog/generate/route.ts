@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { generateText } from "ai";
 import { createServiceClient } from "@/lib/supabase/server";
-import { primaryModel } from "@/lib/ai/providers";
+import { primaryModel, logLLMCall } from "@/lib/ai/providers";
 import type { ApiResponse } from "@/types/api";
 
 function slugify(text: string): string {
@@ -75,10 +75,21 @@ export async function POST(
       );
     }
 
-    const { text } = await generateText({
+    const startTime = Date.now();
+    const { text, usage } = await generateText({
       model: primaryModel,
       system: `You are a professional blog writer for ${business.name}, a ${business.niche} business. Write in a ${tone} tone.`,
       prompt: `Write a blog post about: ${topic}. Target word count: ${wordCount}. Format: Start with a compelling title on the first line, then a blank line, then the full article body using markdown formatting (## for headings, **bold**, etc). Include a brief meta description on the last line prefixed with 'META: '.`,
+    });
+
+    logLLMCall({
+      businessId,
+      userId,
+      model: "gpt-4o",
+      feature: "blog_generate",
+      inputTokens: usage.inputTokens ?? 0,
+      outputTokens: usage.outputTokens ?? 0,
+      durationMs: Date.now() - startTime,
     });
 
     // Parse the AI response

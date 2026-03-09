@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { generateText } from "ai";
 import { createServiceClient } from "@/lib/supabase/server";
-import { primaryModel } from "@/lib/ai/providers";
+import { primaryModel, logLLMCall } from "@/lib/ai/providers";
 import type { ApiResponse } from "@/types/api";
 
 const generatePostSchema = z.object({
@@ -84,9 +84,22 @@ export async function POST(
 
     const topicContext = topic ? `Topic/angle: ${topic}.` : "";
 
-    const { text } = await generateText({
+    const llmStart = Date.now();
+    const { text, usage } = await generateText({
       model: primaryModel,
       prompt: `You are a social media expert. Generate a ${length} ${platform} post for ${business.name}, a ${business.niche} business. ${productContext} ${topicContext} Length guide: short=under 100 chars, medium=100-250 chars, long=250-500 chars. Return ONLY the post text, no quotes.`,
+    });
+    const llmDurationMs = Date.now() - llmStart;
+
+    logLLMCall({
+      businessId,
+      userId,
+      model: "gpt-4o",
+      feature: "marketing.generate-post",
+      inputTokens: usage?.inputTokens ?? 0,
+      outputTokens: usage?.outputTokens ?? 0,
+      durationMs: llmDurationMs,
+      status: "success",
     });
 
     const content = text.trim();

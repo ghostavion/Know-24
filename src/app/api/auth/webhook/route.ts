@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
 
 interface ClerkWebhookEvent {
   type: string;
@@ -71,6 +72,14 @@ export async function POST(req: Request) {
         },
         { onConflict: "clerk_user_id" }
       );
+
+      logPlatformEvent({
+        event_category: "AUTH",
+        event_type: evt.type as "user.created" | "user.updated",
+        clerk_user_id: id,
+        status: "success",
+        payload: { email: primaryEmail, provider: "clerk" },
+      });
       break;
     }
 
@@ -80,6 +89,14 @@ export async function POST(req: Request) {
         .from("users")
         .update({ deleted_at: new Date().toISOString() })
         .eq("clerk_user_id", id);
+
+      logPlatformEvent({
+        event_category: "AUTH",
+        event_type: "user.deleted",
+        clerk_user_id: id,
+        status: "success",
+        payload: { provider: "clerk" },
+      });
       break;
     }
   }
