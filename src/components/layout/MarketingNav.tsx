@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { useAuth, UserButton } from "@clerk/nextjs";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,7 @@ const navLinks = [
 ];
 
 export function MarketingNav() {
+  const { isSignedIn } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -41,29 +42,32 @@ export function MarketingNav() {
 
         {/* Desktop Auth */}
         <div className="hidden items-center gap-3 md:flex">
-          <SignedOut>
-            <Link
-              href="/sign-in"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Login
-            </Link>
-            <Link
-              href="/sign-up"
-              className="rounded-lg bg-[#0891b2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0e7490]"
-            >
-              Start Free
-            </Link>
-          </SignedOut>
-          <SignedIn>
-            <Link
-              href="/dashboard"
-              className="rounded-lg bg-[#0891b2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0e7490]"
-            >
-              Dashboard
-            </Link>
-            <UserButton />
-          </SignedIn>
+          {isSignedIn ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="rounded-lg bg-[#0891b2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0e7490]"
+              >
+                Dashboard
+              </Link>
+              <UserButton />
+            </>
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Login
+              </Link>
+              <Link
+                href="/sign-up"
+                className="rounded-lg bg-[#0891b2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0e7490]"
+              >
+                Start Free
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Toggle */}
@@ -95,32 +99,35 @@ export function MarketingNav() {
             </Link>
           ))}
           <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
-            <SignedOut>
-              <Link
-                href="/sign-in"
-                className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent"
-              >
-                Login
-              </Link>
-              <Link
-                href="/sign-up"
-                className="rounded-lg bg-[#0891b2] px-3 py-2 text-center text-sm font-medium text-white hover:bg-[#0e7490]"
-              >
-                Start Free
-              </Link>
-            </SignedOut>
-            <SignedIn>
-              <Link
-                href="/dashboard"
-                onClick={() => setMobileOpen(false)}
-                className="rounded-lg bg-[#0891b2] px-3 py-2 text-center text-sm font-medium text-white hover:bg-[#0e7490]"
-              >
-                Dashboard
-              </Link>
-              <div className="flex items-center gap-2 px-3 py-2">
-                <UserButton />
-              </div>
-            </SignedIn>
+            {isSignedIn ? (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-lg bg-[#0891b2] px-3 py-2 text-center text-sm font-medium text-white hover:bg-[#0e7490]"
+                >
+                  Dashboard
+                </Link>
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <UserButton />
+                </div>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/sign-in"
+                  className="rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/sign-up"
+                  className="rounded-lg bg-[#0891b2] px-3 py-2 text-center text-sm font-medium text-white hover:bg-[#0e7490]"
+                >
+                  Start Free
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
