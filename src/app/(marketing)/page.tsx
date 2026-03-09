@@ -1,13 +1,28 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import {
   BookOpen,
   Zap,
   ShoppingBag,
   BarChart3,
   ArrowRight,
+  Star,
+  Users,
+  Globe,
+  Sparkles,
+  Shield,
+  Clock,
+  Check,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { testimonials } from "@/data/testimonials";
+import { pricingPlans } from "@/data/pricing";
 
-const features = [
+export const metadata: Metadata = {
+  title: "Know24 — Turn Your Expertise Into a Business",
+};
+
+const steps = [
   {
     icon: BookOpen,
     title: "Upload Your Knowledge",
@@ -34,47 +49,54 @@ const features = [
   },
 ];
 
+const features = [
+  {
+    icon: Sparkles,
+    title: "AI Product Generation",
+    description:
+      "Create ebooks, courses, chatbots, quizzes, and more from your raw expertise. AI does the heavy lifting.",
+  },
+  {
+    icon: Globe,
+    title: "Branded Storefront",
+    description:
+      "A beautiful, conversion-optimized storefront with custom domain support. Live in minutes.",
+  },
+  {
+    icon: BarChart3,
+    title: "Analytics Dashboard",
+    description:
+      "Track sales, visitors, and engagement in real-time. Understand what content drives revenue.",
+  },
+  {
+    icon: Shield,
+    title: "Stripe Connect Payments",
+    description:
+      "Get paid directly to your bank account. Secure, PCI-compliant payments with zero hassle.",
+  },
+  {
+    icon: Users,
+    title: "AI Marketing Suite",
+    description:
+      "300 social posts/month, blog engine with auto-publish, and email sequences — all AI-generated.",
+  },
+  {
+    icon: Clock,
+    title: "Scout Intelligence",
+    description:
+      "AI scans Reddit, X, LinkedIn, and more to find opportunities where your expertise is needed.",
+  },
+];
+
 export default function LandingPage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Navigation */}
-      <nav className="border-b border-border bg-background">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-              K
-            </div>
-            <span className="text-lg font-semibold">Know24</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link
-              href="/pricing"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/sign-in"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              Sign In
-            </Link>
-            <Link
-              href="/sign-up"
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+    <>
       {/* Hero */}
       <section className="mx-auto max-w-7xl px-6 py-24 text-center">
         <div className="mx-auto max-w-3xl">
           <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl">
             Turn Your Expertise Into a{" "}
-            <span className="text-primary">Knowledge Business</span>
+            <span className="text-[#0891b2]">Knowledge Business</span>
           </h1>
           <p className="mt-6 text-lg text-muted-foreground">
             From raw expertise to a fully operational knowledge business in
@@ -84,9 +106,12 @@ export default function LandingPage() {
           <div className="mt-10 flex items-center justify-center gap-4">
             <Link
               href="/sign-up"
-              className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 text-base font-medium text-primary-foreground hover:bg-primary/90"
+              className={cn(
+                "inline-flex items-center gap-2 rounded-lg px-8 py-3 text-base font-medium text-white",
+                "bg-[#0891b2] hover:bg-[#0e7490]"
+              )}
             >
-              Start Building
+              Start Building Free
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
@@ -95,6 +120,21 @@ export default function LandingPage() {
             >
               View Pricing
             </Link>
+          </div>
+          {/* Social Proof Bar */}
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-[#0891b2]" />
+              <span>2,500+ knowledge businesses launched</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Star className="h-4 w-4 text-[#0891b2]" />
+              <span>4.9/5 average rating</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-[#0891b2]" />
+              <span>Launch in under 1 hour</span>
+            </div>
           </div>
         </div>
       </section>
@@ -110,16 +150,47 @@ export default function LandingPage() {
             heavy lifting.
           </p>
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature, index) => (
+            {steps.map((step, index) => (
               <div
-                key={feature.title}
+                key={step.title}
                 className="relative rounded-xl border border-border bg-card p-6"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <feature.icon className="h-5 w-5" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0891b2]/10 text-[#0891b2]">
+                  <step.icon className="h-5 w-5" />
                 </div>
-                <div className="absolute -top-3 left-6 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                <div className="absolute -top-3 left-6 flex h-6 w-6 items-center justify-center rounded-full bg-[#0891b2] text-xs font-bold text-white">
                   {index + 1}
+                </div>
+                <h3 className="mt-4 text-base font-semibold text-foreground">
+                  {step.title}
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {step.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <h2 className="text-center text-3xl font-bold text-foreground">
+            Everything You Need to Succeed
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
+            A complete platform for building, launching, and growing your
+            knowledge business.
+          </p>
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature) => (
+              <div
+                key={feature.title}
+                className="rounded-xl border border-border bg-card p-6"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0891b2]/10 text-[#0891b2]">
+                  <feature.icon className="h-5 w-5" />
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-foreground">
                   {feature.title}
@@ -133,32 +204,131 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* Testimonials */}
+      <section className="border-t border-border bg-muted/30 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <h2 className="text-center text-3xl font-bold text-foreground">
+            Loved by Experts Everywhere
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
+            See how knowledge professionals are transforming their expertise
+            into thriving businesses.
+          </p>
+          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {testimonials.map((testimonial) => (
+              <div
+                key={testimonial.name}
+                className="rounded-xl border border-border bg-card p-6"
+              >
+                <div className="flex gap-0.5">
+                  {Array.from({ length: testimonial.rating }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className="h-4 w-4 fill-[#0891b2] text-[#0891b2]"
+                    />
+                  ))}
+                </div>
+                <p className="mt-4 text-sm text-muted-foreground">
+                  &ldquo;{testimonial.content}&rdquo;
+                </p>
+                <div className="mt-4 border-t border-border pt-4">
+                  <p className="text-sm font-semibold text-foreground">
+                    {testimonial.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {testimonial.title}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
       <section className="py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <h2 className="text-center text-3xl font-bold text-foreground">
+            Simple, Transparent Pricing
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-center text-muted-foreground">
+            One plan to run your business. One add-on to supercharge growth.
+          </p>
+          <div className="mx-auto mt-16 grid max-w-4xl gap-8 lg:grid-cols-2">
+            {pricingPlans.map((plan) => (
+              <div
+                key={plan.name}
+                className={cn(
+                  "rounded-xl border bg-card p-8",
+                  plan.highlighted
+                    ? "border-[#0891b2] ring-2 ring-[#0891b2]/20"
+                    : "border-border"
+                )}
+              >
+                {plan.highlighted && (
+                  <span className="mb-4 inline-block rounded-full bg-[#0891b2]/10 px-3 py-1 text-xs font-semibold text-[#0891b2]">
+                    Most Popular
+                  </span>
+                )}
+                <h3 className="text-xl font-bold text-foreground">
+                  {plan.name}
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {plan.description}
+                </p>
+                <div className="mt-6">
+                  <span className="text-4xl font-bold text-foreground">
+                    ${plan.price}
+                  </span>
+                  <span className="text-muted-foreground">/{plan.interval}</span>
+                </div>
+                <ul className="mt-8 space-y-3">
+                  {plan.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-3 text-sm text-muted-foreground"
+                    >
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#0891b2]" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/sign-up"
+                  className={cn(
+                    "mt-8 block w-full rounded-lg py-3 text-center text-sm font-medium",
+                    plan.highlighted
+                      ? "bg-[#0891b2] text-white hover:bg-[#0e7490]"
+                      : "border border-border text-foreground hover:bg-accent"
+                  )}
+                >
+                  {plan.cta}
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="bg-[#0891b2] py-24">
         <div className="mx-auto max-w-3xl px-6 text-center">
-          <h2 className="text-3xl font-bold text-foreground">
+          <h2 className="text-3xl font-bold text-white">
             Ready to Monetize Your Knowledge?
           </h2>
-          <p className="mt-4 text-muted-foreground">
+          <p className="mt-4 text-white/80">
             Join thousands of experts who have turned their expertise into
             thriving knowledge businesses with Know24.
           </p>
           <Link
             href="/sign-up"
-            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 text-base font-medium text-primary-foreground hover:bg-primary/90"
+            className="mt-8 inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3 text-base font-medium text-[#0891b2] hover:bg-white/90"
           >
             Get Started Free
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="border-t border-border bg-background py-8">
-        <div className="mx-auto max-w-7xl px-6 text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} Know24. All rights reserved.
-        </div>
-      </footer>
-    </div>
+    </>
   );
 }

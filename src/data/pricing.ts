@@ -1,0 +1,41 @@
+export const pricingPlans = [
+  {
+    name: "Know24 Base",
+    price: 99,
+    interval: "month" as const,
+    description: "Everything you need to launch and run a knowledge business.",
+    features: [
+      '"Setup My Business" AI onboarding',
+      "AI Workspace — manage by conversation",
+      "10+ product types (ebooks, courses, quizzes, chatbots)",
+      "Branded storefront with custom domain",
+      "300 social posts/month (AI-generated)",
+      "Blog engine with AI auto-publish",
+      "Email sequences (Welcome, Nurture, Launch)",
+      "Referral program",
+      "Stripe Connect payments",
+      "Analytics dashboard",
+    ],
+    cta: "Start Building",
+    highlighted: true,
+    stripeLookupKey: "know24_base_monthly",
+  },
+  {
+    name: "Scout Add-On",
+    price: 199,
+    interval: "month" as const,
+    description:
+      "AI market intelligence that finds opportunities while you sleep.",
+    features: [
+      "20 scans/month across 6+ platforms",
+      "Reddit, X, LinkedIn, Quora, podcasts, news",
+      "AI-scored opportunity cards",
+      "Draft responses pre-written",
+      "Approve / Edit / Dismiss workflow",
+      "Trending topic detection",
+    ],
+    cta: "Add Scout",
+    highlighted: false,
+    stripeLookupKey: "know24_scout_monthly",
+  },
+] as const;
