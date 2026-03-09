@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
-import { productGenerationQueue } from "@/lib/queue/queues";
+import { getProductGenerationQueue } from "@/lib/queue/queues";
 import type { ApiResponse } from "@/types/api";
 
 function slugify(text: string): string {
@@ -202,7 +202,7 @@ export async function POST(
     }
 
     // Enqueue generation job
-    await productGenerationQueue.add("generate", {
+    await getProductGenerationQueue().add("generate", {
       productId,
       businessId,
       productTypeSlug,

@@ -26,24 +26,36 @@ function connection(): ConnectionOptions {
   return _connection;
 }
 
-export const productGenerationQueue = new Queue("product-generation", {
-  connection: connection(),
-});
-export const knowledgeIngestQueue = new Queue("knowledge-ingest", {
-  connection: connection(),
-});
-export const blogPublishQueue = new Queue("blog-publish", {
-  connection: connection(),
-});
-export const emailSendQueue = new Queue("email-send", {
-  connection: connection(),
-});
-export const scoutScanQueue = new Queue("scout-scan", {
-  connection: connection(),
-});
-export const socialPostQueue = new Queue("social-post-generate", {
-  connection: connection(),
-});
-export const embeddingIngestQueue = new Queue("embedding-ingest", {
-  connection: connection(),
-});
+// Lazy queue factory — avoids connecting at module load (build time)
+const queueCache = new Map<string, Queue>();
+
+function getQueue(name: string): Queue {
+  let q = queueCache.get(name);
+  if (!q) {
+    q = new Queue(name, { connection: connection() });
+    queueCache.set(name, q);
+  }
+  return q;
+}
+
+export function getProductGenerationQueue(): Queue {
+  return getQueue("product-generation");
+}
+export function getKnowledgeIngestQueue(): Queue {
+  return getQueue("knowledge-ingest");
+}
+export function getBlogPublishQueue(): Queue {
+  return getQueue("blog-publish");
+}
+export function getEmailSendQueue(): Queue {
+  return getQueue("email-send");
+}
+export function getScoutScanQueue(): Queue {
+  return getQueue("scout-scan");
+}
+export function getSocialPostQueue(): Queue {
+  return getQueue("social-post-generate");
+}
+export function getEmbeddingIngestQueue(): Queue {
+  return getQueue("embedding-ingest");
+}

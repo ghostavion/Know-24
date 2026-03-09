@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
-import { productGenerationQueue } from "@/lib/queue/queues";
+import { getProductGenerationQueue } from "@/lib/queue/queues";
 import { PRODUCT_TYPES } from "@/lib/constants/product-types";
 import type { ApiResponse } from "@/types/api";
 
@@ -122,7 +122,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Build
         );
       }
 
-      await productGenerationQueue.add("generate-product", {
+      await getProductGenerationQueue().add("generate-product", {
         productId,
         businessId,
         productTypeSlug: slug,

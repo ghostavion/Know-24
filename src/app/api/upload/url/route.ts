@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
-import { knowledgeIngestQueue } from "@/lib/queue/queues";
+import { getKnowledgeIngestQueue } from "@/lib/queue/queues";
 import type { ApiResponse } from "@/types/api";
 
 const submitUrlSchema = z.object({
@@ -76,7 +76,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<UrlSu
       );
     }
 
-    await knowledgeIngestQueue.add("ingest-url", {
+    await getKnowledgeIngestQueue().add("ingest-url", {
       knowledgeItemId,
       businessId,
       url,

@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { STOREFRONT_PALETTES } from "@/lib/constants/product-types";
-import { productGenerationQueue } from "@/lib/queue/queues";
+import { getProductGenerationQueue } from "@/lib/queue/queues";
 
 export function getWorkspaceTools(businessId: string) {
   return {
@@ -253,7 +253,7 @@ export function getWorkspaceTools(businessId: string) {
           };
         }
 
-        await productGenerationQueue.add("generate", {
+        await getProductGenerationQueue().add("generate", {
           productId: product.id,
           businessId,
           productType,
