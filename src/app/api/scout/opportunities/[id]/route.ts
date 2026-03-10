@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import type { ApiResponse } from "@/types/api";
 
 // ---------------------------------------------------------------------------
@@ -32,8 +33,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse<ApiResponse<UpdateResult>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 },
@@ -73,6 +74,15 @@ export async function PATCH(
 
     const { status, editedDraft } = parsed.data;
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 },
+      );
+    }
 
     // Fetch the opportunity
     const { data: opportunity, error: oppError } = await supabase

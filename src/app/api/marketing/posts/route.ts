@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import type { ApiResponse } from "@/types/api";
 
 const businessIdSchema = z.string().uuid();
@@ -25,8 +26,8 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<SocialPost[]>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -48,6 +49,15 @@ export async function GET(
     }
 
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify business ownership
     const { data: business, error: bizError } = await supabase
@@ -90,8 +100,8 @@ export async function DELETE(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<{ deleted: boolean }>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -113,6 +123,15 @@ export async function DELETE(
     }
 
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify the post belongs to user's business
     const { data: post, error: postError } = await supabase

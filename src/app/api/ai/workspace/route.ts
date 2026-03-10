@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { streamText, convertToModelMessages, stepCountIs, type UIMessage } from "ai";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import { primaryModel, logLLMCall } from "@/lib/ai/providers";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
@@ -35,8 +36,8 @@ export async function POST(
   request: NextRequest
 ): Promise<Response> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json<ApiResponse>(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -60,6 +61,15 @@ export async function POST(
 
     const { businessId, messages } = parsed.data;
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json<ApiResponse>(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify business belongs to user
     const { data: business, error: bizError } = await supabase
@@ -135,7 +145,7 @@ Be concise, helpful, and proactive. When the creator asks to do something, use t
         logPlatformEvent({
           event_category: "LLM",
           event_type: "ai.workspace.chat",
-          clerk_user_id: userId,
+          clerk_user_id: clerkUserId,
           status: "success",
           business_id: businessId,
           duration_ms: Date.now() - startTime,

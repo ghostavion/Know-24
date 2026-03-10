@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
@@ -24,8 +25,8 @@ interface AnalysisData {
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse<AnalysisData>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -49,6 +50,15 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Analy
 
     const { businessId } = parsed.data;
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify business ownership
     const { data: business } = await supabase
@@ -95,7 +105,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Analy
     logPlatformEvent({
       event_category: "DATA",
       event_type: "setup.analysis.completed",
-      clerk_user_id: userId,
+      clerk_user_id: clerkUserId,
       status: "success",
       business_id: businessId,
       payload: { mock: true },

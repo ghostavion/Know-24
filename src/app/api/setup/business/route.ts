@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import { logPlatformEvent, extractRequestMeta } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
@@ -27,8 +28,8 @@ interface BusinessData {
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse<BusinessData>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -54,6 +55,15 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Busin
     const slug = slugify(name);
     const supabase = createServiceClient();
 
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User record not found. Please sign out and sign back in." } },
+        { status: 404 }
+      );
+    }
+
     // Find organization for this user
     const { data: membership } = await supabase
       .from("organization_members")
@@ -69,24 +79,34 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Busin
     } else {
       // Create an organization for the user
       const orgId = crypto.randomUUID();
+      const orgSlug = `${slug}-org`;
       const { error: orgError } = await supabase.from("organizations").insert({
         id: orgId,
+        owner_id: userId,
         name: `${name} Org`,
+        slug: orgSlug,
       });
 
       if (orgError) {
         return NextResponse.json(
-          { error: { code: "ORG_CREATE_FAILED", message: "Failed to create organization" } },
+          { error: { code: "ORG_CREATE_FAILED", message: orgError.message } },
           { status: 500 }
         );
       }
 
       // Add user as member
-      await supabase.from("organization_members").insert({
+      const { error: memberError } = await supabase.from("organization_members").insert({
         organization_id: orgId,
         user_id: userId,
         role: "owner",
       });
+
+      if (memberError) {
+        return NextResponse.json(
+          { error: { code: "MEMBER_CREATE_FAILED", message: memberError.message } },
+          { status: 500 }
+        );
+      }
 
       organizationId = orgId;
     }
@@ -106,7 +126,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Busin
 
     if (businessError) {
       return NextResponse.json(
-        { error: { code: "BUSINESS_CREATE_FAILED", message: "Failed to create business" } },
+        { error: { code: "BUSINESS_CREATE_FAILED", message: businessError.message } },
         { status: 500 }
       );
     }
@@ -120,7 +140,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Busin
 
     if (storefrontError) {
       return NextResponse.json(
-        { error: { code: "STOREFRONT_CREATE_FAILED", message: "Failed to create storefront" } },
+        { error: { code: "STOREFRONT_CREATE_FAILED", message: storefrontError.message } },
         { status: 500 }
       );
     }
@@ -129,7 +149,8 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Busin
     logPlatformEvent({
       event_category: "USER_ACTION",
       event_type: "setup.business.created",
-      clerk_user_id: userId,
+      clerk_user_id: clerkUserId,
+      user_id: userId,
       status: "success",
       business_id: businessId,
       organization_id: organizationId,

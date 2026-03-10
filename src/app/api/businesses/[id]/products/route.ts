@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import { getProductGenerationQueue } from "@/lib/queue/queues";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
@@ -51,8 +52,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<unknown[]>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -61,6 +62,15 @@ export async function GET(
 
     const { id: businessId } = await params;
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify business belongs to user
     const { data: business, error: bizError } = await supabase
@@ -120,8 +130,8 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<ApiResponse<ProductRow>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -146,6 +156,15 @@ export async function POST(
     const { id: businessId } = await params;
     const { productTypeSlug, title: providedTitle } = parsed.data;
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify business ownership
     const { data: business, error: bizError } = await supabase
@@ -213,7 +232,7 @@ export async function POST(
     logPlatformEvent({
       event_category: "USER_ACTION",
       event_type: "product.created",
-      clerk_user_id: userId,
+      clerk_user_id: clerkUserId,
       status: "success",
       business_id: businessId,
       payload: { product_id: productId, product_type: productTypeSlug, title },

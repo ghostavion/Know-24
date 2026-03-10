@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import type { ApiResponse } from "@/types/api";
 
 function slugify(text: string): string {
@@ -59,8 +60,8 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<BlogPost[]>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -82,6 +83,15 @@ export async function GET(
     }
 
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify business ownership
     const { data: business, error: bizError } = await supabase
@@ -125,8 +135,8 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<BlogPost>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -151,6 +161,15 @@ export async function POST(
     const { businessId, title, body: postBody, excerpt, status, metaTitle, metaDescription } =
       parsed.data;
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify business ownership
     const { data: business, error: bizError } = await supabase
@@ -217,8 +236,8 @@ export async function PATCH(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<BlogPost>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -243,6 +262,15 @@ export async function PATCH(
     const { postId, title, body: postBody, excerpt, status, metaTitle, metaDescription } =
       parsed.data;
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Fetch existing post and verify ownership
     const { data: existingPost, error: postError } = await supabase

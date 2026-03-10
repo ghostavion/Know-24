@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import { STOREFRONT_PALETTES } from "@/lib/constants/product-types";
 import { logPlatformEvent, extractRequestMeta } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
@@ -19,8 +20,8 @@ interface GoLiveData {
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse<GoLiveData>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -44,6 +45,15 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<GoLiv
 
     const { businessId, palette } = parsed.data;
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify business ownership
     const { data: business } = await supabase
@@ -122,7 +132,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<GoLiv
     logPlatformEvent({
       event_category: "USER_ACTION",
       event_type: "setup.golive.completed",
-      clerk_user_id: userId,
+      clerk_user_id: clerkUserId,
       status: "success",
       business_id: businessId,
       payload: { palette, subdomain: storefront.subdomain },

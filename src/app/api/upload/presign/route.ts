@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import { r2 } from "@/lib/storage/r2";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -21,8 +22,8 @@ interface PresignData {
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse<PresignData>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -46,6 +47,15 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Presi
 
     const { businessId, fileName, fileType } = parsed.data;
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Verify business ownership
     const { data: business } = await supabase
@@ -75,7 +85,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Presi
     logPlatformEvent({
       event_category: "USER_ACTION",
       event_type: "upload.presigned",
-      clerk_user_id: userId,
+      clerk_user_id: clerkUserId,
       status: "success",
       business_id: businessId,
       payload: { file_name: fileName, file_type: fileType, r2_key: r2Key },

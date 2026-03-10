@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import type { ApiResponse } from "@/types/api";
 import type { DashboardBusiness } from "@/types/workspace";
@@ -19,8 +20,8 @@ interface BusinessWithStorefront {
 
 export async function GET(): Promise<NextResponse<ApiResponse<DashboardBusiness[]>>> {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
         { status: 401 }
@@ -28,6 +29,15 @@ export async function GET(): Promise<NextResponse<ApiResponse<DashboardBusiness[
     }
 
     const supabase = createServiceClient();
+
+    // Resolve Clerk user ID → internal UUID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User not found" } },
+        { status: 404 }
+      );
+    }
 
     // Fetch businesses with storefront subdomain and product count
     const { data: rows, error } = await supabase
@@ -86,7 +96,7 @@ export async function GET(): Promise<NextResponse<ApiResponse<DashboardBusiness[
     logPlatformEvent({
       event_category: "DATA",
       event_type: "businesses.listed",
-      clerk_user_id: userId,
+      clerk_user_id: clerkUserId,
       status: "success",
       payload: { count: businesses.length },
     });
