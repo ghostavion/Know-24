@@ -32,19 +32,23 @@ export interface PlatformLogEntry {
 export function logPlatformEvent(entry: PlatformLogEntry): void {
   const supabase = createServiceClient();
 
+  // Sanitize ip_address: INET column rejects empty strings
+  const sanitized = {
+    ...entry,
+    ip_address: entry.ip_address || null,
+    environment: entry.environment ?? process.env.NODE_ENV ?? "production",
+    app_version:
+      entry.app_version ?? process.env.NEXT_PUBLIC_APP_VERSION ?? "0.1.0",
+  };
+
   supabase
     .from("platform_logs")
-    .insert({
-      ...entry,
-      environment: entry.environment ?? process.env.NODE_ENV ?? "production",
-      app_version:
-        entry.app_version ?? process.env.NEXT_PUBLIC_APP_VERSION ?? "0.1.0",
-    })
+    .insert(sanitized)
     .then(({ error }) => {
-      if (error && process.env.NODE_ENV === "development") {
-        // Intentional dev-only stderr log for debugging logger failures
+      if (error) {
+        
         process.stderr.write(
-          `[PlatformLogger] Failed to write log: ${error.message}\n`
+          `[PlatformLogger] Insert failed: ${error.message} | code=${error.code}\n`
         );
       }
     });

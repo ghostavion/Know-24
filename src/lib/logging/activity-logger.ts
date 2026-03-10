@@ -45,9 +45,9 @@ export function logActivity(entry: ActivityLogEntry): void {
       metadata: entry.metadata ?? {},
     })
     .then(({ error }) => {
-      if (error && process.env.NODE_ENV === "development") {
+      if (error) {
         process.stderr.write(
-          `[ActivityLogger] Failed to write log: ${error.message}\n`
+          `[ActivityLogger] Insert failed: ${error.message} | code=${error.code}\n`
         );
       }
     });

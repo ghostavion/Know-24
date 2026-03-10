@@ -16,28 +16,30 @@ import {
 
 interface AnalyticsData {
   revenue: {
-    total: number;
-    byDay: Array<{ date: string; revenue: number; orders: number }>;
-    growth: number;
+    totalRevenueCents: number;
+    orderCount: number;
+    dailyBreakdown: Array<{ date: string; revenueCents: number; orderCount: number }>;
+    growthPercent: number;
   };
   users: {
     total: number;
     newThisPeriod: number;
-    byDay: Array<{ date: string; count: number; cumulative: number }>;
+    dailyCumulative: Array<{ date: string; cumulative: number }>;
   };
   topBusinesses: Array<{
-    id: string;
-    name: string;
-    revenue: number;
-    orders: number;
-    products: number;
+    businessId: string;
+    businessName: string;
+    revenueCents: number;
+    orderCount: number;
+    productCount: number;
   }>;
   productTypeBreakdown: Array<{
-    type: string;
+    productType: string;
+    displayName: string;
     count: number;
-    revenue: number;
+    revenueCents: number;
   }>;
-  usageStats: {
+  usage: {
     totalAiTokens: number;
     totalSocialPosts: number;
     totalScoutScans: number;
@@ -80,8 +82,8 @@ export default function AnalyticsPage() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               label="Revenue"
-              value={`$${(data.revenue.total / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
-              subtitle={`${data.revenue.growth >= 0 ? "+" : ""}${data.revenue.growth.toFixed(1)}% vs previous period`}
+              value={`$${(data.revenue.totalRevenueCents / 100).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+              subtitle={`${(data.revenue.growthPercent ?? 0) >= 0 ? "+" : ""}${(data.revenue.growthPercent ?? 0).toFixed(1)}% vs previous period`}
               icon={DollarSign}
             />
             <StatCard
@@ -92,14 +94,14 @@ export default function AnalyticsPage() {
             />
             <StatCard
               label="AI Tokens Used"
-              value={data.usageStats.totalAiTokens.toLocaleString()}
+              value={data.usage.totalAiTokens.toLocaleString()}
               subtitle="across all businesses"
               icon={Zap}
             />
             <StatCard
               label="Social Posts"
-              value={data.usageStats.totalSocialPosts.toLocaleString()}
-              subtitle={`${data.usageStats.totalScoutScans} scout scans`}
+              value={data.usage.totalSocialPosts.toLocaleString()}
+              subtitle={`${data.usage.totalScoutScans} scout scans`}
               icon={MessageSquare}
             />
           </div>
@@ -109,7 +111,7 @@ export default function AnalyticsPage() {
             <h3 className="mb-4 text-base font-semibold text-foreground">
               Revenue Trend
             </h3>
-            <RevenueLineChart data={data.revenue.byDay} />
+            <RevenueLineChart data={data.revenue.dailyBreakdown.map(d => ({ date: d.date, revenue: d.revenueCents / 100, orders: d.orderCount }))} />
           </div>
 
           {/* User growth */}
@@ -117,7 +119,7 @@ export default function AnalyticsPage() {
             <h3 className="mb-4 text-base font-semibold text-foreground">
               User Growth
             </h3>
-            <UserGrowthChart data={data.users.byDay} />
+            <UserGrowthChart data={data.users.dailyCumulative.map(d => ({ date: d.date, count: 0, cumulative: d.cumulative }))} />
           </div>
 
           {/* Top businesses + product breakdown */}
@@ -126,13 +128,13 @@ export default function AnalyticsPage() {
               <h3 className="mb-4 text-base font-semibold text-foreground">
                 Top Businesses
               </h3>
-              <TopBusinessesTable businesses={data.topBusinesses} />
+              <TopBusinessesTable businesses={data.topBusinesses.map(b => ({ id: b.businessId, name: b.businessName, revenue: b.revenueCents / 100, orders: b.orderCount, products: b.productCount }))} />
             </div>
             <div className="rounded-xl border border-border bg-card p-6">
               <h3 className="mb-4 text-base font-semibold text-foreground">
                 Revenue by Product Type
               </h3>
-              <ProductTypeBarChart data={data.productTypeBreakdown} />
+              <ProductTypeBarChart data={data.productTypeBreakdown.map(p => ({ type: p.displayName, count: p.count, revenue: p.revenueCents / 100 }))} />
             </div>
           </div>
         </>
