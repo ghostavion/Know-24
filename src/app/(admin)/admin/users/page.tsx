@@ -16,7 +16,7 @@ interface UserRow {
   email: string;
   first_name: string | null;
   last_name: string | null;
-  image_url: string | null;
+  avatar_url: string | null;
   created_at: string;
 }
 
@@ -33,7 +33,7 @@ export default async function AdminUsersPage({
   let query = supabase
     .from("users")
     .select(
-      "id, clerk_user_id, email, first_name, last_name, image_url, created_at",
+      "id, clerk_user_id, email, first_name, last_name, avatar_url, created_at",
       { count: "exact" }
     )
     .order("created_at", { ascending: false })
@@ -158,9 +158,9 @@ export default async function AdminUsersPage({
                           href={`/admin/users/${user.id}`}
                           className="flex items-center gap-3"
                         >
-                          {user.image_url ? (
+                          {user.avatar_url ? (
                             <img
-                              src={user.image_url}
+                              src={user.avatar_url}
                               alt=""
                               className="h-8 w-8 rounded-full"
                             />
