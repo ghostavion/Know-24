@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   BookOpen,
@@ -46,6 +46,7 @@ interface AIBuildingStepProps {
 
 const AIBuildingStep = ({ className }: AIBuildingStepProps) => {
   const {
+    businessId,
     selectedProductTypes,
     buildItems,
     setBuildItems,
@@ -55,6 +56,7 @@ const AIBuildingStep = ({ className }: AIBuildingStepProps) => {
   } = useSetupWizard();
 
   const hasStartedRef = useRef(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (hasStartedRef.current) return;
@@ -73,20 +75,52 @@ const AIBuildingStep = ({ className }: AIBuildingStepProps) => {
     setBuildItems(items);
 
     const runBuild = async () => {
+      // Set all items to "building"
       for (const item of items) {
         updateBuildItem(item.productTypeSlug, "building");
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        updateBuildItem(item.productTypeSlug, "complete");
-        await new Promise((resolve) => setTimeout(resolve, 1500));
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      try {
+        const res = await fetch("/api/setup/build", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            businessId,
+            productTypes: selectedProductTypes,
+          }),
+        });
+
+        const json = await res.json();
+
+        if (res.ok && json.data?.products) {
+          // Mark all as complete
+          for (const item of items) {
+            updateBuildItem(item.productTypeSlug, "complete");
+          }
+        } else {
+          // API error — mark items as error
+          const msg = json.error?.message ?? "Build failed";
+          setError(msg);
+          for (const item of items) {
+            updateBuildItem(item.productTypeSlug, "error", msg);
+          }
+        }
+      } catch {
+        setError("Network error — could not reach the build service");
+        for (const item of items) {
+          updateBuildItem(item.productTypeSlug, "error", "Network error");
+        }
+      }
+
+      // Small delay for visual feedback, then advance
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setBuildComplete(true);
       setStep(5);
     };
 
     runBuild();
   }, [
+    businessId,
     selectedProductTypes,
     setBuildItems,
     updateBuildItem,
@@ -109,6 +143,14 @@ const AIBuildingStep = ({ className }: AIBuildingStepProps) => {
           Sit back — our AI is generating your products right now.
         </p>
       </div>
+
+      {/* Error notice */}
+      {error && (
+        <div className="flex w-full max-w-md items-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-2 text-sm text-yellow-800 dark:border-yellow-700 dark:bg-yellow-950 dark:text-yellow-200">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          {error} — products were created but may need processing later.
+        </div>
+      )}
 
       {/* Build Items List */}
       <div className="w-full max-w-md space-y-3">
@@ -163,15 +205,6 @@ const AIBuildingStep = ({ className }: AIBuildingStepProps) => {
                     <span className="text-xs font-medium text-red-500">
                       {item.errorMessage ?? "Failed"}
                     </span>
-                    <button
-                      type="button"
-                      className="ml-1 text-xs font-medium text-[#0891b2] underline hover:text-[#0891b2]/80"
-                      onClick={() =>
-                        updateBuildItem(item.productTypeSlug, "queued")
-                      }
-                    >
-                      Retry
-                    </button>
                   </>
                 )}
               </div>

@@ -134,11 +134,15 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Build
         );
       }
 
-      await getProductGenerationQueue().add("generate-product", {
-        productId,
-        businessId,
-        productTypeSlug: slug,
-      });
+      try {
+        await getProductGenerationQueue().add("generate-product", {
+          productId,
+          businessId,
+          productTypeSlug: slug,
+        });
+      } catch {
+        // Queue unavailable — product saved to DB but won't be processed until queue is online
+      }
 
       queuedProducts.push({
         id: productId,

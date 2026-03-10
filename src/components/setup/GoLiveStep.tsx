@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 import {
   BookOpen,
   Layout,
@@ -14,8 +17,12 @@ import {
   MessageCircle,
   Cpu,
   Check,
+  Loader2,
+  AlertCircle,
+  PartyPopper,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { STOREFRONT_PALETTES } from "@/lib/constants/product-types";
 import { useSetupWizard } from "@/hooks/useSetupWizard";
@@ -67,12 +74,20 @@ interface GoLiveStepProps {
 
 const GoLiveStep = ({ className }: GoLiveStepProps) => {
   const {
+    businessId,
     businessName,
     businessSlug,
     buildItems,
     selectedPalette,
     setSelectedPalette,
+    reset,
   } = useSetupWizard();
+
+  const router = useRouter();
+  const [publishing, setPublishing] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [storefrontUrl, setStorefrontUrl] = useState("");
 
   const activePalette = STOREFRONT_PALETTES.find(
     (p) => p.id === selectedPalette
@@ -81,6 +96,58 @@ const GoLiveStep = ({ className }: GoLiveStepProps) => {
   const completedItems = buildItems.filter(
     (item) => item.status === "complete"
   );
+
+  const handleGoLive = async () => {
+    setPublishing(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/setup/golive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId, palette: selectedPalette }),
+      });
+
+      const json = await res.json();
+
+      if (res.ok && json.data) {
+        setSuccess(true);
+        setStorefrontUrl(json.data.storefrontUrl ?? `https://${businessSlug}.know24.io`);
+      } else {
+        setError(json.error?.message ?? "Failed to publish storefront");
+      }
+    } catch {
+      setError("Network error — please try again");
+    } finally {
+      setPublishing(false);
+    }
+  };
+
+  const handleGoToDashboard = () => {
+    reset();
+    router.push("/dashboard");
+  };
+
+  // Success state
+  if (success) {
+    return (
+      <div className={cn("flex flex-col items-center gap-6 py-16", className)}>
+        <PartyPopper className="h-16 w-16 text-[#0891b2]" />
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">You&apos;re Live!</h2>
+          <p className="mt-2 text-muted-foreground">
+            Your storefront is now published and ready for customers.
+          </p>
+          {storefrontUrl && (
+            <p className="mt-1 text-sm font-medium text-[#0891b2]">
+              {storefrontUrl}
+            </p>
+          )}
+        </div>
+        <Button onClick={handleGoToDashboard}>Go to Dashboard</Button>
+      </div>
+    );
+  }
 
   return (
     <div className={cn("space-y-10", className)}>
@@ -208,8 +275,16 @@ const GoLiveStep = ({ className }: GoLiveStepProps) => {
         </div>
       </section>
 
-      {/* Section 4: Go Live Reassurance */}
-      <section className="space-y-2 rounded-lg border border-border bg-card p-6 text-center">
+      {/* Error */}
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm text-red-800 dark:border-red-700 dark:bg-red-950 dark:text-red-200">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          {error}
+        </div>
+      )}
+
+      {/* Section 4: Go Live */}
+      <section className="space-y-4 rounded-lg border border-border bg-card p-6 text-center">
         <p className="text-sm font-medium text-foreground">
           Everything looks great! Click Go Live to publish your storefront and
           start selling.
@@ -220,6 +295,14 @@ const GoLiveStep = ({ className }: GoLiveStepProps) => {
             {businessSlug || "your-business"}.know24.io
           </span>
         </p>
+        <Button
+          onClick={handleGoLive}
+          disabled={publishing}
+          className="gap-2"
+        >
+          {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
+          {publishing ? "Publishing..." : "Go Live"}
+        </Button>
       </section>
     </div>
   );

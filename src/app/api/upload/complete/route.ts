@@ -88,11 +88,15 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Uploa
       );
     }
 
-    await getKnowledgeIngestQueue().add("ingest-file", {
-      knowledgeItemId,
-      businessId,
-      r2Key,
-    });
+    try {
+      await getKnowledgeIngestQueue().add("ingest-file", {
+        knowledgeItemId,
+        businessId,
+        r2Key,
+      });
+    } catch {
+      // Queue unavailable — item saved to DB but won't be processed until queue is online
+    }
 
     return NextResponse.json({
       data: { id: knowledgeItemId, status: "queued" },

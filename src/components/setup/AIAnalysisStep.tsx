@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import {
   BookOpen,
@@ -19,6 +19,7 @@ import {
   Monitor,
   MessageCircle,
   Cpu,
+  AlertCircle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -26,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { useSetupWizard } from "@/hooks/useSetupWizard";
 import { PRODUCT_TYPES } from "@/lib/constants/product-types";
 import { cn } from "@/lib/utils";
+import type { AIAnalysisResult } from "@/types/setup";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   BookOpen: BookOpenIcon,
@@ -42,12 +44,36 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Cpu,
 };
 
+const FALLBACK_ANALYSIS: AIAnalysisResult = {
+  knowledgeSummary:
+    "Your expertise covers a diverse range of topics with strong practical applications. Your content demonstrates deep domain knowledge that can be packaged into multiple product formats for your audience.",
+  topics: ["Core Methodology", "Best Practices", "Implementation Strategies"],
+  recommendedProducts: [
+    {
+      productTypeSlug: "guide_ebook",
+      reason: "Your content is well-suited for a comprehensive guide",
+      suggestedTitle: "The Complete Guide",
+    },
+    {
+      productTypeSlug: "cheat_sheet",
+      reason: "Key concepts can be condensed into a quick reference",
+      suggestedTitle: "Quick Reference Card",
+    },
+    {
+      productTypeSlug: "email_course",
+      reason: "Your topics naturally break into a learning sequence",
+      suggestedTitle: "5-Day Masterclass",
+    },
+  ],
+};
+
 interface AIAnalysisStepProps {
   className?: string;
 }
 
 const AIAnalysisStep = ({ className }: AIAnalysisStepProps) => {
   const {
+    businessId,
     aiAnalysis,
     analysisLoading,
     setAIAnalysis,
@@ -56,38 +82,36 @@ const AIAnalysisStep = ({ className }: AIAnalysisStepProps) => {
     setStep,
   } = useSetupWizard();
 
-  const handleAnalyze = useCallback(() => {
-    setAnalysisLoading(true);
+  const [warning, setWarning] = useState("");
 
-    setTimeout(() => {
-      setAIAnalysis({
-        knowledgeSummary:
-          "Your expertise covers a diverse range of topics with strong practical applications. Your content demonstrates deep domain knowledge that can be packaged into multiple product formats for your audience.",
-        topics: ["Topic 1", "Topic 2", "Topic 3"],
-        recommendedProducts: [
-          {
-            productTypeSlug: "guide_ebook",
-            reason:
-              "Your content is well-suited for a comprehensive guide",
-            suggestedTitle: "The Complete Guide",
-          },
-          {
-            productTypeSlug: "cheat_sheet",
-            reason:
-              "Key concepts can be condensed into a quick reference",
-            suggestedTitle: "Quick Reference Card",
-          },
-          {
-            productTypeSlug: "email_course",
-            reason:
-              "Your topics naturally break into a learning sequence",
-            suggestedTitle: "5-Day Masterclass",
-          },
-        ],
+  const handleAnalyze = useCallback(async () => {
+    setAnalysisLoading(true);
+    setWarning("");
+
+    try {
+      const res = await fetch("/api/setup/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId }),
       });
+
+      const json = await res.json();
+
+      if (res.ok && json.data) {
+        setAIAnalysis(json.data);
+      } else {
+        setAIAnalysis(FALLBACK_ANALYSIS);
+        if (json.error?.code === "NO_KNOWLEDGE") {
+          setWarning("No knowledge sources were processed yet — showing default recommendations.");
+        }
+      }
+    } catch {
+      setAIAnalysis(FALLBACK_ANALYSIS);
+      setWarning("Could not reach the analysis service — showing default recommendations.");
+    } finally {
       setAnalysisLoading(false);
-    }, 2000);
-  }, [setAIAnalysis, setAnalysisLoading]);
+    }
+  }, [businessId, setAIAnalysis, setAnalysisLoading]);
 
   const handleAcceptRecommendations = () => {
     if (!aiAnalysis) return;
@@ -125,6 +149,14 @@ const AIAnalysisStep = ({ className }: AIAnalysisStepProps) => {
   if (aiAnalysis) {
     return (
       <div className={cn("space-y-6", className)}>
+        {/* Warning notice (if using fallback) */}
+        {warning && (
+          <div className="flex items-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-2 text-sm text-yellow-800 dark:border-yellow-700 dark:bg-yellow-950 dark:text-yellow-200">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            {warning}
+          </div>
+        )}
+
         {/* Knowledge Summary */}
         <div className="flex items-start gap-4 rounded-xl border border-border p-5">
           <BookOpen className="mt-0.5 h-6 w-6 shrink-0 text-[#0891b2]" />

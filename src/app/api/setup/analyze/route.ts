@@ -75,20 +75,6 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Analy
       );
     }
 
-    // Check that knowledge items exist
-    const { data: knowledgeItems } = await supabase
-      .from("knowledge_items")
-      .select("id")
-      .eq("business_id", businessId)
-      .limit(1);
-
-    if (!knowledgeItems || knowledgeItems.length === 0) {
-      return NextResponse.json(
-        { error: { code: "NO_KNOWLEDGE", message: "No knowledge items found for this business" } },
-        { status: 400 }
-      );
-    }
-
     // Update onboarding step
     const { error: updateError } = await supabase
       .from("businesses")

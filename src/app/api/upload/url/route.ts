@@ -4,6 +4,8 @@ import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
 import { getKnowledgeIngestQueue } from "@/lib/queue/queues";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
 
 const submitUrlSchema = z.object({
@@ -86,10 +88,31 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<UrlSu
       );
     }
 
-    await getKnowledgeIngestQueue().add("ingest-url", {
-      knowledgeItemId,
-      businessId,
-      url,
+    try {
+      await getKnowledgeIngestQueue().add("ingest-url", {
+        knowledgeItemId,
+        businessId,
+        url,
+      });
+    } catch {
+      // Queue unavailable — item saved to DB but won't be processed until queue is online
+    }
+
+    logPlatformEvent({
+      event_category: "DATA",
+      event_type: "knowledge.url.submitted",
+      clerk_user_id: clerkUserId,
+      status: "success",
+      business_id: businessId,
+      payload: { url, knowledge_item_id: knowledgeItemId },
+    });
+
+    logActivity({
+      business_id: businessId,
+      event_type: "knowledge_ingested",
+      title: "URL submitted for analysis",
+      description: `URL added: ${url}`,
+      metadata: { url, knowledge_item_id: knowledgeItemId },
     });
 
     return NextResponse.json({
