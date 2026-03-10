@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { createServiceClient } from "@/lib/supabase/server";
 import { AdminHealthPanel } from "@/components/admin/AdminHealthPanel";
+import TestLoggingButton from "@/components/admin/TestLoggingButton";
 
 interface StatCardProps {
   label: string;
@@ -229,6 +230,9 @@ export default async function AdminOverviewPage() {
           </div>
         )}
       </div>
+
+      {/* Logging diagnostic */}
+      <TestLoggingButton />
 
       {/* Quick links */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
