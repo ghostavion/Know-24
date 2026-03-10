@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { createServiceClient } from "@/lib/supabase/server";
 import { LogsTable } from "@/components/admin/LogsTable";
 import { LogsFilters } from "@/components/admin/LogsFilters";
