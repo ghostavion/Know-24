@@ -4,6 +4,8 @@ import { z } from "zod";
 import { generateText } from "ai";
 import { createServiceClient } from "@/lib/supabase/server";
 import { primaryModel, logLLMCall } from "@/lib/ai/providers";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
 
 const generatePostSchema = z.object({
@@ -124,6 +126,23 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    logPlatformEvent({
+      event_category: "LLM",
+      event_type: "marketing.social_post.generated",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: businessId,
+      payload: { platform, length, post_id: post.id },
+    });
+
+    logActivity({
+      business_id: businessId,
+      event_type: "social_post_generated",
+      title: `Social post generated for ${platform}`,
+      description: `${length} ${platform} post created`,
+      metadata: { post_id: post.id, platform, length },
+    });
 
     return NextResponse.json({
       data: {

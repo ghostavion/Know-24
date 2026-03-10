@@ -4,6 +4,8 @@ import { z } from "zod";
 import { generateText } from "ai";
 import { createServiceClient } from "@/lib/supabase/server";
 import { primaryModel, logLLMCall } from "@/lib/ai/providers";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
 
 function slugify(text: string): string {
@@ -147,6 +149,23 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    logPlatformEvent({
+      event_category: "LLM",
+      event_type: "marketing.blog.generated",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: businessId,
+      payload: { topic, tone, word_count: wordCount, post_id: post.id },
+    });
+
+    logActivity({
+      business_id: businessId,
+      event_type: "blog_published",
+      title: `Blog post generated: ${title}`,
+      description: `AI-generated blog post on "${topic}"`,
+      metadata: { post_id: post.id, topic, tone },
+    });
 
     return NextResponse.json({
       data: {

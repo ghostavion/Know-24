@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logPlatformEvent, extractRequestMeta } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
 
 const createBusinessSchema = z.object({
@@ -122,6 +124,26 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Busin
         { status: 500 }
       );
     }
+
+    const meta = extractRequestMeta(req);
+    logPlatformEvent({
+      event_category: "USER_ACTION",
+      event_type: "setup.business.created",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: businessId,
+      organization_id: organizationId,
+      payload: { name, slug, niche },
+      ...meta,
+    });
+
+    logActivity({
+      business_id: businessId,
+      event_type: "business_created",
+      title: `Business "${name}" created`,
+      description: `New business created in the ${niche} niche`,
+      metadata: { slug, niche, organization_id: organizationId },
+    });
 
     return NextResponse.json({
       data: { id: businessId, name, slug, niche },

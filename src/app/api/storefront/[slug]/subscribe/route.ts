@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getPublishedStorefront } from "@/lib/storefront/queries";
 import { createServiceClient } from "@/lib/supabase/server";
+import { logPlatformEvent, extractRequestMeta } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
 
 const slugSchema = z.string().min(1);
@@ -82,6 +84,24 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    const meta = extractRequestMeta(request);
+    logPlatformEvent({
+      event_category: "USER_ACTION",
+      event_type: "storefront.subscriber.created",
+      status: "success",
+      business_id: storefront.business_id,
+      payload: { email, source: "storefront", slug },
+      ...meta,
+    });
+
+    logActivity({
+      business_id: storefront.business_id,
+      event_type: "customer_signup",
+      title: "New email subscriber",
+      description: `${email} subscribed via storefront`,
+      metadata: { email, source: "storefront" },
+    });
 
     return NextResponse.json({ data: { subscribed: true } });
   } catch {

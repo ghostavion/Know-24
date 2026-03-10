@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { STOREFRONT_PALETTES } from "@/lib/constants/product-types";
+import { logPlatformEvent, extractRequestMeta } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
 
 const goLiveSchema = z.object({
@@ -115,6 +117,32 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<GoLiv
         { status: 500 }
       );
     }
+
+    const meta = extractRequestMeta(req);
+    logPlatformEvent({
+      event_category: "USER_ACTION",
+      event_type: "setup.golive.completed",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: businessId,
+      payload: { palette, subdomain: storefront.subdomain },
+      ...meta,
+    });
+
+    logActivity({
+      business_id: businessId,
+      event_type: "storefront_published",
+      title: "Storefront published — business is live!",
+      description: `Storefront published at ${storefront.subdomain}.know24.io with palette ${palette}`,
+      metadata: { palette, subdomain: storefront.subdomain },
+    });
+
+    logActivity({
+      business_id: businessId,
+      event_type: "onboarding_completed",
+      title: "Onboarding completed",
+      description: "Business setup wizard completed successfully",
+    });
 
     return NextResponse.json({
       data: {

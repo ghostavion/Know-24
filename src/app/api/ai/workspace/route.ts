@@ -4,6 +4,8 @@ import { z } from "zod";
 import { streamText, convertToModelMessages, stepCountIs, type UIMessage } from "ai";
 import { createServiceClient } from "@/lib/supabase/server";
 import { primaryModel, logLLMCall } from "@/lib/ai/providers";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import { getWorkspaceTools } from "@/lib/ai/tools/workspace-tools";
 import type { ApiResponse } from "@/types/api";
 
@@ -128,6 +130,29 @@ Be concise, helpful, and proactive. When the creator asks to do something, use t
           inputTokens: usage.inputTokens ?? 0,
           outputTokens: usage.outputTokens ?? 0,
           durationMs: Date.now() - startTime,
+        });
+
+        logPlatformEvent({
+          event_category: "LLM",
+          event_type: "ai.workspace.chat",
+          clerk_user_id: userId,
+          status: "success",
+          business_id: businessId,
+          duration_ms: Date.now() - startTime,
+          payload: {
+            input_tokens: usage.inputTokens ?? 0,
+            output_tokens: usage.outputTokens ?? 0,
+          },
+        });
+
+        logActivity({
+          business_id: businessId,
+          event_type: "ai_workspace_action",
+          title: "AI Workspace conversation",
+          metadata: {
+            input_tokens: usage.inputTokens ?? 0,
+            output_tokens: usage.outputTokens ?? 0,
+          },
         });
       },
     });

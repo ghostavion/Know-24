@@ -3,6 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { getProductGenerationQueue } from "@/lib/queue/queues";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
 
 function slugify(text: string): string {
@@ -206,6 +208,23 @@ export async function POST(
       productId,
       businessId,
       productTypeSlug,
+    });
+
+    logPlatformEvent({
+      event_category: "USER_ACTION",
+      event_type: "product.created",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: businessId,
+      payload: { product_id: productId, product_type: productTypeSlug, title },
+    });
+
+    logActivity({
+      business_id: businessId,
+      event_type: "product_created",
+      title: `Product created: ${title}`,
+      description: `New ${productTypeSlug} product created`,
+      metadata: { product_id: productId, product_type: productTypeSlug },
     });
 
     return NextResponse.json({ data: product as ProductRow });

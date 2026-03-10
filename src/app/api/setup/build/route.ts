@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { getProductGenerationQueue } from "@/lib/queue/queues";
 import { PRODUCT_TYPES } from "@/lib/constants/product-types";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
 
 const buildSchema = z.object({
@@ -161,6 +162,16 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Build
         product_ids: queuedProducts.map((p) => p.id),
       },
     });
+
+    for (const qp of queuedProducts) {
+      logActivity({
+        business_id: businessId,
+        event_type: "product_created",
+        title: "Product queued for generation",
+        description: `Product type: ${qp.productTypeSlug}`,
+        metadata: { product_id: qp.id, product_type: qp.productTypeSlug },
+      });
+    }
 
     return NextResponse.json({
       data: { products: queuedProducts },

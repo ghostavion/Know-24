@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { r2 } from "@/lib/storage/r2";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import type { ApiResponse } from "@/types/api";
 
 const presignSchema = z.object({
@@ -70,6 +71,15 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Presi
     });
 
     const presignedUrl = await getSignedUrl(r2, command, { expiresIn: 3600 });
+
+    logPlatformEvent({
+      event_category: "USER_ACTION",
+      event_type: "upload.presigned",
+      clerk_user_id: userId,
+      status: "success",
+      business_id: businessId,
+      payload: { file_name: fileName, file_type: fileType, r2_key: r2Key },
+    });
 
     return NextResponse.json({
       data: { uploadUrl: presignedUrl, r2Key },

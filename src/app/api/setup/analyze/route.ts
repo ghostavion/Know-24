@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
 
 const analyzeSchema = z.object({
@@ -98,6 +99,14 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Analy
       status: "success",
       business_id: businessId,
       payload: { mock: true },
+    });
+
+    logActivity({
+      business_id: businessId,
+      event_type: "knowledge_ingested",
+      title: "Knowledge analyzed",
+      description: "AI analysis completed — product recommendations generated",
+      metadata: { step: 2 },
     });
 
     // Mock analysis result — real AI integration comes later
