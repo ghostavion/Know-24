@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { streamText, convertToModelMessages, stepCountIs, type UIMessage } from "ai";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
@@ -8,6 +9,7 @@ import { primaryModel, logLLMCall } from "@/lib/ai/providers";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
 import { getWorkspaceTools } from "@/lib/ai/tools/workspace-tools";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const workspaceSchema = z.object({
@@ -36,6 +38,15 @@ export async function POST(
   request: NextRequest
 ): Promise<Response> {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "ai");
+    if (!rlResult.success) {
+      return NextResponse.json<ApiResponse>(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429 }
+      );
+    }
+
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json<ApiResponse>(
@@ -168,7 +179,8 @@ Be concise, helpful, and proactive. When the creator asks to do something, use t
     });
 
     return result.toUIMessageStreamResponse();
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return NextResponse.json<ApiResponse>(
       { error: { code: "INTERNAL_ERROR", message: "An unexpected error occurred" } },
       { status: 500 }

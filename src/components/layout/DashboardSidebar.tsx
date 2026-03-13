@@ -4,11 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  Activity,
+  Search,
+  BookOpen,
+  Coins,
+  Radar,
+  Gift,
   Settings,
-  Plus,
-  Sparkles,
+  LayoutDashboard,
 } from "lucide-react";
 
 const navItems = [
@@ -18,9 +20,29 @@ const navItems = [
     icon: LayoutDashboard,
   },
   {
-    label: "AI Advisor",
-    href: "/activity",
-    icon: Sparkles,
+    label: "Research",
+    href: "/research",
+    icon: Search,
+  },
+  {
+    label: "My Ebooks",
+    href: "/ebooks",
+    icon: BookOpen,
+  },
+  {
+    label: "Scout",
+    href: "/scout",
+    icon: Radar,
+  },
+  {
+    label: "Credits",
+    href: "/credits",
+    icon: Coins,
+  },
+  {
+    label: "Referrals",
+    href: "/referrals",
+    icon: Gift,
   },
   {
     label: "Settings",
@@ -47,7 +69,7 @@ export function DashboardSidebar() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-4">
         {navItems.map((item) => {
-          const isActive = pathname === item.href;
+          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
@@ -66,14 +88,14 @@ export function DashboardSidebar() {
         })}
       </nav>
 
-      {/* New Business Button */}
+      {/* New Ebook CTA */}
       <div className="border-t border-border p-4">
         <Link
-          href="/setup"
+          href="/research"
           className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
         >
-          <Plus className="h-4 w-4" />
-          New Business
+          <Search className="h-4 w-4" />
+          New Ebook
         </Link>
       </div>
     </aside>

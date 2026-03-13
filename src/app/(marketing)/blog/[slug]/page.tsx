@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import { notFound } from "next/navigation";
+import { AIDisclosure } from "@/components/compliance/AIDisclosure";
 
 const posts: Record<
   string,
@@ -140,6 +141,8 @@ export default async function BlogArticlePage({
             <span>&middot;</span>
             <span>{post.readTime}</span>
           </div>
+
+          <AIDisclosure className="mt-3" />
         </header>
 
         <div className="mt-12 space-y-6">

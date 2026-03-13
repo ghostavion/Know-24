@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const analyzeSchema = z.object({
@@ -15,16 +16,35 @@ interface RecommendedProduct {
   productTypeSlug: string;
   reason: string;
   suggestedTitle: string;
+  suggestedPrice?: number;
+}
+
+interface MarketInsights {
+  topSellingProducts: unknown[];
+  contentGaps: unknown[];
+  trendingTopics: unknown[];
+  pricingInsights: unknown;
 }
 
 interface AnalysisData {
-  knowledgeSummary: string;
+  status: "completed" | "researching";
+  knowledgeSummary: string | null;
   topics: string[];
   recommendedProducts: RecommendedProduct[];
+  marketInsights?: MarketInsights;
 }
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse<AnalysisData>>> {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json(
@@ -88,13 +108,70 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Analy
       );
     }
 
+    // Fetch latest research document for this business
+    const { data: research } = await supabase
+      .from("research_documents")
+      .select("research_data, status")
+      .eq("business_id", businessId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (!research || research.status !== "completed") {
+      logPlatformEvent({
+        event_category: "DATA",
+        event_type: "setup.analysis.pending",
+        clerk_user_id: clerkUserId,
+        status: "success",
+        business_id: businessId,
+        payload: { researchStatus: research?.status ?? "not_found" },
+      });
+
+      return NextResponse.json({
+        data: {
+          status: "researching" as const,
+          knowledgeSummary: null,
+          topics: [],
+          recommendedProducts: [],
+        },
+      });
+    }
+
+    const researchData = research.research_data as {
+      recommendedProduct: {
+        type: string;
+        title: string;
+        price: number;
+        whyThisWillSell: string;
+      };
+      subNiches: string[];
+      topSellingProducts: unknown[];
+      contentGaps: Array<{ productType: string; title: string; reason: string }>;
+      trendingTopics: unknown[];
+      pricingInsights: unknown;
+    };
+
+    const recommendedProducts: RecommendedProduct[] = [
+      {
+        productTypeSlug: researchData.recommendedProduct.type,
+        reason: researchData.recommendedProduct.whyThisWillSell,
+        suggestedTitle: researchData.recommendedProduct.title,
+        suggestedPrice: researchData.recommendedProduct.price,
+      },
+      ...(researchData.contentGaps ?? []).map((gap) => ({
+        productTypeSlug: gap.productType,
+        reason: gap.reason,
+        suggestedTitle: gap.title,
+      })),
+    ];
+
     logPlatformEvent({
       event_category: "DATA",
       event_type: "setup.analysis.completed",
       clerk_user_id: clerkUserId,
       status: "success",
       business_id: businessId,
-      payload: { mock: true },
+      payload: { productCount: recommendedProducts.length },
     });
 
     logActivity({
@@ -105,34 +182,18 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Analy
       metadata: { step: 2 },
     });
 
-    // Mock analysis result — real AI integration comes later
     return NextResponse.json({
       data: {
-        knowledgeSummary:
-          "Your knowledge base covers a range of expertise topics...",
-        topics: [
-          "Core Methodology",
-          "Best Practices",
-          "Implementation Strategies",
-          "Case Studies",
-        ],
-        recommendedProducts: [
-          {
-            productTypeSlug: "guide_ebook",
-            reason: "Your content has enough depth for a comprehensive guide",
-            suggestedTitle: "The Complete Guide",
-          },
-          {
-            productTypeSlug: "cheat_sheet",
-            reason: "Key concepts can be condensed into a quick reference",
-            suggestedTitle: "Quick Reference Card",
-          },
-          {
-            productTypeSlug: "email_course",
-            reason: "Your topics naturally break into a learning sequence",
-            suggestedTitle: "5-Day Email Masterclass",
-          },
-        ],
+        status: "completed" as const,
+        knowledgeSummary: researchData.recommendedProduct.whyThisWillSell,
+        topics: researchData.subNiches,
+        recommendedProducts,
+        marketInsights: {
+          topSellingProducts: researchData.topSellingProducts,
+          contentGaps: researchData.contentGaps,
+          trendingTopics: researchData.trendingTopics,
+          pricingInsights: researchData.pricingInsights,
+        },
       },
     });
   } catch {

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin/guard";
+import { logAdminAudit } from "@/lib/logging/admin-audit";
 import type { ApiResponse } from "@/types/api";
 
 export const dynamic = "force-dynamic";
@@ -75,8 +76,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ): Promise<NextResponse<ApiResponse<UserDetailData>>> {
+  let adminUserId: string;
   try {
-    await requireAdmin();
+    adminUserId = await requireAdmin();
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     if (message === "UNAUTHORIZED") {
@@ -99,6 +101,14 @@ export async function GET(
 
   try {
     const { userId } = await params;
+
+    logAdminAudit({
+      admin_user_id: adminUserId,
+      action: "user.view",
+      target_resource: "user",
+      target_id: userId,
+    });
+
     const supabase = createServiceClient();
 
     // 1. Get user

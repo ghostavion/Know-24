@@ -4,6 +4,7 @@ import { getPublishedStorefront } from "@/lib/storefront/queries";
 import { createServiceClient } from "@/lib/supabase/server";
 import { logPlatformEvent, extractRequestMeta } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const slugSchema = z.string().min(1);
@@ -18,6 +19,15 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<NextResponse<ApiResponse<{ subscribed: boolean }>>> {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "storefront");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const { slug } = await params;
 
     const parsedSlug = slugSchema.safeParse(slug);

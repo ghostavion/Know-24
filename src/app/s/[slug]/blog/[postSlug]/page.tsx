@@ -3,6 +3,7 @@ import Image from "next/image"
 import { notFound } from "next/navigation"
 
 import { createServiceClient } from "@/lib/supabase/server"
+import { AIDisclosure } from "@/components/compliance/AIDisclosure"
 import type { StorefrontBlogPost } from "@/types/storefront"
 import type { Metadata } from "next"
 
@@ -190,6 +191,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             {formatDate(post.publishedAt)}
           </time>
         </div>
+
+        <AIDisclosure className="mt-3" />
       </header>
 
       {/* Body */}

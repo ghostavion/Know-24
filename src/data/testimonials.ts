@@ -3,7 +3,7 @@ export const testimonials = [
     name: "Sarah Chen, RN",
     title: "Nurse Leadership Academy",
     content:
-      "I went from a stack of teaching notes to a full product suite and storefront in 45 minutes. My first sale came in 3 hours after going live.",
+      "I picked 'Nurse Leadership' as my niche, and 8 minutes later I had a full product suite and storefront live. My first sale came in 3 hours.",
     avatar: null,
     rating: 5,
   },

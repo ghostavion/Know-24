@@ -7,6 +7,7 @@ import { resolveUserId } from "@/lib/auth/resolve-user";
 import { primaryModel, logLLMCall } from "@/lib/ai/providers";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const generatePostSchema = z.object({
@@ -29,6 +30,15 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<GeneratedPost>>> {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "ai");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429 }
+      );
+    }
+
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json(

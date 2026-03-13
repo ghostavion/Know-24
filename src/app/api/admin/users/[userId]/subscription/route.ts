@@ -3,6 +3,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin/guard";
+import { logAdminAudit } from "@/lib/logging/admin-audit";
 import type { ApiResponse } from "@/types/api";
 
 export const dynamic = "force-dynamic";
@@ -49,8 +50,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ): Promise<NextResponse<ApiResponse<SubscriptionResult>>> {
+  let adminUserId: string;
   try {
-    await requireAdmin();
+    adminUserId = await requireAdmin();
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     if (message === "UNAUTHORIZED") {
@@ -212,6 +214,14 @@ export async function PATCH(
         );
       }
     }
+
+    logAdminAudit({
+      admin_user_id: adminUserId,
+      action: `user.subscription.${action}` as "user.subscription.cancel" | "user.subscription.pause" | "user.subscription.resume" | "user.subscription.change_plan",
+      target_resource: "user",
+      target_id: userId,
+      metadata: { organization_id: organizationId, subscription_action: action, plan },
+    });
 
     // Update organization subscription status in database
     const { error: updateError } = await supabase

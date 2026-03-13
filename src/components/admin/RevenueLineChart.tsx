@@ -43,7 +43,7 @@ export const RevenueLineChart = ({ data }: RevenueLineChartProps) => {
             }
           />
           <Line type="monotone" dataKey="revenue" stroke="#0891b2" strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey="orders" stroke="#6366f1" strokeWidth={1.5} dot={false} strokeDasharray="4 4" />
+          <Line type="monotone" dataKey="orders" stroke="#0891b2" strokeWidth={1.5} dot={false} strokeDasharray="4 4" />
         </LineChart>
       </ResponsiveContainer>
     </div>

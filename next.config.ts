@@ -41,7 +41,9 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://*.clerk.com https://*.clerk.accounts.dev https://*.vercel-insights.com https://*.vercel-analytics.com https://challenges.cloudflare.com",
+              // unsafe-inline is required for Clerk's injected auth scripts and Next.js inline scripts.
+              // Nonce-based CSP is not feasible with Clerk's current SDK which injects inline scripts dynamically.
+              "script-src 'self' 'unsafe-inline' https://*.clerk.com https://*.clerk.accounts.dev https://*.vercel-insights.com https://*.vercel-analytics.com https://challenges.cloudflare.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://*.r2.cloudflarestorage.com https://img.clerk.com https://*.clerk.com",
               "font-src 'self'",

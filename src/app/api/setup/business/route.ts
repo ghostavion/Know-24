@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
 import { logPlatformEvent, extractRequestMeta } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const createBusinessSchema = z.object({
@@ -28,6 +29,15 @@ interface BusinessData {
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse<BusinessData>>> {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json(

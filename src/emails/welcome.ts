@@ -22,7 +22,7 @@ export function renderWelcomeEmail(props: WelcomeEmailProps): string {
         <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
           <!-- Header -->
           <tr>
-            <td style="background-color: #6366f1; padding: 32px 40px; text-align: center;">
+            <td style="background-color: #0891b2; padding: 32px 40px; text-align: center;">
               <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700; line-height: 1.3;">
                 Welcome to ${businessName}!
               </h1>
@@ -45,7 +45,7 @@ export function renderWelcomeEmail(props: WelcomeEmailProps): string {
                   <td style="padding: 0 0 12px;">
                     <table role="presentation" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="padding-right: 12px; vertical-align: top; color: #6366f1; font-size: 16px; font-weight: 700;">1.</td>
+                        <td style="padding-right: 12px; vertical-align: top; color: #0891b2; font-size: 16px; font-weight: 700;">1.</td>
                         <td style="color: #1f2937; font-size: 15px; line-height: 1.5;">Exclusive content and resources curated just for you</td>
                       </tr>
                     </table>
@@ -55,7 +55,7 @@ export function renderWelcomeEmail(props: WelcomeEmailProps): string {
                   <td style="padding: 0 0 12px;">
                     <table role="presentation" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="padding-right: 12px; vertical-align: top; color: #6366f1; font-size: 16px; font-weight: 700;">2.</td>
+                        <td style="padding-right: 12px; vertical-align: top; color: #0891b2; font-size: 16px; font-weight: 700;">2.</td>
                         <td style="color: #1f2937; font-size: 15px; line-height: 1.5;">New product announcements and updates</td>
                       </tr>
                     </table>
@@ -65,7 +65,7 @@ export function renderWelcomeEmail(props: WelcomeEmailProps): string {
                   <td style="padding: 0 0 24px;">
                     <table role="presentation" cellpadding="0" cellspacing="0">
                       <tr>
-                        <td style="padding-right: 12px; vertical-align: top; color: #6366f1; font-size: 16px; font-weight: 700;">3.</td>
+                        <td style="padding-right: 12px; vertical-align: top; color: #0891b2; font-size: 16px; font-weight: 700;">3.</td>
                         <td style="color: #1f2937; font-size: 15px; line-height: 1.5;">Tips, insights, and community highlights</td>
                       </tr>
                     </table>
@@ -76,7 +76,7 @@ export function renderWelcomeEmail(props: WelcomeEmailProps): string {
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="center" style="padding: 8px 0 0;">
-                    <a href="${storefrontUrl}" style="display: inline-block; background-color: #6366f1; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 6px; line-height: 1;">
+                    <a href="${storefrontUrl}" style="display: inline-block; background-color: #0891b2; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 6px; line-height: 1;">
                       Visit Our Storefront
                     </a>
                   </td>
@@ -88,7 +88,7 @@ export function renderWelcomeEmail(props: WelcomeEmailProps): string {
           <tr>
             <td style="padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
               <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; line-height: 1.5;">
-                Powered by <a href="https://know24.io" style="color: #6366f1; text-decoration: none;">Know24</a>
+                Powered by <a href="https://know24.io" style="color: #0891b2; text-decoration: none;">Know24</a>
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.5;">
                 <a href="{{unsubscribe_url}}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>

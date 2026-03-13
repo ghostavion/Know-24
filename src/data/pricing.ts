@@ -1,41 +1,61 @@
+export const FOUNDER_PRICE = 79;
+export const STANDARD_PRICE = 99;
+export const FOUNDER_SLOTS_TOTAL = 100;
+
 export const pricingPlans = [
   {
-    name: "Know24 Base",
-    price: 99,
-    interval: "month" as const,
-    description: "Everything you need to launch and run a knowledge business.",
-    features: [
-      '"Setup My Business" AI onboarding',
-      "AI Workspace — manage by conversation",
-      "10+ product types (ebooks, courses, quizzes, chatbots)",
-      "Branded storefront with custom domain",
-      "300 social posts/month (AI-generated)",
-      "Blog engine with AI auto-publish",
-      "Email sequences (Welcome, Nurture, Launch)",
-      "Referral program",
-      "Stripe Connect payments",
-      "Analytics dashboard",
-    ],
-    cta: "Start Building",
-    highlighted: true,
-    stripeLookupKey: "know24_base_monthly",
-  },
-  {
-    name: "Scout Add-On",
-    price: 199,
+    name: "Founder",
+    price: FOUNDER_PRICE,
+    originalPrice: STANDARD_PRICE,
     interval: "month" as const,
     description:
-      "AI market intelligence that finds opportunities while you sleep.",
+      "Lock in the lowest price forever. Limited to the first 100 members.",
+    badge: "Limited — Founder Pricing",
     features: [
-      "20 scans/month across 6+ platforms",
-      "Reddit, X, LinkedIn, Quora, podcasts, news",
-      "AI-scored opportunity cards",
-      "Draft responses pre-written",
-      "Approve / Edit / Dismiss workflow",
-      "Trending topic detection",
+      "200 AI credits per month",
+      "AI niche research with Proof Card",
+      "Full ebook generation (outline → draft → polish)",
+      "AI cover art generation (5 styles)",
+      "Chapter-level AI rewriting",
+      "PDF export & download",
+      "Publish to your storefront",
+      "Scout: AI opportunity scanning",
+      "Referral rewards (50 credits each side)",
+      "Priority support",
     ],
-    cta: "Add Scout",
+    cta: "Claim Founder Spot",
+    highlighted: true,
+    stripeLookupKey: "know24_founder_monthly",
+  },
+  {
+    name: "Standard",
+    price: STANDARD_PRICE,
+    interval: "month" as const,
+    description:
+      "Everything you need to research, create, and sell ebooks with AI.",
+    features: [
+      "200 AI credits per month",
+      "AI niche research with Proof Card",
+      "Full ebook generation (outline → draft → polish)",
+      "AI cover art generation (5 styles)",
+      "Chapter-level AI rewriting",
+      "PDF export & download",
+      "Publish to your storefront",
+      "Scout: AI opportunity scanning",
+      "Referral rewards (50 credits each side)",
+      "Email support",
+    ],
+    cta: "Get Started",
     highlighted: false,
-    stripeLookupKey: "know24_scout_monthly",
+    stripeLookupKey: "know24_standard_monthly",
   },
 ] as const;
+
+export const creditCosts = {
+  research: { cost: 10, label: "Niche Research" },
+  ebook_generation: { cost: 50, label: "Ebook Generation" },
+  cover_generation: { cost: 10, label: "Cover Art" },
+  chapter_rewrite: { cost: 5, label: "Chapter Rewrite" },
+  scout_scan: { cost: 15, label: "Scout Scan" },
+  referral_reward: { cost: -50, label: "Referral Reward" },
+} as const;

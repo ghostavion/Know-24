@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { stripe } from "@/lib/stripe/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const connectSchema = z.object({
@@ -23,6 +24,15 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<ConnectData>>> {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429 }
+      );
+    }
+
     const { userId } = await auth();
 
     if (!userId) {

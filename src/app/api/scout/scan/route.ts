@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
 import { runScan } from "@/lib/scout/orchestrator";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 // ---------------------------------------------------------------------------
@@ -41,6 +42,15 @@ export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<ApiResponse<{ scanId: string; status: string }>>> {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "ai");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429 },
+      );
+    }
+
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json(
@@ -208,6 +218,15 @@ export async function GET(
   request: NextRequest,
 ): Promise<NextResponse<ApiResponse<ScanRecord[]>>> {
   try {
+    const getIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const getRl = await checkRateLimit(getIp, "api");
+    if (!getRl.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429 },
+      );
+    }
+
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json(

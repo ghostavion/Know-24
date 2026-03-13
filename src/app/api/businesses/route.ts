@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import * as Sentry from "@sentry/nextjs";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
@@ -102,7 +103,8 @@ export async function GET(): Promise<NextResponse<ApiResponse<DashboardBusiness[
     });
 
     return NextResponse.json({ data: businesses });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return NextResponse.json(
       { error: { code: "INTERNAL_ERROR", message: "An unexpected error occurred" } },
       { status: 500 }

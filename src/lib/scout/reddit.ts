@@ -1,43 +1,108 @@
-// MVP: Simulated results. Replace with real API integration.
-
 import type { PlatformResult, ScoutConfig } from "@/types/scout";
 
-function buildRedditResults(config: ScoutConfig): PlatformResult[] {
-  const { niche, keywords, businessName } = config;
-  const primaryKeyword: string = keywords[0] ?? niche;
-  const secondaryKeyword: string = keywords[1] ?? niche;
+const REDDIT_TIMEOUT_MS = 5000;
+const USER_AGENT = "Know24-Scout/1.0 (server-side research)";
 
-  return [
-    {
-      platform: "reddit",
-      type: "hot_thread",
-      title: `Looking for recommendations about ${niche} — any good resources?`,
-      url: `https://www.reddit.com/r/${niche.replace(/\s+/g, "")}/comments/abc123/looking_for_recommendations/`,
-      context: `A thread in r/${niche.replace(/\s+/g, "")} with 47 upvotes and 23 comments. OP is asking for trusted resources related to "${primaryKeyword}". Several commenters are recommending competitors but no one has mentioned ${businessName} yet. High engagement window — thread is 4 hours old.`,
-      relevanceHint: "high",
-    },
-    {
-      platform: "reddit",
-      type: "community_engagement",
-      title: `Best ${niche} resources 2024? Compiling a list`,
-      url: `https://www.reddit.com/r/${niche.replace(/\s+/g, "")}/comments/def456/best_resources_2024/`,
-      context: `Community-driven list post gaining traction (89 upvotes, 41 comments). Users are sharing their favorite "${secondaryKeyword}" tools and courses. This is an ideal opportunity to get ${businessName} added to the list organically.`,
-      relevanceHint: "high",
-    },
-    {
-      platform: "reddit",
-      type: "hot_thread",
-      title: `Struggling with ${primaryKeyword} — what am I doing wrong?`,
-      url: `https://www.reddit.com/r/Entrepreneur/comments/ghi789/struggling_with_${primaryKeyword.replace(/\s+/g, "_")}/`,
-      context: `A frustrated learner in r/Entrepreneur posted about challenges with "${primaryKeyword}". The thread has 15 comments with mixed advice. A thoughtful, expert reply from ${businessName} could establish authority and drive traffic.`,
-      relevanceHint: "medium",
-    },
-  ];
+interface RedditPost {
+  title: string;
+  selftext?: string;
+  permalink: string;
+  score: number;
+  num_comments: number;
+  subreddit: string;
 }
 
-export async function scanReddit(config: ScoutConfig): Promise<PlatformResult[]> {
-  // Simulate API latency
-  await new Promise<void>((r) => setTimeout(r, 200));
+interface RedditListingChild {
+  data: RedditPost;
+}
 
-  return buildRedditResults(config);
+interface RedditListingResponse {
+  data: {
+    children: RedditListingChild[];
+  };
+}
+
+async function fetchRedditJson(url: string): Promise<RedditListingResponse> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REDDIT_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Reddit API returned ${response.status}`);
+    }
+
+    return (await response.json()) as RedditListingResponse;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function mapPostToResult(post: RedditPost): PlatformResult {
+  return {
+    platform: "reddit",
+    type: "hot_thread",
+    title: post.title,
+    url: `https://reddit.com${post.permalink}`,
+    context: post.selftext?.slice(0, 500) ?? "",
+    relevanceHint:
+      post.score > 50 ? "high" : post.score > 10 ? "medium" : "low",
+  };
+}
+
+export async function scanReddit(
+  config: ScoutConfig,
+): Promise<PlatformResult[]> {
+  const { niche, keywords } = config;
+  const query = [niche, ...keywords].join(" ");
+  const encodedQuery = encodeURIComponent(query);
+
+  const results: PlatformResult[] = [];
+  const seenUrls = new Set<string>();
+
+  // General search across all of Reddit
+  try {
+    const generalUrl = `https://www.reddit.com/search.json?q=${encodedQuery}&sort=relevance&t=week&limit=10`;
+    const generalData = await fetchRedditJson(generalUrl);
+
+    for (const child of generalData.data.children) {
+      const mapped = mapPostToResult(child.data);
+      if (!seenUrls.has(mapped.url)) {
+        seenUrls.add(mapped.url);
+        results.push(mapped);
+      }
+    }
+  } catch {
+    // General search failed — continue with subreddit searches
+  }
+
+  // Search niche-specific subreddits
+  const subreddits = [
+    niche.replace(/\s+/g, ""),
+    "Entrepreneur",
+    "passive_income",
+  ];
+
+  for (const subreddit of subreddits) {
+    try {
+      const subUrl = `https://www.reddit.com/r/${encodeURIComponent(subreddit)}/search.json?q=${encodedQuery}&sort=new&t=week&limit=5&restrict_sr=on`;
+      const subData = await fetchRedditJson(subUrl);
+
+      for (const child of subData.data.children) {
+        const mapped = mapPostToResult(child.data);
+        if (!seenUrls.has(mapped.url)) {
+          seenUrls.add(mapped.url);
+          results.push(mapped);
+        }
+      }
+    } catch {
+      // Subreddit search failed — continue with remaining subreddits
+    }
+  }
+
+  return results;
 }

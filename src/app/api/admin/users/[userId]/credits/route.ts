@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin/guard";
+import { logAdminAudit } from "@/lib/logging/admin-audit";
 import type { ApiResponse } from "@/types/api";
 
 export const dynamic = "force-dynamic";
@@ -316,6 +317,14 @@ export async function POST(
       metadata: Record<string, unknown>;
       created_at: string;
     };
+
+    logAdminAudit({
+      admin_user_id: adminUserId,
+      action: "user.credit.issue",
+      target_resource: "user",
+      target_id: userId,
+      metadata: { organization_id: organizationId, credit_action: action, amount_cents: amountCents, token_amount: tokenAmount },
+    });
 
     return NextResponse.json(
       {

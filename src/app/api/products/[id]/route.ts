@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
@@ -129,7 +130,8 @@ export async function PATCH(
     });
 
     return NextResponse.json({ data: updatedProduct as ProductRow });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return NextResponse.json(
       { error: { code: "INTERNAL_ERROR", message: "An unexpected error occurred" } },
       { status: 500 }
@@ -208,7 +210,8 @@ export async function DELETE(
     });
 
     return NextResponse.json({ data: { id: productId, deleted: true } });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return NextResponse.json(
       { error: { code: "INTERNAL_ERROR", message: "An unexpected error occurred" } },
       { status: 500 }

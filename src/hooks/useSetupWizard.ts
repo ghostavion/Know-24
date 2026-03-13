@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type {
   SetupWizardState,
   KnowledgeIntakeData,
@@ -16,7 +17,9 @@ const initialKnowledgeIntake: KnowledgeIntakeData = {
   interviewTranscript: "",
 };
 
-export const useSetupWizard = create<SetupWizardState>((set) => ({
+export const useSetupWizard = create<SetupWizardState>()(
+  persist(
+    (set) => ({
   currentStep: 1,
   businessId: null,
   businessName: "",
@@ -134,4 +137,22 @@ export const useSetupWizard = create<SetupWizardState>((set) => ({
       buildComplete: false,
       selectedPalette: "A",
     }),
-}));
+    }),
+    {
+      name: "know24-setup-wizard",
+      partialize: (state: SetupWizardState) => ({
+        currentStep: state.currentStep,
+        businessId: state.businessId,
+        businessName: state.businessName,
+        businessSlug: state.businessSlug,
+        niche: state.niche,
+        knowledgeIntake: state.knowledgeIntake,
+        aiAnalysis: state.aiAnalysis,
+        selectedProductTypes: state.selectedProductTypes,
+        buildItems: state.buildItems,
+        buildComplete: state.buildComplete,
+        selectedPalette: state.selectedPalette,
+      }),
+    }
+  )
+);

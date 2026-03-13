@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin/guard";
+import { logAdminAudit } from "@/lib/logging/admin-audit";
 import Stripe from "stripe";
 import type { ApiResponse } from "@/types/api";
 
@@ -116,8 +117,9 @@ interface ServicesData {
 // ---------------------------------------------------------------------------
 
 export async function GET(): Promise<NextResponse<ApiResponse<ServicesData>>> {
+  let adminUserId: string;
   try {
-    await requireAdmin();
+    adminUserId = await requireAdmin();
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     if (message === "UNAUTHORIZED") {
@@ -139,6 +141,12 @@ export async function GET(): Promise<NextResponse<ApiResponse<ServicesData>>> {
   }
 
   try {
+    logAdminAudit({
+      admin_user_id: adminUserId,
+      action: "services.check",
+      target_resource: "services",
+    });
+
     const [supabase, redis, stripe] = await Promise.all([
       checkSupabase(),
       checkRedis(),

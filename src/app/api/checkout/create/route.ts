@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import Stripe from "stripe";
+import * as Sentry from "@sentry/nextjs";
 import { stripe } from "@/lib/stripe/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const checkoutSchema = z.object({
@@ -50,6 +52,15 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<CheckoutSessionData>>> {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const body: unknown = await request.json();
     const parsed = checkoutSchema.safeParse(body);
 
@@ -285,6 +296,7 @@ export async function POST(
       );
     }
 
+    Sentry.captureException(err);
     return NextResponse.json(
       {
         error: {

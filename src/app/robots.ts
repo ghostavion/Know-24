@@ -6,7 +6,14 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/dashboard/", "/setup/", "/activity/", "/settings/"],
+        disallow: [
+          "/api/",
+          "/dashboard/",
+          "/admin/",
+          "/setup/",
+          "/sign-in",
+          "/sign-up",
+        ],
       },
     ],
     sitemap: "https://know24.io/sitemap.xml",

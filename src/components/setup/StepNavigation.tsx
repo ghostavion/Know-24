@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 interface StepNavigationProps {
   currentStep: number;
+  totalSteps?: number;
   onBack: () => void;
   onNext: () => void;
   nextLabel?: string;
@@ -16,13 +17,14 @@ interface StepNavigationProps {
 
 const StepNavigation = ({
   currentStep,
+  totalSteps = 3,
   onBack,
   onNext,
   nextLabel,
   nextDisabled = false,
   nextLoading = false,
 }: StepNavigationProps) => {
-  const resolvedNextLabel = nextLabel ?? (currentStep === 5 ? "Go Live" : "Continue");
+  const resolvedNextLabel = nextLabel ?? (currentStep === totalSteps ? "Go Live" : "Continue");
 
   return (
     <div className="flex items-center justify-between border-t border-border py-4">

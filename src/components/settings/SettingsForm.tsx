@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Save, Trash2, Loader2 } from "lucide-react";
+import { Save, Trash2, Loader2, Crown, CreditCard, ExternalLink } from "lucide-react";
 
 interface SettingsFormProps {
   user: {
@@ -270,6 +270,9 @@ export const SettingsForm = ({ user }: SettingsFormProps) => {
         </div>
       </div>
 
+      {/* Subscription Section */}
+      <SubscriptionSection />
+
       {/* Save Button and Message */}
       <div className="flex items-center gap-4">
         <button
@@ -398,6 +401,135 @@ interface NotificationToggleProps {
   checked: boolean;
   onToggle: () => void;
 }
+
+/* ---------------------------------------------------------- */
+/* Subscription Section                                       */
+/* ---------------------------------------------------------- */
+
+interface SubStatus {
+  active: boolean;
+  tier: "founder" | "standard" | null;
+  status: string;
+  founderMember: boolean;
+}
+
+const SubscriptionSection = () => {
+  const [sub, setSub] = useState<SubStatus | null>(null);
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/subscription/status")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.data) setSub(json.data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const openBillingPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/billing-portal", { method: "POST" });
+      const json = await res.json();
+      if (json.data?.url) {
+        window.location.href = json.data.url;
+      }
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
+  if (!sub) {
+    return (
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+          <span className="text-sm text-muted-foreground">Loading subscription...</span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-border bg-card p-6">
+      <div className="flex items-center gap-2">
+        <CreditCard className="h-5 w-5 text-primary" />
+        <h2 className="text-base font-semibold text-foreground">Subscription</h2>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Manage your Know24 subscription and billing.
+      </p>
+
+      <div className="mt-6 space-y-4">
+        {/* Current plan */}
+        <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
+          <div className="flex items-center gap-3">
+            {sub.founderMember && <Crown className="h-5 w-5 text-amber-500" />}
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {sub.tier === "founder" ? "Founder Plan" : sub.tier === "standard" ? "Standard Plan" : "No Plan"}
+              </p>
+              <p className="text-xs text-muted-foreground capitalize">
+                Status: {sub.status}
+              </p>
+            </div>
+          </div>
+          <span
+            className={cn(
+              "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
+              sub.active
+                ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            )}
+          >
+            {sub.active ? "Active" : "Inactive"}
+          </span>
+        </div>
+
+        {/* Pricing note for founders */}
+        {sub.founderMember && (
+          <p className="text-xs text-amber-600 dark:text-amber-400">
+            You have founder pricing locked in at $79/mo forever.
+          </p>
+        )}
+
+        {/* Manage billing */}
+        {sub.active ? (
+          <button
+            type="button"
+            onClick={openBillingPortal}
+            disabled={portalLoading}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-lg border border-border px-4 py-2",
+              "text-sm font-medium text-foreground",
+              "hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary/30",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              "transition-colors"
+            )}
+          >
+            {portalLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ExternalLink className="h-4 w-4" />
+            )}
+            Manage Billing
+          </button>
+        ) : (
+          <a
+            href="/api/subscribe"
+            className={cn(
+              "inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2",
+              "text-sm font-medium text-primary-foreground",
+              "hover:bg-primary/90 transition-colors"
+            )}
+          >
+            Subscribe Now
+          </a>
+        )}
+      </div>
+    </div>
+  );
+};
 
 const NotificationToggle = ({
   label,

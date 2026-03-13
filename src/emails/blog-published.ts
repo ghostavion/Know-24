@@ -24,7 +24,7 @@ export function renderBlogPublishedEmail(props: BlogPublishedEmailProps): string
         <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
           <!-- Header -->
           <tr>
-            <td style="background-color: #6366f1; padding: 32px 40px; text-align: center;">
+            <td style="background-color: #0891b2; padding: 32px 40px; text-align: center;">
               <p style="margin: 0 0 4px; color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 500;">
                 ${businessName}
               </p>
@@ -59,7 +59,7 @@ export function renderBlogPublishedEmail(props: BlogPublishedEmailProps): string
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="center" style="padding: 8px 0 0;">
-                    <a href="${postUrl}" style="display: inline-block; background-color: #6366f1; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 6px; line-height: 1;">
+                    <a href="${postUrl}" style="display: inline-block; background-color: #0891b2; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 6px; line-height: 1;">
                       Read the Full Post
                     </a>
                   </td>
@@ -71,7 +71,7 @@ export function renderBlogPublishedEmail(props: BlogPublishedEmailProps): string
           <tr>
             <td style="padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
               <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; line-height: 1.5;">
-                Powered by <a href="https://know24.io" style="color: #6366f1; text-decoration: none;">Know24</a>
+                Powered by <a href="https://know24.io" style="color: #0891b2; text-decoration: none;">Know24</a>
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.5;">
                 <a href="{{unsubscribe_url}}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>

@@ -64,7 +64,7 @@ export function MarketingNav() {
                 href="/sign-up"
                 className="rounded-lg bg-[#0891b2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0e7490]"
               >
-                Start Free
+                Start Free Trial
               </Link>
             </>
           )}
@@ -124,7 +124,7 @@ export function MarketingNav() {
                   href="/sign-up"
                   className="rounded-lg bg-[#0891b2] px-3 py-2 text-center text-sm font-medium text-white hover:bg-[#0e7490]"
                 >
-                  Start Free
+                  Start Free Trial
                 </Link>
               </>
             )}

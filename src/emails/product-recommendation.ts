@@ -40,7 +40,7 @@ function renderProductCard(product: RecommendedProduct): string {
                         <span style="color: #1f2937; font-size: 18px; font-weight: 700;">${formattedPrice}</span>
                       </td>
                       <td align="right" style="vertical-align: middle;">
-                        <a href="${product.url}" style="display: inline-block; background-color: #6366f1; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 6px; line-height: 1;">
+                        <a href="${product.url}" style="display: inline-block; background-color: #0891b2; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 10px 20px; border-radius: 6px; line-height: 1;">
                           View Product
                         </a>
                       </td>
@@ -75,7 +75,7 @@ export function renderProductRecommendationEmail(props: ProductRecommendationEma
         <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
           <!-- Header -->
           <tr>
-            <td style="background-color: #6366f1; padding: 32px 40px; text-align: center;">
+            <td style="background-color: #0891b2; padding: 32px 40px; text-align: center;">
               <p style="margin: 0 0 4px; color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 500;">
                 ${businessName}
               </p>
@@ -103,7 +103,7 @@ export function renderProductRecommendationEmail(props: ProductRecommendationEma
           <tr>
             <td style="padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
               <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; line-height: 1.5;">
-                Powered by <a href="https://know24.io" style="color: #6366f1; text-decoration: none;">Know24</a>
+                Powered by <a href="https://know24.io" style="color: #0891b2; text-decoration: none;">Know24</a>
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.5;">
                 <a href="{{unsubscribe_url}}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>

@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
-import { getProductGenerationQueue } from "@/lib/queue/queues";
+import { dispatchProductGeneration } from "@/lib/queue/dispatch";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
 import type { ApiResponse } from "@/types/api";
@@ -222,8 +222,8 @@ export async function POST(
       );
     }
 
-    // Enqueue generation job
-    await getProductGenerationQueue().add("generate", {
+    // Dispatch generation via Inngest
+    await dispatchProductGeneration({
       productId,
       businessId,
       productTypeSlug,

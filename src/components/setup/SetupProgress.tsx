@@ -4,7 +4,7 @@ import { Check } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-const STEP_LABELS = ["Knowledge", "Analysis", "Products", "Building", "Go Live"];
+const STEP_LABELS = ["Pick Niche", "AI Builds", "Go Live"];
 
 interface SetupProgressProps {
   currentStep: number;

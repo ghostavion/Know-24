@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin/guard";
+import { logAdminAudit } from "@/lib/logging/admin-audit";
 import type { ApiResponse } from "@/types/api";
 
 export const dynamic = "force-dynamic";
@@ -23,8 +24,9 @@ export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ userId: string }> }
 ): Promise<NextResponse<ApiResponse<ImpersonateResult>>> {
+  let adminUserId: string;
   try {
-    await requireAdmin();
+    adminUserId = await requireAdmin();
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     if (message === "UNAUTHORIZED") {
@@ -62,6 +64,13 @@ export async function POST(
         { status: 404 }
       );
     }
+
+    logAdminAudit({
+      admin_user_id: adminUserId,
+      action: "user.impersonate",
+      target_resource: "user",
+      target_id: userId,
+    });
 
     // For now, return a link to the Clerk dashboard for this user.
     // In the future, this could use Clerk's impersonation feature

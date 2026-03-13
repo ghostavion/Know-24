@@ -3,9 +3,10 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
-import { getKnowledgeIngestQueue } from "@/lib/queue/queues";
+import { inngest } from "@/lib/inngest/client";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const submitUrlSchema = z.object({
@@ -20,6 +21,15 @@ interface UrlSubmitData {
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse<UrlSubmitData>>> {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json(
@@ -88,15 +98,10 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<UrlSu
       );
     }
 
-    try {
-      await getKnowledgeIngestQueue().add("ingest-url", {
-        knowledgeItemId,
-        businessId,
-        url,
-      });
-    } catch {
-      // Queue unavailable — item saved to DB but won't be processed until queue is online
-    }
+    await inngest.send({
+      name: "knowledge/ingest.requested",
+      data: { knowledgeItemId, businessId, url },
+    });
 
     logPlatformEvent({
       event_category: "DATA",

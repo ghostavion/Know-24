@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getPublishedStorefront } from "@/lib/storefront/queries";
 import { createServiceClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const slugSchema = z.string().min(1);
@@ -35,6 +36,15 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<NextResponse<ApiResponse<StorefrontBlogPost[]>>> {
   try {
+    const ip = _request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "storefront");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const { slug } = await params;
 
     const parsed = slugSchema.safeParse(slug);

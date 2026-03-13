@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { auth } from "@clerk/nextjs/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { resolveUserId } from "@/lib/auth/resolve-user";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 import type { ChatConversation } from "@/types/chatbot";
 
@@ -57,7 +60,58 @@ export async function GET(
   { params }: { params: Promise<{ businessId: string }> }
 ): Promise<NextResponse<ApiResponse<ChatConversation[]>>> {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
+    // Auth check
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
+      return NextResponse.json(
+        { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        { status: 401 }
+      );
+    }
+
     const { businessId } = await params;
+    const supabase = createServiceClient();
+
+    // Resolve internal user ID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User record not found. Please sign out and sign back in." } },
+        { status: 404 }
+      );
+    }
+
+    // Verify business ownership
+    const { data: business, error: bizError } = await supabase
+      .from("businesses")
+      .select("owner_id")
+      .eq("id", businessId)
+      .single();
+
+    if (bizError || !business) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Business not found" } },
+        { status: 404 }
+      );
+    }
+
+    if (business.owner_id !== userId) {
+      return NextResponse.json(
+        { error: { code: "FORBIDDEN", message: "Not authorized to access this business" } },
+        { status: 403 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
 
     const parsed = getConversationsSchema.safeParse({
@@ -79,7 +133,6 @@ export async function GET(
     }
 
     const { productId, customerEmail } = parsed.data;
-    const supabase = createServiceClient();
 
     // Verify product belongs to business
     const { data: product } = await supabase
@@ -141,7 +194,57 @@ export async function POST(
   { params }: { params: Promise<{ businessId: string }> }
 ): Promise<NextResponse<ApiResponse<ChatConversation>>> {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
+    // Auth check
+    const { userId: clerkUserId } = await auth();
+    if (!clerkUserId) {
+      return NextResponse.json(
+        { error: { code: "UNAUTHORIZED", message: "Not authenticated" } },
+        { status: 401 }
+      );
+    }
+
     const { businessId } = await params;
+    const supabase = createServiceClient();
+
+    // Resolve internal user ID
+    const userId = await resolveUserId(supabase, clerkUserId);
+    if (!userId) {
+      return NextResponse.json(
+        { error: { code: "USER_NOT_FOUND", message: "User record not found. Please sign out and sign back in." } },
+        { status: 404 }
+      );
+    }
+
+    // Verify business ownership
+    const { data: business, error: bizError } = await supabase
+      .from("businesses")
+      .select("owner_id")
+      .eq("id", businessId)
+      .single();
+
+    if (bizError || !business) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Business not found" } },
+        { status: 404 }
+      );
+    }
+
+    if (business.owner_id !== userId) {
+      return NextResponse.json(
+        { error: { code: "FORBIDDEN", message: "Not authorized to access this business" } },
+        { status: 403 }
+      );
+    }
 
     const body: unknown = await request.json();
     const parsed = createConversationSchema.safeParse(body);
@@ -160,7 +263,6 @@ export async function POST(
     }
 
     const { productId, customerEmail, customerName, title } = parsed.data;
-    const supabase = createServiceClient();
 
     // Verify product belongs to business
     const { data: product } = await supabase

@@ -3,25 +3,47 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
-import { r2 } from "@/lib/storage/r2";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { getSignedUploadUrl, BUCKETS } from "@/lib/storage/supabase-storage";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const presignSchema = z.object({
   businessId: z.string().uuid("Invalid business ID"),
-  fileName: z.string().min(1, "File name is required"),
-  fileType: z.string().min(1, "File type is required"),
+  fileName: z
+    .string()
+    .min(1, "File name is required")
+    .regex(/^[a-zA-Z0-9_\-. ]+$/, "Invalid file name characters"),
+  fileType: z.enum([
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/plain",
+    "text/markdown",
+    "audio/mpeg",
+    "audio/wav",
+    "audio/webm",
+    "image/png",
+    "image/jpeg",
+  ], { error: "Unsupported file type" }),
+  fileSize: z.number().max(52428800, "File too large (50MB max)"),
 });
 
 interface PresignData {
   uploadUrl: string;
-  r2Key: string;
+  storagePath: string;
 }
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse<PresignData>>> {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json(
@@ -72,15 +94,9 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Presi
       );
     }
 
-    const r2Key = `knowledge/${businessId}/${crypto.randomUUID()}-${fileName}`;
+    const storagePath = `${businessId}/${crypto.randomUUID()}-${fileName}`;
 
-    const command = new PutObjectCommand({
-      Bucket: process.env.R2_PRODUCT_ASSETS_BUCKET!,
-      Key: r2Key,
-      ContentType: fileType,
-    });
-
-    const presignedUrl = await getSignedUrl(r2, command, { expiresIn: 3600 });
+    const { signedUrl } = await getSignedUploadUrl(BUCKETS.knowledge, storagePath);
 
     logPlatformEvent({
       event_category: "USER_ACTION",
@@ -88,11 +104,11 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Presi
       clerk_user_id: clerkUserId,
       status: "success",
       business_id: businessId,
-      payload: { file_name: fileName, file_type: fileType, r2_key: r2Key },
+      payload: { file_name: fileName, file_type: fileType, storage_path: storagePath },
     });
 
     return NextResponse.json({
-      data: { uploadUrl: presignedUrl, r2Key },
+      data: { uploadUrl: signedUrl, storagePath },
     });
   } catch {
     return NextResponse.json(

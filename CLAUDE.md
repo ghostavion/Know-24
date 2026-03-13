@@ -6,14 +6,14 @@ Know24 is a multi-tenant SaaS platform — "Shopify for Knowledge Businesses" �
 ## Tech Stack
 - **Frontend**: Next.js 15 (App Router), TypeScript (strict mode), Tailwind CSS v4, shadcn/ui
 - **Auth**: Clerk (@clerk/nextjs)
-- **Database**: Supabase (PostgreSQL 16 + pgvector)
+- **Database + Storage**: Supabase (PostgreSQL 16 + pgvector + Storage)
 - **Payments**: Stripe Billing + Stripe Connect
-- **AI**: Vercel AI SDK (OpenAI, Anthropic, Google)
-- **Queue**: BullMQ + Upstash Redis
-- **Storage**: Cloudflare R2
+- **AI**: Vercel AI SDK — Google Gemini (drafts, images) + Anthropic Claude (polish)
+- **Background Jobs**: Inngest (serverless, event-driven)
 - **Email**: Resend + React Email
-- **Hosting**: Vercel (frontend/API) + Railway (background workers)
+- **Hosting**: Vercel (everything — frontend, API, background jobs)
 - **Monitoring**: Sentry + Vercel Analytics
+- **Research**: Firecrawl + Tavily
 
 ## Code Conventions
 
@@ -57,12 +57,15 @@ Every API route MUST:
 - NEVER leave `console.log` in production code
 
 ## Business Logic Rules
+- V1 is ebook-only — one product type, done exceptionally well
+- $99/mo + sliding transaction fee (5% → 1% based on volume)
+- Unified credit system: 200 credits/mo (Research=10, Ebook=50, Cover=10, Scout=15, Chapter rewrite=5)
 - Each user can have multiple businesses; each business has exactly one storefront
 - Products belong to businesses, never to users directly
-- Subscriptions belong to organizations, not businesses
-- Scout is a per-org add-on. AI usage is metered per business per billing period
-- Storefronts at `{slug}.know24.io` or custom domains
-- The AI Advisor NEVER acts without explicit creator approval
+- Scout is a live opportunity hunter, NOT a playbook generator
+- Storefronts at `know24.io/s/{slug}`
+- Background jobs dispatched via `src/lib/queue/dispatch.ts` → Inngest events
+- Storage uses Supabase Storage buckets: `ebooks`, `covers`, `knowledge`
 
 ## File Patterns
 - Pages: `src/app/(group)/route/page.tsx`

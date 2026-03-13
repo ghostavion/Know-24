@@ -1,11 +1,4 @@
-import { generateCheatSheet } from "./cheat-sheet";
-import { generateEmailCourse } from "./email-course";
-import { generateFrameworkTemplatePack } from "./framework-template-pack";
 import { generateGuideEbook } from "./guide-ebook";
-import { generatePromptPack } from "./prompt-pack";
-import { generateResourceDirectory } from "./resource-directory";
-import { generateSwipeFile } from "./swipe-file";
-import { generateWorksheetWorkbook } from "./worksheet-workbook";
 
 export interface GeneratorResult {
   success: boolean;
@@ -19,14 +12,7 @@ type GeneratorFn = (
 ) => Promise<GeneratorResult>;
 
 const generators: Record<string, GeneratorFn> = {
-  "cheat-sheet": generateCheatSheet,
-  "email-course": generateEmailCourse,
-  "framework-template-pack": generateFrameworkTemplatePack,
   "guide-ebook": generateGuideEbook,
-  "prompt-pack": generatePromptPack,
-  "resource-directory": generateResourceDirectory,
-  "swipe-file": generateSwipeFile,
-  "worksheet-workbook": generateWorksheetWorkbook,
 };
 
 /**

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 
 import { createServiceClient } from "@/lib/supabase/server"
 import { CheckoutButton } from "@/components/storefront/CheckoutButton"
+import { AIDisclosure } from "@/components/compliance/AIDisclosure"
 import type { StorefrontProduct } from "@/types/storefront"
 import type { Metadata } from "next"
 
@@ -255,9 +256,12 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       {/* Description */}
       {product.description && (
         <div className="mt-12">
-          <h2 className="text-xl font-semibold text-foreground">
-            About this product
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-foreground">
+              About this product
+            </h2>
+            <AIDisclosure variant="badge" />
+          </div>
           <div className="prose prose-lg mt-4 max-w-none text-muted-foreground">
             {product.description.split("\n").map((paragraph, i) => (
               <p key={i}>{paragraph}</p>

@@ -8,7 +8,7 @@ export const helpCategories = [
       {
         slug: "creating-your-account",
         title: "Creating Your Account",
-        body: "Sign up at know24.io and verify your email. You'll be guided through our onboarding process that takes less than 5 minutes to complete.\n\n## Steps\n\n1. Click **Start Free** on the homepage\n2. Enter your email and create a password (or sign in with Google)\n3. Complete your profile with your name and expertise area\n4. You're ready to set up your first business!",
+        body: "Sign up at know24.io and verify your email. You'll be guided through our onboarding process that takes less than 5 minutes to complete.\n\n## Steps\n\n1. Click **Start Free Trial** on the homepage\n2. Enter your email and create a password (or sign in with Google)\n3. Complete your profile with your name and expertise area\n4. You're ready to set up your first business!",
       },
       {
         slug: "setup-my-business-walkthrough",

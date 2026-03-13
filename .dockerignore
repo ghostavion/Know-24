@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+*.md
+LICENSE
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+coverage
+dist
+.turbo
+supabase/.temp

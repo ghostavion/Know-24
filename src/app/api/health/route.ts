@@ -1,5 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import Stripe from "stripe";
 
 export const dynamic = "force-dynamic";
@@ -98,8 +99,17 @@ async function checkStripe(): Promise<ServiceStatus> {
   }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const [supabase, redis, stripe] = await Promise.all([
       checkSupabase(),
       checkRedis(),

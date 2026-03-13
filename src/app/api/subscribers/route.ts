@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { ApiResponse } from "@/types/api";
 
@@ -182,7 +183,9 @@ export async function GET(
       .order("subscribed_at", { ascending: false });
 
     if (search) {
-      query = query.ilike("email", `%${search}%`);
+      // Escape LIKE wildcards in user input to prevent pattern injection
+      const escaped = search.replace(/[%_\\]/g, (ch) => `\\${ch}`);
+      query = query.ilike("email", `%${escaped}%`);
     }
 
     const { data: subscribers, error: fetchError } = await query;
@@ -209,7 +212,8 @@ export async function GET(
     }
 
     return NextResponse.json({ data: typedSubscribers.map(mapSubscriber) });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return NextResponse.json(
       { error: { code: "INTERNAL_ERROR", message: "An unexpected error occurred" } },
       { status: 500 }

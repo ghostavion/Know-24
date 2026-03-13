@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import * as Sentry from "@sentry/nextjs";
 import { streamText } from "ai";
 import { primaryModel } from "@/lib/ai/providers";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -9,6 +10,7 @@ import {
   getRecommendableProducts,
 } from "@/lib/ai/chatbot-prompt";
 import { trackUsage } from "@/lib/usage-metering";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ChatMessage, ChatConversation } from "@/types/chatbot";
 
 // ---------- Zod schemas ----------
@@ -78,6 +80,15 @@ export async function POST(
   { params }: { params: Promise<{ businessId: string }> }
 ): Promise<Response> {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "ai");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const { businessId } = await params;
 
     // 1. Validate input
@@ -345,7 +356,8 @@ export async function POST(
     });
 
     return result.toTextStreamResponse();
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error);
     return NextResponse.json(
       {
         error: {

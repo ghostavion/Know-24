@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { STOREFRONT_PALETTES } from "@/lib/constants/product-types";
-import { getProductGenerationQueue } from "@/lib/queue/queues";
+import { dispatchProductGeneration } from "@/lib/queue/dispatch";
 
 export function getWorkspaceTools(businessId: string) {
   return {
@@ -43,7 +43,7 @@ export function getWorkspaceTools(businessId: string) {
           .from("products")
           .select("id, title, price_cents")
           .eq("business_id", businessId)
-          .ilike("title", `%${productName}%`)
+          .ilike("title", `%${productName.replace(/[%_\\]/g, (ch) => `\\${ch}`)}%`)
           .limit(1)
           .single();
 
@@ -92,7 +92,7 @@ export function getWorkspaceTools(businessId: string) {
           .from("products")
           .select("id, title, status")
           .eq("business_id", businessId)
-          .ilike("title", `%${productName}%`)
+          .ilike("title", `%${productName.replace(/[%_\\]/g, (ch) => `\\${ch}`)}%`)
           .limit(1)
           .single();
 
@@ -253,10 +253,10 @@ export function getWorkspaceTools(businessId: string) {
           };
         }
 
-        await getProductGenerationQueue().add("generate", {
-          productId: product.id,
+        await dispatchProductGeneration({
+          productId: product.id as string,
           businessId,
-          productType,
+          productTypeSlug: productType,
         });
 
         return {

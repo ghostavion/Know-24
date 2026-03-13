@@ -3,10 +3,15 @@ import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
-import { getProductGenerationQueue } from "@/lib/queue/queues";
+import {
+  dispatchProductGeneration,
+  dispatchCoverGeneration,
+  dispatchStorefrontBuild,
+} from "@/lib/queue/dispatch";
 import { PRODUCT_TYPES } from "@/lib/constants/product-types";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { logActivity } from "@/lib/logging/activity-logger";
+import { checkRateLimit } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 const buildSchema = z.object({
@@ -28,6 +33,15 @@ interface BuildData {
 
 export async function POST(req: Request): Promise<NextResponse<ApiResponse<BuildData>>> {
   try {
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const rlResult = await checkRateLimit(ip, "api");
+    if (!rlResult.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Too many requests" } },
+        { status: 429, headers: { "Retry-After": String(Math.ceil((rlResult.reset - Date.now()) / 1000)) } }
+      );
+    }
+
     const { userId: clerkUserId } = await auth();
     if (!clerkUserId) {
       return NextResponse.json(
@@ -66,7 +80,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Build
     // Verify business ownership
     const { data: business } = await supabase
       .from("businesses")
-      .select("id, name")
+      .select("id, name, niche")
       .eq("id", businessId)
       .eq("owner_id", userId)
       .single();
@@ -134,15 +148,18 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Build
         );
       }
 
-      try {
-        await getProductGenerationQueue().add("generate-product", {
-          productId,
-          businessId,
-          productTypeSlug: slug,
-        });
-      } catch {
-        // Queue unavailable — product saved to DB but won't be processed until queue is online
-      }
+      await dispatchProductGeneration({
+        productId,
+        businessId,
+        productTypeSlug: slug,
+      });
+
+      await dispatchCoverGeneration({
+        productId,
+        businessId,
+        title,
+        niche: business.niche ?? "general",
+      });
 
       queuedProducts.push({
         id: productId,
@@ -150,6 +167,12 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<Build
         status: "queued",
       });
     }
+
+    // Dispatch storefront build
+    await dispatchStorefrontBuild({
+      businessId,
+      productId: queuedProducts[0]?.id ?? "",
+    });
 
     // Update onboarding step
     const { error: updateError } = await supabase

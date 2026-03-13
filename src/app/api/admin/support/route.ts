@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/admin/guard";
+import { logAdminAudit } from "@/lib/logging/admin-audit";
 import type { ApiResponse } from "@/types/api";
 
 export const dynamic = "force-dynamic";
@@ -86,8 +87,9 @@ interface TicketRow {
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<SupportData>>> {
+  let adminUserId: string;
   try {
-    await requireAdmin();
+    adminUserId = await requireAdmin();
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     if (message === "UNAUTHORIZED") {
@@ -135,6 +137,12 @@ export async function GET(
         { status: 400 }
       );
     }
+
+    logAdminAudit({
+      admin_user_id: adminUserId,
+      action: "support.list",
+      target_resource: "support_tickets",
+    });
 
     const { page, limit, status, priority, search } = parsed.data;
     const offset = (page - 1) * limit;

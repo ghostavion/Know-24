@@ -2,10 +2,11 @@ import Link from "next/link"
 
 interface StorefrontFooterProps {
   businessName: string
+  businessSlug?: string
   socialLinks: Record<string, string>
 }
 
-const StorefrontFooter = ({ businessName, socialLinks }: StorefrontFooterProps) => {
+const StorefrontFooter = ({ businessName, businessSlug, socialLinks }: StorefrontFooterProps) => {
   const socialEntries = Object.entries(socialLinks)
 
   return (
@@ -38,12 +39,13 @@ const StorefrontFooter = ({ businessName, socialLinks }: StorefrontFooterProps) 
             &copy; {new Date().getFullYear()} {businessName}. All rights reserved.
           </p>
           <p className="mt-1">
-            Powered by{" "}
             <Link
-              href="https://know24.io"
+              href={`https://know24.io${businessSlug ? `?ref=${businessSlug}` : ""}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-medium text-foreground transition-colors hover:underline"
             >
-              Know24
+              Powered by Know24
             </Link>
           </p>
         </div>

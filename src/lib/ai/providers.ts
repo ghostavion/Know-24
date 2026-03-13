@@ -1,11 +1,19 @@
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
+import { anthropic } from "@ai-sdk/anthropic";
 import { logPlatformEvent } from "@/lib/logging/platform-logger";
 import { estimateCostUsd } from "@/lib/admin/llm-costs";
 
-export const primaryModel = openai("gpt-4o");
-export const reasoningModel = openai("gpt-4o"); // swap to anthropic when ANTHROPIC_API_KEY is added
-export const longContextModel = openai("gpt-4o"); // swap to google when GOOGLE_GENERATIVE_AI_API_KEY is added
-export const embeddingModel = openai.embedding("text-embedding-3-small");
+// Primary model — fast drafts, cheap
+export const primaryModel = google("gemini-2.5-flash-preview-05-20");
+
+// Reasoning / polish model — quality pass
+export const reasoningModel = anthropic("claude-sonnet-4-5-20250514");
+
+// Long context model — research synthesis
+export const longContextModel = google("gemini-2.5-pro-preview-05-06");
+
+// Embedding model — Gemini text embeddings
+export const embeddingModel = google.textEmbeddingModel("text-embedding-004");
 
 /**
  * Log a completed LLM call with token usage and cost.

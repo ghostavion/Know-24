@@ -1,23 +1,13 @@
 import type { MetadataRoute } from "next";
+import { createServiceClient } from "@/lib/supabase/server";
 
 const BASE_URL = "https://know24.io";
 
-const blogSlugs = [
-  "the-rise-of-knowledge-businesses",
-  "5-ways-ai-is-changing-how-experts-monetize",
-  "from-expert-to-entrepreneur",
-];
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const supabase = createServiceClient();
 
-const helpSlugs = [
-  "getting-started",
-  "products",
-  "storefront",
-  "marketing",
-  "billing",
-  "expert-engine",
-];
+  /* ---- Static pages ---------------------------------------------------- */
 
-export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE_URL, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
     { url: `${BASE_URL}/pricing`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
@@ -25,19 +15,54 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE_URL}/help`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
   ];
 
-  const blogPages: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
-    url: `${BASE_URL}/blog/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
+  /* ---- Dynamic storefront pages (/s/[slug]) ---------------------------- */
+
+  const { data: storefronts } = await supabase
+    .from("storefronts")
+    .select("subdomain, updated_at")
+    .eq("is_published", true);
+
+  const storefrontPages: MetadataRoute.Sitemap = (storefronts ?? []).map((sf) => ({
+    url: `${BASE_URL}/s/${sf.subdomain}`,
+    lastModified: sf.updated_at ? new Date(sf.updated_at) : new Date(),
+    changeFrequency: "weekly" as const,
+    priority: 0.7,
   }));
 
-  const helpPages: MetadataRoute.Sitemap = helpSlugs.map((slug) => ({
-    url: `${BASE_URL}/help/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.5,
-  }));
+  /* ---- Dynamic blog posts (/s/[slug]/blog/[postSlug]) ------------------ */
 
-  return [...staticPages, ...blogPages, ...helpPages];
+  const { data: blogPosts } = await supabase
+    .from("blog_posts")
+    .select("slug, published_at, business_id")
+    .not("published_at", "is", null);
+
+  // Map business_id → subdomain for URL construction
+  const businessIds = [
+    ...new Set((blogPosts ?? []).map((p) => p.business_id)),
+  ];
+
+  let businessToSubdomain: Record<string, string> = {};
+
+  if (businessIds.length > 0) {
+    const { data: sfLookup } = await supabase
+      .from("storefronts")
+      .select("business_id, subdomain")
+      .eq("is_published", true)
+      .in("business_id", businessIds);
+
+    businessToSubdomain = Object.fromEntries(
+      (sfLookup ?? []).map((sf) => [sf.business_id, sf.subdomain])
+    );
+  }
+
+  const blogPages: MetadataRoute.Sitemap = (blogPosts ?? [])
+    .filter((post) => businessToSubdomain[post.business_id])
+    .map((post) => ({
+      url: `${BASE_URL}/s/${businessToSubdomain[post.business_id]}/blog/${post.slug}`,
+      lastModified: post.published_at ? new Date(post.published_at) : new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }));
+
+  return [...staticPages, ...storefrontPages, ...blogPages];
 }
