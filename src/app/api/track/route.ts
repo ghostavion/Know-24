@@ -87,19 +87,27 @@ export async function POST(request: Request) {
     environment: process.env.NODE_ENV ?? "production",
   }));
 
-  const { error: insertError } = await supabase
+  const { data: inserted, error: insertError } = await supabase
     .from("platform_logs")
-    .insert(rows);
+    .insert(rows)
+    .select("id, event_type, timestamp");
 
   if (insertError) {
     return NextResponse.json(
-      { ok: false, error: insertError.message, code: insertError.code },
+      {
+        ok: false,
+        error: insertError.message,
+        code: insertError.code,
+        hint: insertError.hint,
+        details: insertError.details,
+        supabase_url: process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(0, 30),
+      },
       { status: 500, headers: rateLimitHeaders(rateLimitResult) }
     );
   }
 
   return NextResponse.json(
-    { ok: true, processed: events.length },
+    { ok: true, processed: events.length, inserted: inserted?.length ?? 0, ids: inserted?.map((r: { id: string }) => r.id) },
     { headers: rateLimitHeaders(rateLimitResult) }
   );
 }
