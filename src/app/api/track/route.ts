@@ -107,7 +107,7 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json(
-    { ok: true, processed: events.length, inserted: inserted?.length ?? 0, ids: inserted?.map((r: { id: string }) => r.id) },
+    { ok: true, processed: events.length, inserted: inserted?.length ?? 0, ids: inserted?.map((r: { id: string }) => r.id), db: process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(8, 40) },
     { headers: rateLimitHeaders(rateLimitResult) }
   );
 }
