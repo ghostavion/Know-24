@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { getSessionId } from "@/lib/tracking/session";
+import { pushEvent as pushToBuffer } from "@/lib/tracking/event-buffer";
 
 const TRACK_ENDPOINT = "/api/track";
 const IDENTIFY_ENDPOINT = "/api/track/identify";
@@ -34,6 +35,7 @@ let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
 function enqueueEvent(event: TrackPayload): void {
   eventQueue.push(event);
+  pushToBuffer(event);
   if (eventQueue.length >= FLUSH_BATCH_SIZE) {
     flushQueue();
   }

@@ -9,6 +9,7 @@ import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { ActivityTracker } from "@/components/tracking/ActivityTracker";
 import { PerformanceTracker } from "@/components/tracking/PerformanceTracker";
 import { CookieConsent } from "@/components/compliance/CookieConsent";
+import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -54,6 +55,7 @@ export default function RootLayout({
           <Suspense fallback={null}>
             <ActivityTracker />
             <PerformanceTracker />
+            <FeedbackWidget />
           </Suspense>
           <CookieConsent />
         </body>
