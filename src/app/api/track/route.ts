@@ -12,8 +12,15 @@ const trackingSchema = z.object({
   page_url: z.string().max(2048),
   page_route: z.string().max(500),
   session_id: z.string().uuid(),
+  timestamp: z.number().optional(),
   payload: z.record(z.string(), z.unknown()).optional(),
 });
+
+// Accept a single event object OR an array of event objects
+const bodySchema = z.union([
+  z.array(trackingSchema).min(1).max(50),
+  trackingSchema,
+]);
 
 export async function POST(request: Request) {
   // Rate limit by IP
@@ -38,15 +45,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const parsed = trackingSchema.safeParse(body);
+  const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid payload", details: parsed.error.flatten().fieldErrors },
+      { error: "Invalid payload", details: parsed.error.flatten() },
       { status: 400 }
     );
   }
 
-  const data = parsed.data;
+  // Normalize to array
+  const events = Array.isArray(parsed.data) ? parsed.data : [parsed.data];
 
   // Get Clerk user ID if authenticated (don't error if not)
   let clerkUserId: string | null = null;
@@ -60,24 +68,26 @@ export async function POST(request: Request) {
   // Extract request metadata
   const meta = extractRequestMeta(request);
 
-  // Fire-and-forget log
-  logPlatformEvent({
-    event_category: "UI",
-    event_type: data.event_type,
-    clerk_user_id: clerkUserId,
-    session_id: data.session_id,
-    ip_address: meta.ip_address,
-    user_agent: meta.user_agent,
-    geo_country: meta.geo_country,
-    geo_city: meta.geo_city,
-    page_url: data.page_url,
-    page_route: data.page_route,
-    status: "success",
-    payload: data.payload ?? {},
-  });
+  // Log each event
+  for (const data of events) {
+    logPlatformEvent({
+      event_category: "UI",
+      event_type: data.event_type,
+      clerk_user_id: clerkUserId,
+      session_id: data.session_id,
+      ip_address: meta.ip_address,
+      user_agent: meta.user_agent,
+      geo_country: meta.geo_country,
+      geo_city: meta.geo_city,
+      page_url: data.page_url,
+      page_route: data.page_route,
+      status: "success",
+      payload: data.payload ?? {},
+    });
+  }
 
   return NextResponse.json(
-    { ok: true },
+    { ok: true, processed: events.length },
     { headers: rateLimitHeaders(rateLimitResult) }
   );
 }

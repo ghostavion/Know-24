@@ -7,6 +7,7 @@ import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 import { ActivityTracker } from "@/components/tracking/ActivityTracker";
+import { PerformanceTracker } from "@/components/tracking/PerformanceTracker";
 import { CookieConsent } from "@/components/compliance/CookieConsent";
 import "./globals.css";
 
@@ -52,6 +53,7 @@ export default function RootLayout({
           <AnalyticsProvider />
           <Suspense fallback={null}>
             <ActivityTracker />
+            <PerformanceTracker />
           </Suspense>
           <CookieConsent />
         </body>
