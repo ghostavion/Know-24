@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@clerk/nextjs/server";
 import {
-  logPlatformEvent,
+  logPlatformEventAsync,
   extractRequestMeta,
 } from "@/lib/logging/platform-logger";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
@@ -68,23 +68,25 @@ export async function POST(request: Request) {
   // Extract request metadata
   const meta = extractRequestMeta(request);
 
-  // Log each event
-  for (const data of events) {
-    logPlatformEvent({
-      event_category: "UI",
-      event_type: data.event_type,
-      clerk_user_id: clerkUserId,
-      session_id: data.session_id,
-      ip_address: meta.ip_address,
-      user_agent: meta.user_agent,
-      geo_country: meta.geo_country,
-      geo_city: meta.geo_city,
-      page_url: data.page_url,
-      page_route: data.page_route,
-      status: "success",
-      payload: data.payload ?? {},
-    });
-  }
+  // Log each event (must await — Vercel kills the function after response)
+  await Promise.all(
+    events.map((data) =>
+      logPlatformEventAsync({
+        event_category: "UI",
+        event_type: data.event_type,
+        clerk_user_id: clerkUserId,
+        session_id: data.session_id,
+        ip_address: meta.ip_address,
+        user_agent: meta.user_agent,
+        geo_country: meta.geo_country,
+        geo_city: meta.geo_city,
+        page_url: data.page_url,
+        page_route: data.page_route,
+        status: "success",
+        payload: data.payload ?? {},
+      })
+    )
+  );
 
   return NextResponse.json(
     { ok: true, processed: events.length },

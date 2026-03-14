@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { logPlatformEvent, extractRequestMeta } from "./platform-logger";
+import { logPlatformEventAsync, extractRequestMeta } from "./platform-logger";
 import type { LogStatus } from "@/types/admin-logs";
 
 /**
@@ -44,7 +44,7 @@ export function withApiLogging<T>(
       const errorMessage =
         err instanceof Error ? err.message : "Unknown error";
 
-      logPlatformEvent({
+      await logPlatformEventAsync({
         event_category: "API",
         event_type: routeName,
         clerk_user_id: clerkUserId,
@@ -72,7 +72,7 @@ export function withApiLogging<T>(
     else if (statusCode >= 400) logStatus = "failure";
 
     // --- Log event ---
-    logPlatformEvent({
+    await logPlatformEventAsync({
       event_category: "API",
       event_type: routeName,
       clerk_user_id: clerkUserId,

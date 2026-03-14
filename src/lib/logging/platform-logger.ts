@@ -46,12 +46,38 @@ export function logPlatformEvent(entry: PlatformLogEntry): void {
     .insert(sanitized)
     .then(({ error }) => {
       if (error) {
-        
+
         process.stderr.write(
           `[PlatformLogger] Insert failed: ${error.message} | code=${error.code}\n`
         );
       }
     });
+}
+
+/**
+ * Awaitable version of logPlatformEvent.
+ * Use this in endpoints where fire-and-forget won't work (Vercel serverless).
+ */
+export async function logPlatformEventAsync(entry: PlatformLogEntry): Promise<void> {
+  const supabase = createServiceClient();
+
+  const sanitized = {
+    ...entry,
+    ip_address: entry.ip_address || null,
+    environment: entry.environment ?? process.env.NODE_ENV ?? "production",
+    app_version:
+      entry.app_version ?? process.env.NEXT_PUBLIC_APP_VERSION ?? "0.1.0",
+  };
+
+  const { error } = await supabase
+    .from("platform_logs")
+    .insert(sanitized);
+
+  if (error) {
+    process.stderr.write(
+      `[PlatformLogger] Insert failed: ${error.message} | code=${error.code}\n`
+    );
+  }
 }
 
 /**
