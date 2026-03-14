@@ -6,26 +6,28 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
+  Bot,
+  CreditCard,
   Activity,
+  BarChart3,
+  BrainCircuit,
+  ScrollText,
   Server,
   ArrowLeft,
   Shield,
-  ScrollText,
-  BarChart3,
-  BrainCircuit,
-  Radio,
   LifeBuoy,
 } from "lucide-react";
 
 const navItems = [
   { label: "Overview", href: "/admin", icon: LayoutDashboard },
   { label: "Users", href: "/admin/users", icon: Users },
+  { label: "Agents", href: "/admin/agents", icon: Bot },
+  { label: "Subscriptions", href: "/admin/subscriptions", icon: CreditCard },
   { label: "Activity", href: "/admin/activity", icon: Activity },
-  { label: "Services", href: "/admin/services", icon: Server },
-  { label: "Platform Logs", href: "/admin/logs", icon: ScrollText },
   { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
   { label: "LLM Usage", href: "/admin/llm", icon: BrainCircuit },
-  { label: "Live Feed", href: "/admin/feed", icon: Radio },
+  { label: "Platform Logs", href: "/admin/logs", icon: ScrollText },
+  { label: "Services", href: "/admin/services", icon: Server },
   { label: "Support", href: "/admin/support", icon: LifeBuoy },
 ];
 

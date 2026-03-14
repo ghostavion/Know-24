@@ -3,12 +3,13 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import {
   Users,
-  Building2,
-  Package,
-  ShoppingCart,
+  CreditCard,
   DollarSign,
-  Globe,
-  BrainCircuit,
+  Bot,
+  Radio,
+  Activity,
+  Store,
+  TrendingUp,
   AlertCircle,
   ArrowRight,
 } from "lucide-react";
@@ -52,44 +53,39 @@ export default async function AdminOverviewPage() {
   ).toISOString();
 
   const [
-    usersTotal,
-    usersRecent,
-    businessesTotal,
-    businessesActive,
-    businessesRecent,
-    productsTotal,
-    ordersTotal,
-    ordersRevenue,
-    storefrontsTotal,
-    llmCallsResult,
+    totalUsersResult,
+    activeSubscribersResult,
+    totalAgentsResult,
+    liveAgentsResult,
+    totalEventsResult,
+    marketplaceItemsResult,
+    platformRevenueResult,
     recentErrorsResult,
   ] = await Promise.all([
-    supabase.from("users").select("*", { count: "exact", head: true }),
     supabase
-      .from("users")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", sevenDaysAgo),
-    supabase.from("businesses").select("*", { count: "exact", head: true }),
+      .from("user_profiles")
+      .select("*", { count: "exact", head: true }),
     supabase
-      .from("businesses")
+      .from("agent_subscriptions")
       .select("*", { count: "exact", head: true })
       .eq("status", "active"),
     supabase
-      .from("businesses")
+      .from("agents")
+      .select("*", { count: "exact", head: true }),
+    supabase
+      .from("agents")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "running"),
+    supabase
+      .from("events")
       .select("*", { count: "exact", head: true })
       .gte("created_at", sevenDaysAgo),
-    supabase.from("products").select("*", { count: "exact", head: true }),
-    supabase.from("orders").select("*", { count: "exact", head: true }),
     supabase
-      .from("orders")
-      .select("amount_cents")
-      .eq("status", "completed"),
-    supabase.from("storefronts").select("*", { count: "exact", head: true }),
+      .from("marketplace_items")
+      .select("*", { count: "exact", head: true }),
     supabase
-      .from("platform_logs")
-      .select("*", { count: "exact", head: true })
-      .eq("event_category", "LLM")
-      .gte("timestamp", sevenDaysAgo),
+      .from("agent_daily_stats")
+      .select("revenue_cents"),
     supabase
       .from("platform_logs")
       .select("id, timestamp, event_type, error_message, status")
@@ -98,60 +94,63 @@ export default async function AdminOverviewPage() {
       .limit(5),
   ]);
 
-  const totalRevenueCents = (ordersRevenue.data ?? []).reduce(
-    (sum: number, row: { amount_cents: number }) =>
-      sum + (row.amount_cents ?? 0),
+  const activeSubCount = activeSubscribersResult.count ?? 0;
+  const mrrCents = activeSubCount * 99 * 100; // $99 per subscriber in cents
+
+  const totalPlatformRevenueCents = (platformRevenueResult.data ?? []).reduce(
+    (sum: number, row: { revenue_cents: number }) =>
+      sum + (row.revenue_cents ?? 0),
     0
   );
 
   const stats: StatCardProps[] = [
     {
       label: "Total Users",
-      value: usersTotal.count ?? 0,
-      subtitle: `+${usersRecent.count ?? 0} last 7 days`,
+      value: totalUsersResult.count ?? 0,
+      subtitle: "registered user profiles",
       icon: Users,
     },
     {
-      label: "Total Businesses",
-      value: businessesTotal.count ?? 0,
-      subtitle: `+${businessesRecent.count ?? 0} last 7 days`,
-      icon: Building2,
+      label: "Active Subscribers",
+      value: activeSubCount,
+      subtitle: `of ${totalUsersResult.count ?? 0} total users`,
+      icon: CreditCard,
     },
     {
-      label: "Active Businesses",
-      value: businessesActive.count ?? 0,
-      subtitle: `of ${businessesTotal.count ?? 0} total`,
-      icon: Building2,
-    },
-    {
-      label: "Total Products",
-      value: productsTotal.count ?? 0,
-      subtitle: "across all businesses",
-      icon: Package,
-    },
-    {
-      label: "Total Orders",
-      value: ordersTotal.count ?? 0,
-      subtitle: "all time",
-      icon: ShoppingCart,
-    },
-    {
-      label: "Total Revenue",
-      value: formatCurrency(totalRevenueCents),
-      subtitle: "from completed orders",
+      label: "MRR",
+      value: formatCurrency(mrrCents),
+      subtitle: `${activeSubCount} subscribers x $99/mo`,
       icon: DollarSign,
     },
     {
-      label: "Storefronts",
-      value: storefrontsTotal.count ?? 0,
-      subtitle: "published storefronts",
-      icon: Globe,
+      label: "Total Agents",
+      value: totalAgentsResult.count ?? 0,
+      subtitle: "agents created",
+      icon: Bot,
     },
     {
-      label: "LLM Calls (7d)",
-      value: llmCallsResult.count ?? 0,
-      subtitle: "AI API calls this week",
-      icon: BrainCircuit,
+      label: "Live Agents",
+      value: liveAgentsResult.count ?? 0,
+      subtitle: `of ${totalAgentsResult.count ?? 0} total agents`,
+      icon: Radio,
+    },
+    {
+      label: "Total Agent Events (7d)",
+      value: totalEventsResult.count ?? 0,
+      subtitle: "events in last 7 days",
+      icon: Activity,
+    },
+    {
+      label: "Marketplace Items",
+      value: marketplaceItemsResult.count ?? 0,
+      subtitle: "listed in marketplace",
+      icon: Store,
+    },
+    {
+      label: "Platform Revenue",
+      value: formatCurrency(totalPlatformRevenueCents),
+      subtitle: "from agent daily stats",
+      icon: TrendingUp,
     },
   ];
 
@@ -238,8 +237,8 @@ export default async function AdminOverviewPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: "Platform Logs", href: "/admin/logs", desc: "Browse all events" },
-          { label: "Analytics", href: "/admin/analytics", desc: "Revenue & growth" },
-          { label: "LLM Usage", href: "/admin/llm", desc: "Token costs & trends" },
+          { label: "Agent Management", href: "/admin/agents", desc: "Manage & monitor agents" },
+          { label: "Subscriptions", href: "/admin/subscriptions", desc: "Billing & plans" },
           { label: "Live Feed", href: "/admin/feed", desc: "Real-time stream" },
         ].map((link) => (
           <Link
