@@ -139,7 +139,7 @@ export const useSetupWizard = create<SetupWizardState>()(
     }),
     }),
     {
-      name: "know24-setup-wizard",
+      name: "agenttv-setup-wizard",
       partialize: (state: SetupWizardState) => ({
         currentStep: state.currentStep,
         businessId: state.businessId,

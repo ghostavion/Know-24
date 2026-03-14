@@ -22,10 +22,9 @@ import type { AgentSummary, AgentFramework } from "@/types/agenttv";
 const FRAMEWORK_LABELS: Record<AgentFramework, { label: string; color: string }> = {
   langgraph: { label: "LangGraph", color: "bg-blue-500/10 text-blue-600" },
   crewai: { label: "CrewAI", color: "bg-purple-500/10 text-purple-600" },
-  autogen: { label: "AutoGen", color: "bg-orange-500/10 text-orange-600" },
-  custom: { label: "Custom", color: "bg-gray-500/10 text-gray-600" },
-  "openai-assistants": { label: "OpenAI Agents", color: "bg-green-500/10 text-green-600" },
-  langchain: { label: "LangChain", color: "bg-teal-500/10 text-teal-600" },
+  "openai-agents": { label: "OpenAI Agents", color: "bg-green-500/10 text-green-600" },
+  "raw-python": { label: "Raw Python", color: "bg-yellow-500/10 text-yellow-600" },
+  nodejs: { label: "Node.js", color: "bg-teal-500/10 text-teal-600" },
 };
 
 function formatCents(cents: number): string {
@@ -70,21 +69,49 @@ export default function AgentsPage() {
   }, [getToken]);
 
   async function toggleAgent(slug: string, currentStatus: string) {
-    const newStatus = currentStatus === "running" ? "offline" : "running";
+    const isRunning = currentStatus === "running" || currentStatus === "starting";
+    const endpoint = isRunning ? "stop" : "start";
+    const optimisticStatus = isRunning ? "offline" : "starting";
+
+    // Optimistic update
+    setAgents((prev) =>
+      prev.map((a) =>
+        a.slug === slug ? { ...a, status: optimisticStatus as AgentSummary["status"] } : a
+      )
+    );
+
     try {
-      const res = await fetch(`/api/agents/${slug}`, {
-        method: "PATCH",
+      const body = isRunning ? {} : { agent_cmd: "python main.py" };
+      const res = await fetch(`/api/agents/${slug}/${endpoint}`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify(body),
       });
+
       if (res.ok) {
+        const finalStatus = isRunning ? "offline" : "running";
         setAgents((prev) =>
           prev.map((a) =>
-            a.slug === slug ? { ...a, status: newStatus as AgentSummary["status"] } : a
+            a.slug === slug ? { ...a, status: finalStatus as AgentSummary["status"] } : a
           )
         );
+      } else {
+        // Revert on failure
+        setAgents((prev) =>
+          prev.map((a) =>
+            a.slug === slug ? { ...a, status: currentStatus as AgentSummary["status"] } : a
+          )
+        );
+        const json = await res.json().catch(() => ({}));
+        console.error("[agents] Toggle failed:", json.error?.message);
       }
     } catch (err) {
+      // Revert on error
+      setAgents((prev) =>
+        prev.map((a) =>
+          a.slug === slug ? { ...a, status: currentStatus as AgentSummary["status"] } : a
+        )
+      );
       console.error("[agents] Toggle failed:", err);
     }
   }

@@ -84,10 +84,7 @@ export async function POST(
           status: "success",
           payload: {
             stripe_event_id: event.id,
-            payment_intent_id:
-              typeof charge.payment_intent === "string"
-                ? charge.payment_intent
-                : charge.payment_intent?.id ?? null,
+            payment_intent_id: charge.payment_intent ?? null,
             amount_refunded: charge.amount_refunded,
           },
         });
@@ -104,14 +101,8 @@ export async function POST(
           status: "success",
           payload: {
             stripe_event_id: event.id,
-            subscription_id:
-              typeof invoice.subscription === "string"
-                ? invoice.subscription
-                : invoice.subscription?.id ?? null,
-            customer_id:
-              typeof invoice.customer === "string"
-                ? invoice.customer
-                : invoice.customer?.id ?? null,
+            subscription_id: (invoice as unknown as Record<string, unknown>).subscription ?? null,
+            customer_id: (invoice as unknown as Record<string, unknown>).customer ?? null,
             amount_due: invoice.amount_due,
             attempt_count: invoice.attempt_count,
           },
@@ -131,9 +122,7 @@ export async function POST(
             stripe_event_id: event.id,
             subscription_id: subscription.id,
             customer_id:
-              typeof subscription.customer === "string"
-                ? subscription.customer
-                : subscription.customer.id,
+              subscription.customer ?? null,
           },
         });
         break;
@@ -152,9 +141,7 @@ export async function POST(
             subscription_id: subscription.id,
             status: subscription.status,
             customer_id:
-              typeof subscription.customer === "string"
-                ? subscription.customer
-                : subscription.customer.id,
+              subscription.customer ?? null,
           },
         });
         break;
@@ -211,14 +198,12 @@ async function handleCheckoutCompleted(
   }
 
   if (!productId || !businessId || !customerId) {
-    // Not a Know24-originated session — skip silently
+    // Not an AgentTV-originated session — skip silently
     return;
   }
 
   const paymentIntentId =
-    typeof session.payment_intent === "string"
-      ? session.payment_intent
-      : session.payment_intent?.id ?? null;
+    session.payment_intent ?? null;
 
   const amountCents = session.amount_total ?? 0;
 
@@ -249,7 +234,7 @@ async function handleCheckoutCompleted(
       : null;
 
   if (customerEmail) {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://know24.io";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://agenttv.io";
     const internalSecret = process.env.INTERNAL_API_SECRET;
 
     if (internalSecret) {
@@ -314,10 +299,7 @@ async function handleChargeRefunded(
   charge: Stripe.Charge,
   supabase: ReturnType<typeof createServiceClient>
 ): Promise<void> {
-  const paymentIntentId =
-    typeof charge.payment_intent === "string"
-      ? charge.payment_intent
-      : charge.payment_intent?.id ?? null;
+  const paymentIntentId = charge.payment_intent ?? null;
 
   if (!paymentIntentId) return;
 
@@ -359,10 +341,8 @@ async function handleInvoicePaymentFailed(
   invoice: Stripe.Invoice,
   supabase: ReturnType<typeof createServiceClient>
 ): Promise<void> {
-  const subscriptionId =
-    typeof invoice.subscription === "string"
-      ? invoice.subscription
-      : invoice.subscription?.id ?? null;
+  const rawInvoice = invoice as unknown as Record<string, unknown>;
+  const subscriptionId = (typeof rawInvoice.subscription === "string" ? rawInvoice.subscription : null);
 
   if (!subscriptionId) return;
 
@@ -536,7 +516,7 @@ async function handleSubscriptionUpdated(
 }
 
 // ---------------------------------------------------------------------------
-// V1 user-level subscription (Know24 platform subscription)
+// AgentTV subscription handler
 // ---------------------------------------------------------------------------
 
 async function handleUserSubscriptionCreated(
@@ -544,24 +524,35 @@ async function handleUserSubscriptionCreated(
   supabase: ReturnType<typeof createServiceClient>
 ): Promise<void> {
   const clerkUserId = subscription.metadata?.clerk_user_id;
-  const plan = subscription.metadata?.plan; // "founder" | "standard"
 
   if (!clerkUserId) return;
 
-  const updates: Record<string, unknown> = {
-    stripe_subscription_id: subscription.id,
-    subscription_status: subscription.status === "active" ? "active" : "inactive",
-    subscription_tier: plan === "founder" ? "founder" : "standard",
-    monthly_price_cents: plan === "founder" ? 7900 : 9900,
-  };
+  // Single tier: $99/mo paid
+  const tierInfo = { tier: "paid", price_cents: 9900 };
 
-  if (plan === "founder") {
-    updates.founding_member = true;
-  }
+  // Upsert into agent_subscriptions table
+  await supabase
+    .from("agent_subscriptions")
+    .upsert({
+      user_id: clerkUserId,
+      stripe_subscription_id: subscription.id,
+      tier: tierInfo.tier,
+      status: subscription.status === "active" ? "active" : "inactive",
+      price_cents: tierInfo.price_cents,
+      current_period_start: new Date().toISOString(),
+      current_period_end: null,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id" });
 
+  // Also update user_profiles for backward compat
   await supabase
     .from("user_profiles")
-    .update(updates)
+    .update({
+      stripe_subscription_id: subscription.id,
+      subscription_status: subscription.status === "active" ? "active" : "inactive",
+      subscription_tier: tierInfo.tier,
+      monthly_price_cents: tierInfo.price_cents,
+    })
     .eq("user_id", clerkUserId);
 }
 
@@ -589,9 +580,7 @@ async function handleEbookCheckout(
       status: "completed",
       completed_at: new Date().toISOString(),
       stripe_payment_intent_id:
-        typeof session.payment_intent === "string"
-          ? session.payment_intent
-          : session.payment_intent?.id ?? null,
+        session.payment_intent ?? null,
     })
     .eq("stripe_checkout_session_id", session.id)
     .select("id, download_token")
@@ -600,7 +589,7 @@ async function handleEbookCheckout(
   // Send purchase confirmation email with download link
   if (customerEmail && updatedOrder) {
     const typedOrder = updatedOrder as { id: string; download_token: string };
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://know24.io";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://agenttv.io";
     const downloadUrl = `${appUrl}/api/orders/download?token=${typedOrder.download_token}`;
 
     // Fetch ebook title for email

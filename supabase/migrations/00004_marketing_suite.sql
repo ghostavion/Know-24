@@ -8,7 +8,7 @@
 -- ============================================================
 
 CREATE TABLE public.social_posts (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   product_id      UUID REFERENCES public.products (id) ON DELETE SET NULL,
   content         TEXT NOT NULL,
@@ -38,7 +38,7 @@ CREATE POLICY "social_posts_rw_business_member" ON public.social_posts
 -- ============================================================
 
 CREATE TABLE public.email_sequences (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   type            email_sequence_type NOT NULL,
   name            TEXT NOT NULL,
@@ -68,7 +68,7 @@ CREATE POLICY "email_sequences_rw_business_member" ON public.email_sequences
 -- ============================================================
 
 CREATE TABLE public.email_sequence_sends (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   sequence_id     UUID NOT NULL REFERENCES public.email_sequences (id) ON DELETE CASCADE,
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   recipient_email TEXT NOT NULL,
@@ -92,7 +92,7 @@ CREATE POLICY "email_sequence_sends_rw_business_member" ON public.email_sequence
 -- ============================================================
 
 CREATE TABLE public.referral_links (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   product_id      UUID REFERENCES public.products (id) ON DELETE SET NULL,
   code            TEXT NOT NULL UNIQUE,
@@ -122,7 +122,7 @@ CREATE POLICY "referral_links_rw_business_member" ON public.referral_links
 -- ============================================================
 
 CREATE TABLE public.referral_conversions (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   link_id         UUID NOT NULL REFERENCES public.referral_links (id) ON DELETE CASCADE,
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   customer_id     UUID REFERENCES public.customers (id) ON DELETE SET NULL,

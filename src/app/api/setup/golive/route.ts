@@ -143,7 +143,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<GoLiv
       business_id: businessId,
       event_type: "storefront_published",
       title: "Storefront published — business is live!",
-      description: `Storefront published at ${storefront.subdomain}.know24.io with palette ${palette}`,
+      description: `Storefront published at ${storefront.subdomain}.agenttv.io with palette ${palette}`,
       metadata: { palette, subdomain: storefront.subdomain },
     });
 
@@ -156,7 +156,7 @@ export async function POST(req: Request): Promise<NextResponse<ApiResponse<GoLiv
 
     return NextResponse.json({
       data: {
-        storefrontUrl: `https://${storefront.subdomain}.know24.io`,
+        storefrontUrl: `https://${storefront.subdomain}.agenttv.io`,
         businessId,
       },
     });

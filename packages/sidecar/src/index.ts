@@ -7,10 +7,13 @@ import { FlyManager } from "./fly-manager.js";
 // ---------------------------------------------------------------------------
 
 const PORT = parseInt(process.env.SIDECAR_PORT || "8080", 10);
-const API_URL = process.env.AGENTTV_API_URL || "https://agenttv.com";
+const API_URL = process.env.AGENTTV_INGEST_URL || process.env.AGENTTV_API_URL || "https://agenttv.com";
 const RUN_TOKEN = process.env.AGENTTV_RUN_TOKEN || "";
 const DAILY_CAP = parseFloat(process.env.AGENTTV_DAILY_CAP || "0"); // 0 = unlimited
 const AGENT_CMD = process.env.AGENT_CMD || "";
+const AGENT_ID = process.env.AGENTTV_AGENT_ID || "";
+const RUN_ID = process.env.AGENTTV_RUN_ID || "";
+const BUDGET_POLL_INTERVAL = 30_000; // 30 seconds
 
 // ---------------------------------------------------------------------------
 // Event types & validation
@@ -133,6 +136,8 @@ async function forwardToApi(evt: AgentEvent): Promise<void> {
       },
       body: JSON.stringify({
         ...evt,
+        agent_id: AGENT_ID || undefined,
+        run_id: RUN_ID || undefined,
         timestamp: new Date().toISOString(),
       }),
     });
@@ -227,5 +232,83 @@ if (AGENT_CMD) {
   console.log(`[sidecar] Starting agent: ${AGENT_CMD}`);
   spawnAgent(AGENT_CMD, emitEvent);
 }
+
+// ---------------------------------------------------------------------------
+// Budget polling watchdog — polls agent_runs every 30s
+// ---------------------------------------------------------------------------
+
+let budgetPollTimer: ReturnType<typeof setInterval> | null = null;
+
+if (AGENT_ID && RUN_ID) {
+  budgetPollTimer = setInterval(async () => {
+    try {
+      // Query the API for agent run status (uses the ingest URL base)
+      const baseUrl = API_URL.replace("/api/events/ingest", "");
+      const res = await fetch(`${baseUrl}/api/runs/${RUN_ID}`, {
+        headers: {
+          ...(RUN_TOKEN ? { Authorization: `Bearer ${RUN_TOKEN}` } : {}),
+        },
+        signal: AbortSignal.timeout(10_000),
+      });
+
+      if (res.ok) {
+        const body = await res.json() as { data?: { status?: string; spend_cents?: number } };
+        const run = body?.data;
+        if (run?.status === "stopped" || run?.status === "crashed") {
+          console.error(`[sidecar] Run status is ${run.status} — shutting down`);
+          await emitFatalAndKill(`Run terminated externally (status: ${run.status})`);
+          return;
+        }
+      }
+    } catch (err) {
+      // Non-fatal: if we can't poll, just log and try again next interval
+      console.warn("[sidecar] Budget poll failed:", err);
+    }
+  }, BUDGET_POLL_INTERVAL);
+}
+
+// ---------------------------------------------------------------------------
+// Graceful shutdown on SIGTERM / SIGINT
+// ---------------------------------------------------------------------------
+
+let shuttingDown = false;
+
+async function gracefulShutdown(signal: string): Promise<void> {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[sidecar] Received ${signal}, shutting down gracefully...`);
+
+  // Clear budget polling
+  if (budgetPollTimer) clearInterval(budgetPollTimer);
+
+  // Emit final status event
+  try {
+    await forwardToApi({
+      event_type: "status",
+      event_name: "shutdown",
+      data: { state: "terminated", uptime: process.uptime(), budget_left: 0, reason: signal },
+    });
+  } catch {
+    // Best-effort
+  }
+
+  // Stop agent process
+  stopAgent();
+
+  // Close HTTP server
+  server.close(() => {
+    console.log("[sidecar] HTTP server closed");
+    process.exit(0);
+  });
+
+  // Force exit after 5 seconds if server doesn't close
+  setTimeout(() => {
+    console.error("[sidecar] Forced exit after timeout");
+    process.exit(1);
+  }, 5000).unref();
+}
+
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
 
 export { FlyManager } from "./fly-manager.js";

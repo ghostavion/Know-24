@@ -22,13 +22,13 @@ const ChatMessage = ({ role, content, isStreaming = false }: ChatMessageProps) =
         className={cn(
           "px-4 py-2 max-w-[80%] whitespace-pre-wrap",
           isUser
-            ? "bg-[#0891b2] text-white rounded-2xl rounded-br-sm"
+            ? "bg-[#7C3AED] text-white rounded-2xl rounded-br-sm"
             : "bg-muted rounded-2xl rounded-bl-sm"
         )}
       >
         {content}
         {isStreaming && (
-          <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#0891b2] align-middle" />
+          <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-[#7C3AED] align-middle" />
         )}
       </div>
     </div>

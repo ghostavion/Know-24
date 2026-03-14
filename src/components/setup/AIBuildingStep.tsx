@@ -183,8 +183,8 @@ const AIBuildingStep = ({ className }: AIBuildingStepProps) => {
 
                 {item.status === "building" && (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin text-[#0891b2]" />
-                    <span className="text-xs font-medium text-[#0891b2]">
+                    <Loader2 className="h-4 w-4 animate-spin text-[#7C3AED]" />
+                    <span className="text-xs font-medium text-[#7C3AED]">
                       Building...
                     </span>
                   </>

@@ -164,7 +164,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
           productId={product.id}
           productTitle={product.title}
           personality={product.chatbot_personality as string | null}
-          accentColor={storefront.accent_color ?? "#0891b2"}
+          accentColor={storefront.accent_color ?? "#7C3AED"}
         />
       </div>
     </div>

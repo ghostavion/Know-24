@@ -187,7 +187,7 @@ export async function POST(
     if (!stripeCustomerId) {
       const stripeCustomer = await stripe.customers.create({
         email: customerEmail,
-        metadata: { know24_customer_id: customer.id },
+        metadata: { agenttv_customer_id: customer.id },
       });
 
       stripeCustomerId = stripeCustomer.id;
@@ -204,7 +204,7 @@ export async function POST(
     if (!typedProduct.stripe_product_id || !typedProduct.stripe_price_id) {
       const stripeProduct = await stripe.products.create({
         name: typedProduct.title,
-        metadata: { know24_product_id: typedProduct.id },
+        metadata: { agenttv_product_id: typedProduct.id },
       });
 
       const stripePrice = await stripe.prices.create({

@@ -6,95 +6,43 @@ import { LeaderboardTable } from "@/components/leaderboard/LeaderboardTable";
 import type { AgentRowData } from "@/components/leaderboard/AgentRow";
 import type { Tier } from "@/components/leaderboard/TierBadge";
 
-// Mock data generator for demo — replace with real API call
-function generateMockAgents(): AgentRowData[] {
-  const names = [
-    "Atlas Trader",
-    "Nova Writer",
-    "Cipher Scout",
-    "Vega Analyst",
-    "Orion Builder",
-    "Pulse Monitor",
-    "Helix Coder",
-    "Nebula Research",
-    "Zenith Ops",
-    "Flux Agent",
-    "Stellar Bot",
-    "Quasar Mind",
-    "Prism AI",
-    "Echo Watcher",
-    "Drift Navigator",
-    "Apex Solver",
-    "Iron Logic",
-    "Crystal Engine",
-    "Shadow Runner",
-    "Blaze Executor",
-    "Storm Predictor",
-    "Frost Analyst",
-    "Thunder Bot",
-    "Wave Surfer",
-    "Arc Thinker",
-    "Volt Optimizer",
-    "Pixel Creator",
-    "Ember Planner",
-    "Jade Strategist",
-    "Cobalt Agent",
-    "Neon Pathfinder",
-    "Silver Stream",
-    "Onyx Monitor",
-    "Coral Compiler",
-    "Sapphire Scout",
-    "Ruby Engine",
-    "Pearl Navigator",
-    "Topaz Worker",
-    "Amber Finder",
-    "Ivory Thinker",
-    "Slate Builder",
-    "Mint Optimizer",
-    "Crimson Runner",
-    "Azure Planner",
-    "Ochre Watcher",
-    "Teal Executor",
-    "Mauve Analyst",
-    "Olive Agent",
-    "Indigo Coder",
-    "Scarlet Mind",
-  ];
+// Map leaderboard API response to AgentRowData
+interface LeaderboardApiAgent {
+  rank: number;
+  rank_change: number;
+  revenue_change_24h: number;
+  slug: string;
+  name: string;
+  tier: string;
+  total_revenue_cents: number;
+  follower_count: number;
+  status: string;
+  framework: string;
+}
 
-  const frameworks = [
-    "LangChain",
-    "AutoGPT",
-    "CrewAI",
-    "BabyAGI",
-    "MetaGPT",
-    "SuperAGI",
-  ];
-  const tiers: Tier[] = [
-    "rookie",
-    "operator",
-    "strategist",
-    "veteran",
-    "legend",
-  ];
+function mapToRow(a: LeaderboardApiAgent): AgentRowData {
+  return {
+    rank: a.rank,
+    rank_change: a.rank_change ?? 0,
+    slug: a.slug,
+    name: a.name,
+    tier: (a.tier ?? "rookie") as Tier,
+    total_revenue: a.total_revenue_cents,
+    // Sparkline: approximate from total + 24h change
+    revenue_history: Array.from({ length: 7 }, (_, i) =>
+      Math.max(0, a.total_revenue_cents - (a.revenue_change_24h ?? 0) * (6 - i) / 6)
+    ),
+    followers: a.follower_count,
+    status: a.status === "running" ? "live" : "offline",
+    framework: a.framework,
+  };
+}
 
-  return names.map((name, i) => {
-    const revenue = Math.floor(Math.random() * 50000) + 100;
-    return {
-      rank: i + 1,
-      rank_change: Math.floor(Math.random() * 7) - 3,
-      slug: name.toLowerCase().replace(/\s+/g, "-"),
-      name,
-      tier: tiers[Math.min(Math.floor(i / 10), 4)],
-      total_revenue: revenue,
-      revenue_history: Array.from(
-        { length: 7 },
-        () => revenue * (0.7 + Math.random() * 0.6)
-      ),
-      followers: Math.floor(Math.random() * 10000) + 50,
-      status: Math.random() > 0.4 ? ("live" as const) : ("offline" as const),
-      framework: frameworks[Math.floor(Math.random() * frameworks.length)],
-    };
-  });
+async function fetchLeaderboard(): Promise<AgentRowData[]> {
+  const res = await fetch("/api/leaderboard");
+  if (!res.ok) return [];
+  const body = await res.json();
+  return (body.data ?? []).map(mapToRow);
 }
 
 export default function LeaderboardPage() {
@@ -104,16 +52,10 @@ export default function LeaderboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        // TODO: Replace with real API call to /api/leaderboard
-        // const res = await fetch("/api/leaderboard");
-        // const data = await res.json();
-        // setAgents(data.agents);
-        await new Promise((r) => setTimeout(r, 400));
-        const mockAgents = generateMockAgents();
-        // Sort by revenue descending
-        mockAgents.sort((a, b) => b.total_revenue - a.total_revenue);
-        mockAgents.forEach((a, i) => (a.rank = i + 1));
-        setAgents(mockAgents);
+        const data = await fetchLeaderboard();
+        setAgents(data);
+      } catch (err) {
+        console.error("[leaderboard] Failed to load:", err);
       } finally {
         setLoading(false);
       }

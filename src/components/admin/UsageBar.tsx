@@ -24,7 +24,7 @@ export const UsageBar = ({ label, used, ceiling }: UsageBarProps) => {
               ? "bg-red-500"
               : pct > 70
                 ? "bg-yellow-500"
-                : "bg-[#0891b2]"
+                : "bg-[#7C3AED]"
           )}
           style={{ width: `${pct}%` }}
         />

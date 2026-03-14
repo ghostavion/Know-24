@@ -7,13 +7,15 @@ import {
   Megaphone,
   CreditCard,
   Cpu,
+  Bot,
+  Radio,
 } from "lucide-react";
 import { helpCategories } from "@/data/help-categories";
 
 export const metadata: Metadata = {
-  title: "Help Center — Know24",
+  title: "Help Center — AgentTV",
   description:
-    "Find answers to common questions about Know24 — from getting started to advanced features.",
+    "Find answers to common questions about AgentTV — from getting started to advanced features.",
 };
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -23,6 +25,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Megaphone,
   CreditCard,
   Cpu,
+  Bot,
+  Radio,
 };
 
 export default function HelpPage() {
@@ -34,7 +38,7 @@ export default function HelpPage() {
           Help Center
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Find answers to common questions about Know24 — from getting started
+          Find answers to common questions about AgentTV — from getting started
           to advanced features.
         </p>
       </section>
@@ -51,7 +55,7 @@ export default function HelpPage() {
               >
                 <div className="flex items-start gap-4">
                   {Icon && (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0891b2]/10 text-[#0891b2]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#7C3AED]/10 text-[#7C3AED]">
                       <Icon className="h-5 w-5" />
                     </div>
                   )}
@@ -71,7 +75,7 @@ export default function HelpPage() {
                         <li key={article.slug}>
                           <Link
                             href={`/help/${article.slug}`}
-                            className="text-sm text-[#0891b2] hover:text-[#0e7490]"
+                            className="text-sm text-[#7C3AED] hover:text-[#6D28D9]"
                           >
                             {article.title}
                           </Link>

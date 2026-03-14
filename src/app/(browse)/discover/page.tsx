@@ -7,146 +7,38 @@ import { AgentCard, type DiscoverAgent } from "@/components/discover/AgentCard";
 import type { Tier } from "@/components/leaderboard/TierBadge";
 import { Button } from "@/components/ui/button";
 
-// Mock data generator — replace with real API
-function generateMockDiscoverAgents(): DiscoverAgent[] {
-  const agents: DiscoverAgent[] = [
-    {
-      slug: "atlas-trader",
-      name: "Atlas Trader",
-      description:
-        "Autonomous trading agent that scans crypto markets for arbitrage opportunities and executes trades in real time.",
-      tier: "legend",
-      total_revenue: 47832,
-      followers: 8421,
-      framework: "LangChain",
-      status: "live",
-      featured: true,
-    },
-    {
-      slug: "nova-writer",
-      name: "Nova Writer",
-      description:
-        "Creative content agent that generates viral threads, blog posts, and marketing copy on autopilot.",
-      tier: "veteran",
-      total_revenue: 31205,
-      followers: 6102,
-      framework: "CrewAI",
-      status: "live",
-      featured: true,
-    },
-    {
-      slug: "cipher-scout",
-      name: "Cipher Scout",
-      description:
-        "Security-focused agent that monitors smart contracts for vulnerabilities and earns bug bounties.",
-      tier: "strategist",
-      total_revenue: 22140,
-      followers: 4350,
-      framework: "AutoGPT",
-      status: "offline",
-    },
-    {
-      slug: "vega-analyst",
-      name: "Vega Analyst",
-      description:
-        "Data analysis agent that produces market reports and forecasts using real-time data streams.",
-      tier: "veteran",
-      total_revenue: 28900,
-      followers: 5200,
-      framework: "MetaGPT",
-      status: "live",
-      featured: true,
-    },
-    {
-      slug: "orion-builder",
-      name: "Orion Builder",
-      description:
-        "Full-stack development agent that builds and ships web applications from natural language specs.",
-      tier: "strategist",
-      total_revenue: 19500,
-      followers: 3100,
-      framework: "SuperAGI",
-      status: "offline",
-    },
-    {
-      slug: "pulse-monitor",
-      name: "Pulse Monitor",
-      description:
-        "Infrastructure monitoring agent that detects anomalies and auto-remediates production issues.",
-      tier: "operator",
-      total_revenue: 12300,
-      followers: 2100,
-      framework: "BabyAGI",
-      status: "live",
-    },
-    {
-      slug: "helix-coder",
-      name: "Helix Coder",
-      description:
-        "Code review and refactoring agent that improves codebases and fixes bugs autonomously.",
-      tier: "operator",
-      total_revenue: 9800,
-      followers: 1800,
-      framework: "LangChain",
-      status: "live",
-    },
-    {
-      slug: "nebula-research",
-      name: "Nebula Research",
-      description:
-        "Academic research agent that synthesizes papers, generates citations, and produces literature reviews.",
-      tier: "strategist",
-      total_revenue: 15600,
-      followers: 2900,
-      framework: "CrewAI",
-      status: "offline",
-    },
-    {
-      slug: "zenith-ops",
-      name: "Zenith Ops",
-      description:
-        "DevOps automation agent handling CI/CD pipelines, deployments, and cloud infrastructure.",
-      tier: "operator",
-      total_revenue: 11200,
-      followers: 1500,
-      framework: "AutoGPT",
-      status: "live",
-    },
-    {
-      slug: "flux-agent",
-      name: "Flux Agent",
-      description:
-        "Multi-modal creative agent that generates images, videos, and music for content creators.",
-      tier: "rookie",
-      total_revenue: 4200,
-      followers: 890,
-      framework: "MetaGPT",
-      status: "live",
-    },
-    {
-      slug: "stellar-bot",
-      name: "Stellar Bot",
-      description:
-        "Customer support agent that handles tickets, resolves issues, and maintains knowledge bases.",
-      tier: "rookie",
-      total_revenue: 3100,
-      followers: 650,
-      framework: "SuperAGI",
-      status: "offline",
-    },
-    {
-      slug: "quasar-mind",
-      name: "Quasar Mind",
-      description:
-        "Strategic planning agent that creates business plans, competitive analyses, and growth strategies.",
-      tier: "strategist",
-      total_revenue: 20100,
-      followers: 3800,
-      framework: "BabyAGI",
-      status: "live",
-    },
-  ];
-  return agents;
+// Map API response to DiscoverAgent shape
+interface ApiAgent {
+  slug: string;
+  name: string;
+  description: string | null;
+  tier: string;
+  total_revenue_cents: number;
+  follower_count: number;
+  framework: string;
+  status: string;
+}
+
+function mapApiAgent(a: ApiAgent): DiscoverAgent {
+  return {
+    slug: a.slug,
+    name: a.name,
+    description: a.description ?? "",
+    tier: (a.tier ?? "rookie") as Tier,
+    total_revenue: a.total_revenue_cents,
+    followers: a.follower_count,
+    framework: a.framework,
+    status: a.status === "running" ? "live" : "offline",
+    featured: a.total_revenue_cents > 20000,
+  };
+}
+
+async function fetchAgents(sort: string): Promise<DiscoverAgent[]> {
+  const params = new URLSearchParams({ sort, limit: "50" });
+  const res = await fetch(`/api/agents?${params}`);
+  if (!res.ok) return [];
+  const body = await res.json();
+  return (body.data?.agents ?? []).map(mapApiAgent);
 }
 
 type SortOption = "revenue" | "followers" | "newest";
@@ -164,14 +56,16 @@ export default function DiscoverPage() {
   useEffect(() => {
     async function load() {
       try {
-        await new Promise((r) => setTimeout(r, 300));
-        setAgents(generateMockDiscoverAgents());
+        const data = await fetchAgents(sort);
+        setAgents(data);
+      } catch (err) {
+        console.error("[discover] Failed to load agents:", err);
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, []);
+  }, [sort]);
 
   const frameworks = useMemo(() => {
     const set = new Set(agents.map((a) => a.framework));

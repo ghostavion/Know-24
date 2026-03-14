@@ -92,7 +92,7 @@ export function useAgentStream(agentId: string) {
         {
           event: "INSERT",
           schema: "public",
-          table: "agent_events",
+          table: "events",
           filter: `agent_id=eq.${agentId}`,
         },
         handleEvent

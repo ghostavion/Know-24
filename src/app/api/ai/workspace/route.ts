@@ -116,14 +116,14 @@ export async function POST(
     const subdomain = typedStorefront?.subdomain ?? typedBusiness.name.toLowerCase().replace(/\s+/g, "-");
 
     // Build system prompt
-    const systemPrompt = `You are the AI assistant for "${typedBusiness.name}", a knowledge business on Know24.
+    const systemPrompt = `You are the AI assistant for "${typedBusiness.name}", a knowledge business on AgentTV.
 
 Business context:
 - Name: ${typedBusiness.name}
 - Niche: ${typedBusiness.niche}
 - Status: ${typedBusiness.status}
 - Products: ${productCount ?? 0} products
-- Storefront: ${subdomain}.know24.io
+- Storefront: ${subdomain}.agenttv.io
 
 You can help the creator manage their business. You have tools to:
 - View business stats and analytics

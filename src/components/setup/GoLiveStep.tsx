@@ -112,7 +112,7 @@ const GoLiveStep = ({ className }: GoLiveStepProps) => {
 
       if (res.ok && json.data) {
         setSuccess(true);
-        setStorefrontUrl(json.data.storefrontUrl ?? `https://${businessSlug}.know24.io`);
+        setStorefrontUrl(json.data.storefrontUrl ?? `https://${businessSlug}.agenttv.io`);
       } else {
         setError(json.error?.message ?? "Failed to publish storefront");
       }
@@ -132,14 +132,14 @@ const GoLiveStep = ({ className }: GoLiveStepProps) => {
   if (success) {
     return (
       <div className={cn("flex flex-col items-center gap-6 py-16", className)}>
-        <PartyPopper className="h-16 w-16 text-[#0891b2]" />
+        <PartyPopper className="h-16 w-16 text-[#7C3AED]" />
         <div className="text-center">
           <h2 className="text-2xl font-bold">You&apos;re Live!</h2>
           <p className="mt-2 text-muted-foreground">
             Your storefront is now published and ready for customers.
           </p>
           {storefrontUrl && (
-            <p className="mt-1 text-sm font-medium text-[#0891b2]">
+            <p className="mt-1 text-sm font-medium text-[#7C3AED]">
               {storefrontUrl}
             </p>
           )}
@@ -200,13 +200,13 @@ const GoLiveStep = ({ className }: GoLiveStepProps) => {
                 className={cn(
                   "relative flex flex-col items-start gap-2 rounded-lg border-2 p-4 text-left transition-colors",
                   isSelected
-                    ? "border-[#0891b2] bg-[#0891b2]/5"
+                    ? "border-[#7C3AED] bg-[#7C3AED]/5"
                     : "border-border hover:border-gray-400"
                 )}
               >
                 {/* Selected badge */}
                 {isSelected && (
-                  <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#0891b2]">
+                  <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED]">
                     <Check className="h-3 w-3 text-white" />
                   </div>
                 )}
@@ -292,7 +292,7 @@ const GoLiveStep = ({ className }: GoLiveStepProps) => {
         <p className="text-xs text-muted-foreground">
           Your storefront will be live at{" "}
           <span className="font-medium">
-            {businessSlug || "your-business"}.know24.io
+            {businessSlug || "your-business"}.agenttv.io
           </span>
         </p>
         <Button

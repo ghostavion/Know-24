@@ -278,7 +278,7 @@ export default async function AdminUserDetailPage({
               className="h-14 w-14 rounded-full"
             />
           ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0891b2]/10 text-lg font-bold text-[#0891b2]">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#7C3AED]/10 text-lg font-bold text-[#7C3AED]">
               {(user.first_name?.[0] ?? user.email[0]).toUpperCase()}
             </div>
           )}

@@ -38,7 +38,7 @@ export const ProductTypeBarChart = ({ data }: ProductTypeBarChartProps) => {
               name === "revenue" ? [`$${Number(value).toFixed(2)}`, "Revenue"] : [String(value), "Count"]
             }
           />
-          <Bar dataKey="revenue" fill="#0891b2" radius={[0, 4, 4, 0]} />
+          <Bar dataKey="revenue" fill="#7C3AED" radius={[0, 4, 4, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

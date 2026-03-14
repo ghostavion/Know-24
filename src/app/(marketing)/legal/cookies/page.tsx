@@ -2,9 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy | Know24",
+  title: "Cookie Policy | AgentTV",
   description:
-    "Know24 Cookie Policy — how we use cookies and similar technologies.",
+    "AgentTV Cookie Policy — how we use cookies and similar technologies.",
 };
 
 export default function CookiePolicyPage() {
@@ -28,26 +28,22 @@ export default function CookiePolicyPage() {
           Cookies are small text files that are stored on your device when you
           visit a website. They are widely used to make websites work more
           efficiently, remember your preferences, and provide information to
-          site owners. Cookies can be &quot;session&quot; cookies, which are
-          deleted when you close your browser, or &quot;persistent&quot; cookies,
-          which remain on your device until they expire or you delete them.
+          site owners.
         </p>
 
         <h2>2. Essential Cookies</h2>
         <p>
           These cookies are strictly necessary for the platform to function and
-          cannot be disabled. They include:
+          cannot be disabled:
         </p>
         <ul>
           <li>
             <strong>Authentication cookies:</strong> Managed by Clerk to
-            maintain your signed-in session, verify your identity, and protect
-            against unauthorized access.
+            maintain your signed-in session and verify your identity.
           </li>
           <li>
             <strong>Session management cookies:</strong> Used to maintain your
-            session state across pages, remember your active business context,
-            and ensure a seamless navigation experience.
+            session state across pages and ensure seamless navigation.
           </li>
           <li>
             <strong>Security cookies:</strong> Used for CSRF protection and
@@ -63,14 +59,12 @@ export default function CookiePolicyPage() {
         <ul>
           <li>
             <strong>Vercel Analytics:</strong> Collects aggregated, anonymous
-            page view data to help us understand traffic patterns and popular
-            features. No personally identifiable information is tracked.
+            page view data. No personally identifiable information is tracked.
           </li>
           <li>
             <strong>Vercel Speed Insights:</strong> Measures real-world
             performance metrics such as page load times and interaction
-            responsiveness. This data is used to identify and fix performance
-            bottlenecks.
+            responsiveness.
           </li>
         </ul>
 
@@ -81,66 +75,35 @@ export default function CookiePolicyPage() {
         <ul>
           <li>
             <strong>Stripe:</strong> Sets cookies during the payment and
-            checkout process to prevent fraud, manage payment sessions, and
-            comply with financial regulations.
+            checkout process to prevent fraud and manage payment sessions.
           </li>
           <li>
             <strong>Clerk:</strong> Sets cookies for authentication, session
-            management, and device recognition to provide secure sign-in across
-            sessions.
+            management, and device recognition.
           </li>
         </ul>
         <p>
           These cookies are governed by the respective privacy policies of
-          Stripe and Clerk. We do not control the content or behavior of
-          third-party cookies.
+          Stripe and Clerk.
         </p>
 
         <h2>5. Managing Cookies</h2>
         <p>
           You can control and manage cookies through your browser settings. Most
-          browsers allow you to:
+          browsers allow you to view, delete, and block cookies. Please note
+          that disabling essential cookies may prevent you from signing in or
+          using core features of the platform.
         </p>
-        <ul>
-          <li>View what cookies are stored on your device</li>
-          <li>Delete individual cookies or clear all cookies</li>
-          <li>Block cookies from specific or all websites</li>
-          <li>Set preferences for first-party vs. third-party cookies</li>
-        </ul>
-        <p>
-          Please note that disabling essential cookies may prevent you from
-          signing in or using core features of the platform. For instructions on
-          managing cookies in your browser, visit your browser&apos;s help
-          documentation:
-        </p>
-        <ul>
-          <li>
-            <strong>Chrome:</strong> Settings &gt; Privacy and Security &gt;
-            Cookies and other site data
-          </li>
-          <li>
-            <strong>Firefox:</strong> Settings &gt; Privacy &amp; Security &gt;
-            Cookies and Site Data
-          </li>
-          <li>
-            <strong>Safari:</strong> Preferences &gt; Privacy &gt; Manage
-            Website Data
-          </li>
-          <li>
-            <strong>Edge:</strong> Settings &gt; Cookies and site permissions
-            &gt; Cookies and site data
-          </li>
-        </ul>
 
         <h2>6. Contact</h2>
         <p>
           If you have any questions about our use of cookies, please contact us
           at{" "}
           <a
-            href="mailto:support@know24.io"
-            className="text-[#0891b2] hover:text-[#0e7490]"
+            href="mailto:support@agenttv.live"
+            className="text-violet-electric hover:underline"
           >
-            support@know24.io
+            support@agenttv.live
           </a>
           .
         </p>

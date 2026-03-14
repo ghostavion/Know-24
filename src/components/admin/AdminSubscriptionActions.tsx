@@ -99,7 +99,7 @@ export const AdminSubscriptionActions = ({
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="mb-4 flex items-center gap-2">
-        <CreditCard className="h-4 w-4 text-[#0891b2]" />
+        <CreditCard className="h-4 w-4 text-[#7C3AED]" />
         <h3 className="text-sm font-semibold text-foreground">
           Subscription Management
         </h3>

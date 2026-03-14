@@ -119,19 +119,39 @@ export default function EditAgentPage() {
   async function toggleStatus() {
     if (!agent) return;
     setToggling(true);
-    const newStatus = agent.status === "running" ? "offline" : "running";
+    const isRunning = agent.status === "running" || agent.status === "starting";
+
     try {
-      const res = await fetch(`/api/agents/${slug}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setAgent(json.data);
+      if (isRunning) {
+        // Stop agent via dedicated endpoint
+        const res = await fetch(`/api/agents/${slug}/stop`, { method: "POST" });
+        if (res.ok) {
+          setAgent({ ...agent, status: "offline" } as Agent);
+        } else {
+          const json = await res.json();
+          alert(json.error?.message ?? "Failed to stop agent");
+        }
+      } else {
+        // Start agent via dedicated endpoint
+        const agentCmd = (agent as unknown as { config?: { agent_cmd?: string } }).config?.agent_cmd ?? "python main.py";
+        const res = await fetch(`/api/agents/${slug}/start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            agent_cmd: agentCmd,
+            daily_cap_usd: (agent as unknown as { config?: { daily_cap_usd?: number } }).config?.daily_cap_usd,
+          }),
+        });
+        if (res.ok) {
+          setAgent({ ...agent, status: "running" } as Agent);
+        } else {
+          const json = await res.json();
+          alert(json.error?.message ?? "Failed to start agent");
+        }
       }
     } catch (err) {
       console.error("[edit-agent] Toggle failed:", err);
+      alert("Network error while toggling agent");
     } finally {
       setToggling(false);
     }

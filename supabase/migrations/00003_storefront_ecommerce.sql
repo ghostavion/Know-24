@@ -8,7 +8,7 @@
 -- ============================================================
 
 CREATE TABLE public.email_subscribers (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   email           TEXT NOT NULL,
   first_name      TEXT,
@@ -38,7 +38,7 @@ CREATE POLICY "email_subscribers_rw_business_member" ON public.email_subscribers
 -- ============================================================
 
 CREATE TABLE public.storefront_testimonials (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   customer_name   TEXT NOT NULL,
   customer_title  TEXT,

@@ -4,8 +4,8 @@
 -- ============================================================
 
 -- Extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS "vector";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
@@ -105,7 +105,7 @@ $$;
 -- ============================================================
 
 CREATE TABLE public.users (
-  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   clerk_user_id     TEXT NOT NULL UNIQUE,
   email             TEXT NOT NULL UNIQUE,
   email_verified    BOOLEAN NOT NULL DEFAULT false,
@@ -146,7 +146,7 @@ CREATE POLICY "users_update_own" ON public.users
 -- ============================================================
 
 CREATE TABLE public.organizations (
-  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   clerk_org_id      TEXT UNIQUE,
   owner_id          UUID NOT NULL REFERENCES public.users (id) ON DELETE RESTRICT,
   name              TEXT NOT NULL,
@@ -184,7 +184,7 @@ ALTER TABLE public.organizations ENABLE ROW LEVEL SECURITY;
 -- ============================================================
 
 CREATE TABLE public.organization_members (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES public.organizations (id) ON DELETE CASCADE,
   user_id         UUID NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
   role            TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('owner', 'admin', 'member')),
@@ -231,7 +231,7 @@ CREATE POLICY "org_members_select" ON public.organization_members
 -- ============================================================
 
 CREATE TABLE public.businesses (
-  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id       UUID NOT NULL REFERENCES public.organizations (id) ON DELETE RESTRICT,
   owner_id              UUID NOT NULL REFERENCES public.users (id) ON DELETE RESTRICT,
   name                  TEXT NOT NULL,
@@ -294,7 +294,7 @@ CREATE POLICY "businesses_delete_owner" ON public.businesses
 -- ============================================================
 
 CREATE TABLE public.product_types (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug            product_type_enum NOT NULL UNIQUE,
   display_name    TEXT NOT NULL,
   description     TEXT NOT NULL,
@@ -324,7 +324,7 @@ INSERT INTO public.product_types (slug, display_name, description, icon_name, so
 -- ============================================================
 
 CREATE TABLE public.products (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id         UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   product_type_id     UUID NOT NULL REFERENCES public.product_types (id),
   title               TEXT NOT NULL,
@@ -372,7 +372,7 @@ CREATE POLICY "products_rw_business_member" ON public.products
 -- ============================================================
 
 CREATE TABLE public.knowledge_items (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   source_type     knowledge_source_type NOT NULL,
   source_url      TEXT,
@@ -414,7 +414,7 @@ CREATE POLICY "knowledge_items_business_member" ON public.knowledge_items
 -- ============================================================
 
 CREATE TABLE public.knowledge_chunks (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   knowledge_item_id UUID NOT NULL REFERENCES public.knowledge_items (id) ON DELETE CASCADE,
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   chunk_index     INT NOT NULL,
@@ -440,7 +440,7 @@ CREATE POLICY "knowledge_chunks_business_member" ON public.knowledge_chunks
 -- ============================================================
 
 CREATE TABLE public.storefronts (
-  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id           UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE UNIQUE,
   subdomain             TEXT NOT NULL UNIQUE,
   custom_domain         TEXT UNIQUE,
@@ -487,7 +487,7 @@ CREATE POLICY "storefronts_rw_business_member" ON public.storefronts
 -- ============================================================
 
 CREATE TABLE public.customers (
-  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email             TEXT NOT NULL UNIQUE,
   first_name        TEXT,
   last_name         TEXT,
@@ -512,7 +512,7 @@ ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
 -- ============================================================
 
 CREATE TABLE public.orders (
-  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id           UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   customer_id           UUID NOT NULL REFERENCES public.customers (id),
   product_id            UUID NOT NULL REFERENCES public.products (id),
@@ -546,7 +546,7 @@ CREATE POLICY "orders_rw_business_member" ON public.orders
 -- ============================================================
 
 CREATE TABLE public.blog_posts (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   title           TEXT NOT NULL,
   slug            TEXT NOT NULL,
@@ -585,7 +585,7 @@ CREATE POLICY "blog_posts_rw_business_member" ON public.blog_posts
 -- ============================================================
 
 CREATE TABLE public.activity_log (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   event_type      activity_event_type NOT NULL,
   title           TEXT NOT NULL,
@@ -606,7 +606,7 @@ CREATE POLICY "activity_log_rw_business_member" ON public.activity_log
 -- ============================================================
 
 CREATE TABLE public.scout_scans (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   scan_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   platforms       TEXT[] NOT NULL DEFAULT '{}',
@@ -629,7 +629,7 @@ CREATE POLICY "scout_scans_rw_business_member" ON public.scout_scans
 -- ============================================================
 
 CREATE TABLE public.scout_opportunities (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   scan_id         UUID NOT NULL REFERENCES public.scout_scans (id) ON DELETE CASCADE,
   business_id     UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   platform        TEXT NOT NULL,
@@ -663,7 +663,7 @@ CREATE POLICY "scout_opportunities_rw_business_member" ON public.scout_opportuni
 -- ============================================================
 
 CREATE TABLE public.advisor_items (
-  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id       UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   category          advisor_category NOT NULL,
   priority          advisor_priority NOT NULL DEFAULT 'medium',

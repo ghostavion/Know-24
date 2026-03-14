@@ -210,7 +210,7 @@ const VoiceMemoRecorder = ({ businessId, onUploaded, className }: VoiceMemoRecor
           const x = i * (barWidth + 2);
           const y = (height - barHeight) / 2;
 
-          ctx.fillStyle = "#0891b2";
+          ctx.fillStyle = "#7C3AED";
           ctx.beginPath();
           ctx.roundRect(x, y, barWidth, barHeight, 2);
           ctx.fill();
@@ -305,9 +305,9 @@ const VoiceMemoRecorder = ({ businessId, onUploaded, className }: VoiceMemoRecor
           <button
             type="button"
             onClick={startRecording}
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-[#0891b2]/10 transition-colors hover:bg-[#0891b2]/20"
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-[#7C3AED]/10 transition-colors hover:bg-[#7C3AED]/20"
           >
-            <Mic className="h-7 w-7 text-[#0891b2]" />
+            <Mic className="h-7 w-7 text-[#7C3AED]" />
           </button>
           <p className="text-sm text-muted-foreground">
             Tap to start recording (max {MAX_RECORDING_SECONDS / 60} min)
@@ -358,12 +358,12 @@ const VoiceMemoRecorder = ({ businessId, onUploaded, className }: VoiceMemoRecor
             <button
               type="button"
               onClick={togglePlayback}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0891b2]/10 transition-colors hover:bg-[#0891b2]/20"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#7C3AED]/10 transition-colors hover:bg-[#7C3AED]/20"
             >
               {isPlaying ? (
-                <Pause className="h-4 w-4 text-[#0891b2]" />
+                <Pause className="h-4 w-4 text-[#7C3AED]" />
               ) : (
-                <Play className="h-4 w-4 text-[#0891b2]" />
+                <Play className="h-4 w-4 text-[#7C3AED]" />
               )}
             </button>
 
@@ -371,7 +371,7 @@ const VoiceMemoRecorder = ({ businessId, onUploaded, className }: VoiceMemoRecor
             <div className="flex flex-1 flex-col gap-1">
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full bg-[#0891b2] transition-all"
+                  className="h-full rounded-full bg-[#7C3AED] transition-all"
                   style={{
                     width: duration > 0 ? `${(playbackTime / duration) * 100}%` : "0%",
                   }}
@@ -395,7 +395,7 @@ const VoiceMemoRecorder = ({ businessId, onUploaded, className }: VoiceMemoRecor
             </Button>
             <Button
               onClick={handleUpload}
-              className="flex-1 bg-[#0891b2] text-white hover:bg-[#0891b2]/90"
+              className="flex-1 bg-[#7C3AED] text-white hover:bg-[#7C3AED]/90"
             >
               <Upload className="h-4 w-4" />
               Upload
@@ -407,7 +407,7 @@ const VoiceMemoRecorder = ({ businessId, onUploaded, className }: VoiceMemoRecor
       {/* Uploading state */}
       {state === "uploading" && (
         <div className="flex flex-col items-center gap-3 py-6">
-          <Loader2 className="h-8 w-8 animate-spin text-[#0891b2]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#7C3AED]" />
           <p className="text-sm text-muted-foreground">Uploading voice memo...</p>
         </div>
       )}

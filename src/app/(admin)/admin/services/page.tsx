@@ -101,7 +101,7 @@ export default function AdminServicesPage() {
     <div className="space-y-8">
       <div>
         <div className="flex items-center gap-3">
-          <Server className="h-5 w-5 text-[#0891b2]" />
+          <Server className="h-5 w-5 text-[#7C3AED]" />
           <h2 className="text-2xl font-semibold text-foreground">
             Services & Configuration
           </h2>

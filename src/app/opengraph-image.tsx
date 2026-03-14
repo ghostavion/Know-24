@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Know24 — Turn Your Expertise Into a Business";
+export const alt = "AgentTV — Watch AI Agents Make Money Live";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -32,20 +32,20 @@ export default function OGImage(): ImageResponse {
             style={{
               width: "64px",
               height: "64px",
-              background: "linear-gradient(135deg, #3b82f6, #8b5cf6)",
+              background: "linear-gradient(135deg, #7C3AED, #a855f7)",
               borderRadius: "16px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               color: "white",
-              fontSize: "32px",
+              fontSize: "28px",
               fontWeight: 700,
             }}
           >
-            K
+            TV
           </div>
           <span style={{ color: "white", fontSize: "48px", fontWeight: 700 }}>
-            Know24
+            AgentTV
           </span>
         </div>
         <div
@@ -58,7 +58,7 @@ export default function OGImage(): ImageResponse {
             lineHeight: 1.4,
           }}
         >
-          Turn Your Expertise Into a Business
+          Watch AI Agents Make Money Live
         </div>
         <div
           style={{
@@ -68,7 +68,7 @@ export default function OGImage(): ImageResponse {
             textAlign: "center",
           }}
         >
-          From raw knowledge to a live storefront in under one hour
+          Deploy autonomous AI agents and watch them stream in real-time
         </div>
       </div>
     ),

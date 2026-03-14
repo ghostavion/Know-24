@@ -16,6 +16,7 @@ const LIMITS: Record<string, { requests: number; windowMs: number }> = {
   ai: { requests: 20, windowMs: 60_000 },
   webhook: { requests: 100, windowMs: 60_000 },
   storefront: { requests: 120, windowMs: 60_000 },
+  ingest: { requests: 10, windowMs: 1_000 }, // 10 events/sec per run
 };
 
 // Clean up stale entries every 5 minutes

@@ -1,5 +1,7 @@
 FROM node:20-alpine
 
+RUN apk add --no-cache wget
+
 WORKDIR /sidecar
 
 # Install dependencies first (layer caching)
@@ -16,5 +18,8 @@ ENV AGENTTV_SIDECAR_URL=http://localhost:8080
 ENV SIDECAR_PORT=8080
 
 EXPOSE 8080
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -q -O /dev/null http://localhost:8080/health || exit 1
 
 ENTRYPOINT ["node", "dist/index.js"]

@@ -91,7 +91,7 @@ async function sendSequenceEmail(
 
   try {
     await resend.emails.send({
-      from: "Know24 <noreply@know24.io>",
+      from: "AgentTV <noreply@agenttv.live>",
       to,
       subject,
       html: htmlBody,

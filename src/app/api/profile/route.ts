@@ -1,17 +1,19 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { getCreditBalance } from "@/lib/credits/service";
-import crypto from "crypto";
+import type { ApiResponse } from "@/types/api";
 
-const FOUNDER_PRICE_CENTS = 7900; // $79/mo
-const STANDARD_PRICE_CENTS = 9900; // $99/mo
-const FOUNDER_CAP = 100;
+interface ProfileData {
+  user_id: string;
+  tier: "free" | "paid";
+  stripe_customer_id: string | null;
+  agent_count: number;
+}
 
 /**
- * GET /api/profile — Get user profile with credits and subscription info
+ * GET /api/profile — Get user profile with subscription info
  */
-export async function GET() {
+export async function GET(): Promise<NextResponse<ApiResponse<ProfileData>>> {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json(
@@ -22,55 +24,37 @@ export async function GET() {
 
   const supabase = createServiceClient();
 
-  // Get or create profile
-  let { data: profile } = await supabase
-    .from("user_profiles")
-    .select("*")
+  // Get subscription tier
+  const { data: sub } = await supabase
+    .from("agent_subscriptions")
+    .select("tier")
     .eq("user_id", userId)
     .single();
 
-  if (!profile) {
-    const referralCode = `k24-${crypto.randomBytes(4).toString("hex")}`;
+  const tier = ((sub as { tier?: string } | null)?.tier === "paid" ? "paid" : "free") as "free" | "paid";
 
-    // Check if founder slots available
-    const { count } = await supabase
-      .from("user_profiles")
-      .select("id", { count: "exact", head: true })
-      .eq("founding_member", true);
-
-    const isFounder = (count ?? 0) < FOUNDER_CAP;
-
-    const { data: newProfile } = await supabase
-      .from("user_profiles")
-      .insert({
-        user_id: userId,
-        referral_code: referralCode,
-        subscription_tier: isFounder ? "founder" : "standard",
-        founding_member: isFounder,
-        monthly_price_cents: isFounder ? FOUNDER_PRICE_CENTS : STANDARD_PRICE_CENTS,
-      })
-      .select("*")
-      .single();
-    profile = newProfile;
-  }
-
-  const credits = await getCreditBalance(userId);
-
-  // Count founder slots remaining
-  const { count: founderCount } = await supabase
+  // Get stripe customer ID
+  const { data: profile } = await supabase
     .from("user_profiles")
+    .select("stripe_customer_id")
+    .eq("user_id", userId)
+    .single();
+
+  const stripeCustomerId = (profile as { stripe_customer_id?: string } | null)?.stripe_customer_id ?? null;
+
+  // Count user's agents
+  const { count } = await supabase
+    .from("agents")
     .select("id", { count: "exact", head: true })
-    .eq("founding_member", true);
+    .eq("owner_id", userId)
+    .neq("status", "deleted");
 
   return NextResponse.json({
     data: {
-      profile,
-      credits,
-      founderSlotsRemaining: Math.max(0, FOUNDER_CAP - (founderCount ?? 0)),
-      pricing: {
-        founder: FOUNDER_PRICE_CENTS,
-        standard: STANDARD_PRICE_CENTS,
-      },
+      user_id: userId,
+      tier,
+      stripe_customer_id: stripeCustomerId,
+      agent_count: count ?? 0,
     },
   });
 }

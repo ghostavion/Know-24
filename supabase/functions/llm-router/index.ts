@@ -207,8 +207,39 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
+    // ---------- Auth: require bearer run_token ----------
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return Response.json(
+        { error: { code: "UNAUTHORIZED", message: "Missing bearer token" } },
+        { status: 401 }
+      );
+    }
+    const runToken = authHeader.slice(7);
+
     const agentId = req.headers.get("x-agent-id") ?? "unknown";
     const runId = req.headers.get("x-run-id") ?? null;
+
+    // Single Supabase client for auth + logging
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Validate run_token against agents table
+    if (agentId !== "unknown") {
+      const { data: agent } = await supabase
+        .from("agents")
+        .select("run_token")
+        .eq("id", agentId)
+        .single();
+
+      if (!agent || agent.run_token !== runToken) {
+        return Response.json(
+          { error: { code: "UNAUTHORIZED", message: "Invalid run token" } },
+          { status: 401 }
+        );
+      }
+    }
 
     // Rate limit check
     if (!checkRateLimit(agentId)) {
@@ -261,11 +292,6 @@ Deno.serve(async (req: Request) => {
           { status: 400 }
         );
     }
-
-    // Log usage to Supabase (fire-and-forget)
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // Non-blocking usage log
     supabase

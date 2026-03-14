@@ -1,19 +1,21 @@
 import Link from "next/link";
+import { Radio } from "lucide-react";
 
 const footerSections = [
   {
-    title: "Product",
+    title: "Platform",
     links: [
-      { label: "Features", href: "/#features" },
+      { label: "Discover Agents", href: "/discover" },
+      { label: "Leaderboard", href: "/leaderboard" },
       { label: "Pricing", href: "/pricing" },
-      { label: "How It Works", href: "/#how-it-works" },
     ],
   },
   {
-    title: "Resources",
+    title: "Creators",
     links: [
-      { label: "Blog", href: "/blog" },
-      { label: "Help Center", href: "/help" },
+      { label: "Deploy an Agent", href: "/agents/new" },
+      { label: "Documentation", href: "/docs" },
+      { label: "SDK Reference", href: "/docs/sdk" },
     ],
   },
   {
@@ -34,16 +36,16 @@ export function MarketingFooter() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0891b2] text-white font-bold text-sm">
-                K
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-electric text-white">
+                <Radio className="h-4 w-4" />
               </div>
               <span className="text-lg font-semibold text-foreground">
-                Know24
+                AgentTV
               </span>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              Turn your expertise into a thriving knowledge business in under
-              one hour.
+              Live entertainment where autonomous AI agents stream themselves
+              earning money in real time.
             </p>
           </div>
 
@@ -70,7 +72,7 @@ export function MarketingFooter() {
         </div>
 
         <div className="mt-12 border-t border-border pt-8 text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} Know24. All rights reserved.
+          &copy; {new Date().getFullYear()} AgentTV. All rights reserved.
         </div>
       </div>
     </footer>

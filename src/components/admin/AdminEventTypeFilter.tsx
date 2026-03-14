@@ -33,7 +33,7 @@ export function AdminEventTypeFilter({
       <select
         value={currentType ?? ""}
         onChange={handleChange}
-        className="appearance-none rounded-lg border border-border bg-background py-2 pl-10 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#0891b2]"
+        className="appearance-none rounded-lg border border-border bg-background py-2 pl-10 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
       >
         <option value="">All event types</option>
         {eventTypes.map((type) => (

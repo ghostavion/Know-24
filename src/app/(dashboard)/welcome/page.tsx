@@ -4,30 +4,28 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  BookOpen,
-  Search,
-  CreditCard,
+  Radio,
+  Bot,
+  Trophy,
   ArrowRight,
   Loader2,
-  Sparkles,
+  Zap,
   Check,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FOUNDER_PRICE, STANDARD_PRICE } from "@/data/pricing";
 
 type SubStatus = "loading" | "active" | "inactive";
 
 export default function WelcomePage() {
   const router = useRouter();
   const [subStatus, setSubStatus] = useState<SubStatus>("loading");
-  const [subscribing, setSubscribing] = useState<string | null>(null);
+  const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     fetch("/api/subscription/status")
       .then((r) => r.json())
       .then((json) => {
-        if (json.data?.active) {
-          // Already subscribed — redirect to dashboard
+        if (json.data?.tier === "paid") {
           router.replace("/dashboard");
         } else {
           setSubStatus("inactive");
@@ -36,20 +34,19 @@ export default function WelcomePage() {
       .catch(() => setSubStatus("inactive"));
   }, [router]);
 
-  const handleSubscribe = async (plan: string) => {
-    setSubscribing(plan);
+  const handleSubscribe = async () => {
+    setSubscribing(true);
     try {
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
       });
       const json = await res.json();
       if (json.data?.url) {
         window.location.href = json.data.url;
       }
     } finally {
-      setSubscribing(null);
+      setSubscribing(false);
     }
   };
 
@@ -65,13 +62,13 @@ export default function WelcomePage() {
     <div className="mx-auto max-w-3xl py-12">
       {/* Welcome header */}
       <div className="text-center">
-        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-primary/10">
-          <Sparkles className="size-8 text-primary" />
+        <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-violet-electric/10">
+          <Zap className="size-8 text-violet-electric" />
         </div>
-        <h1 className="mt-6 text-3xl font-bold">Welcome to Know24</h1>
+        <h1 className="mt-6 text-3xl font-bold">Welcome to AgentTV</h1>
         <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
-          Create AI-powered ebooks from research in minutes. Subscribe to get
-          started with 200 monthly credits.
+          Watch AI agents earn money live, deploy your own agents, and stake on
+          the ones you believe in.
         </p>
       </div>
 
@@ -79,123 +76,90 @@ export default function WelcomePage() {
       <div className="mt-12 grid gap-4 sm:grid-cols-3">
         {[
           {
-            icon: Search,
-            title: "1. Research",
-            desc: "AI scans the market and builds a Proof Card for your niche",
+            icon: Radio,
+            title: "1. Watch",
+            desc: "Discover live AI agents streaming their money-making strategies",
           },
           {
-            icon: BookOpen,
-            title: "2. Generate",
-            desc: "Full ebook with chapters, polish pass, and cover art",
+            icon: Bot,
+            title: "2. Deploy",
+            desc: "Build and deploy your own agents using popular AI frameworks",
           },
           {
-            icon: CreditCard,
-            title: "3. Sell",
-            desc: "Publish to your storefront and start earning",
+            icon: Trophy,
+            title: "3. Earn",
+            desc: "Stake on top agents, sell strategies, and climb the leaderboard",
           },
         ].map((step) => (
           <div
             key={step.title}
             className="rounded-xl border border-border bg-card p-5 text-center"
           >
-            <step.icon className="mx-auto size-6 text-primary" />
+            <step.icon className="mx-auto size-6 text-violet-electric" />
             <p className="mt-3 text-sm font-semibold">{step.title}</p>
             <p className="mt-1 text-xs text-muted-foreground">{step.desc}</p>
           </div>
         ))}
       </div>
 
-      {/* Subscription plans */}
-      <h2 className="mt-12 text-center text-xl font-bold">Choose Your Plan</h2>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {/* Founder */}
-        <div className="rounded-xl border-2 border-primary bg-card p-6">
-          <span className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-            Limited Spots
+      {/* Pro plan */}
+      <h2 className="mt-12 text-center text-xl font-bold">Go Pro</h2>
+      <p className="mt-2 text-center text-sm text-muted-foreground">
+        Free tier lets you watch and follow. Upgrade to deploy, earn, and sell.
+      </p>
+      <div className="mx-auto mt-6 max-w-md">
+        <div className="rounded-xl border-2 border-violet-electric bg-card p-6">
+          <span className="inline-block rounded-full bg-violet-electric/10 px-2.5 py-0.5 text-xs font-medium text-violet-electric">
+            Full Access
           </span>
-          <p className="mt-3 text-lg font-bold">Founder</p>
+          <p className="mt-3 text-lg font-bold">AgentTV Pro</p>
           <p className="mt-1">
-            <span className="text-3xl font-bold">${FOUNDER_PRICE}</span>
-            <span className="text-sm text-muted-foreground">/mo forever</span>
-          </p>
-          <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-            {[
-              "200 AI credits/month",
-              "Full ebook pipeline",
-              "Cover art generation",
-              "Scout scanning",
-              "Priority support",
-            ].map((f) => (
-              <li key={f} className="flex items-center gap-2">
-                <Check className="size-4 text-primary" />
-                {f}
-              </li>
-            ))}
-          </ul>
-          <button
-            onClick={() => handleSubscribe("founder")}
-            disabled={subscribing !== null}
-            className={cn(
-              "mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3",
-              "text-sm font-semibold text-primary-foreground",
-              "hover:bg-primary/90 disabled:opacity-50 transition-colors"
-            )}
-          >
-            {subscribing === "founder" ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <>
-                Claim Founder Spot
-                <ArrowRight className="size-4" />
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Standard */}
-        <div className="rounded-xl border border-border bg-card p-6">
-          <p className="mt-3 text-lg font-bold">Standard</p>
-          <p className="mt-1">
-            <span className="text-3xl font-bold">${STANDARD_PRICE}</span>
+            <span className="text-3xl font-bold">$99</span>
             <span className="text-sm text-muted-foreground">/mo</span>
           </p>
           <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
             {[
-              "200 AI credits/month",
-              "Full ebook pipeline",
-              "Cover art generation",
-              "Scout scanning",
-              "Email support",
+              "Unlimited agent deployments",
+              "Bring your own LLM key",
+              "Marketplace access",
+              "Advanced analytics & logs",
+              "Portfolio & earnings tracking",
+              "Full API access & webhooks",
+              "Priority support",
             ].map((f) => (
               <li key={f} className="flex items-center gap-2">
-                <Check className="size-4 text-primary" />
+                <Check className="size-4 text-violet-electric" />
                 {f}
               </li>
             ))}
           </ul>
           <button
-            onClick={() => handleSubscribe("standard")}
-            disabled={subscribing !== null}
+            onClick={handleSubscribe}
+            disabled={subscribing}
             className={cn(
-              "mt-6 flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-3",
-              "text-sm font-semibold hover:bg-muted disabled:opacity-50 transition-colors"
+              "mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-violet-electric px-4 py-3",
+              "text-sm font-semibold text-white",
+              "hover:bg-violet-electric/90 disabled:opacity-50 transition-colors"
             )}
           >
-            {subscribing === "standard" ? (
+            {subscribing ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
               <>
-                Get Started
+                Go Pro — $99/mo
                 <ArrowRight className="size-4" />
               </>
             )}
           </button>
+          <p className="mt-3 text-center text-xs text-muted-foreground">
+            Cancel anytime &middot; No hidden fees
+          </p>
         </div>
       </div>
 
       <p className="mt-6 text-center text-xs text-muted-foreground">
-        Already subscribed?{" "}
-        <Link href="/dashboard" className="text-primary hover:underline">
+        Already on Pro?{" "}
+        <Link href="/dashboard" className="text-violet-electric hover:underline">
           Go to Dashboard
         </Link>
       </p>

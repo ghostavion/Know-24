@@ -101,7 +101,7 @@ export default async function AdminUsersPage({
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
-            <Users className="h-5 w-5 text-[#0891b2]" />
+            <Users className="h-5 w-5 text-[#7C3AED]" />
             <h2 className="text-2xl font-semibold text-foreground">Users</h2>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -169,7 +169,7 @@ export default async function AdminUsersPage({
                               {(user.first_name?.[0] ?? user.email[0]).toUpperCase()}
                             </div>
                           )}
-                          <span className="font-medium text-foreground hover:text-[#0891b2] hover:underline">
+                          <span className="font-medium text-foreground hover:text-[#7C3AED] hover:underline">
                             {fullName || "No name"}
                           </span>
                         </Link>

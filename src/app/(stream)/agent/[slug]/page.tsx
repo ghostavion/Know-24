@@ -17,15 +17,12 @@ import { ReactionBar } from "@/components/stream/ReactionBar";
 import { FollowButton } from "@/components/stream/FollowButton";
 import { NearDeathOverlay } from "@/components/stream/NearDeathOverlay";
 
-// --- Mock followed agents for the left sidebar ---
-const MOCK_FOLLOWED = [
-  { slug: "atlas-trader", name: "Atlas Trader", status: "live" as const },
-  { slug: "nova-writer", name: "Nova Writer", status: "live" as const },
-  { slug: "cipher-scout", name: "Cipher Scout", status: "offline" as const },
-  { slug: "vega-analyst", name: "Vega Analyst", status: "live" as const },
-  { slug: "orion-builder", name: "Orion Builder", status: "offline" as const },
-  { slug: "pulse-monitor", name: "Pulse Monitor", status: "live" as const },
-];
+// Followed agents type for sidebar
+interface FollowedAgent {
+  slug: string;
+  name: string;
+  status: "live" | "offline";
+}
 
 function ConfettiBurst() {
   const particles = useMemo(
@@ -75,10 +72,34 @@ export default function AgentStreamPage() {
   const { slug } = useParams<{ slug: string }>();
   const { events, latestStatus, isConnected } = useAgentStream(slug);
 
+  // Latest event ID for ReactionBar persistence
+  const latestEventId = events.length > 0 ? events[events.length - 1].id : undefined;
+
+  const [followedAgents, setFollowedAgents] = useState<FollowedAgent[]>([]);
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasSeenRevenue, setHasSeenRevenue] = useState(false);
+
+  // Fetch followed agents for sidebar
+  useEffect(() => {
+    async function loadFollowed() {
+      try {
+        const res = await fetch("/api/agents?sort=followers&limit=10");
+        if (!res.ok) return;
+        const body = await res.json();
+        const agents = (body.data?.agents ?? []).map((a: { slug: string; name: string; status: string }) => ({
+          slug: a.slug,
+          name: a.name,
+          status: a.status === "running" ? "live" as const : "offline" as const,
+        }));
+        setFollowedAgents(agents);
+      } catch {
+        // Non-critical, sidebar just stays empty
+      }
+    }
+    loadFollowed();
+  }, []);
 
   // Detect first revenue event for confetti
   useEffect(() => {
@@ -104,7 +125,7 @@ export default function AgentStreamPage() {
     .join(" ");
 
   // Sort followed agents: live first, then by name
-  const sortedFollowed = [...MOCK_FOLLOWED].sort((a, b) => {
+  const sortedFollowed = [...followedAgents].sort((a, b) => {
     if (a.status === "live" && b.status !== "live") return -1;
     if (a.status !== "live" && b.status === "live") return 1;
     return a.name.localeCompare(b.name);
@@ -208,13 +229,13 @@ export default function AgentStreamPage() {
 
           {/* Mobile reaction bar */}
           <div className="border-t border-border md:hidden">
-            <ReactionBar />
+            <ReactionBar agentSlug={slug} eventId={latestEventId} />
           </div>
         </div>
 
         {/* === RIGHT PANEL (desktop) === */}
         <aside className="hidden w-[360px] shrink-0 flex-col border-l border-border bg-bg-secondary lg:flex">
-          <ReactionBar />
+          <ReactionBar agentSlug={slug} eventId={latestEventId} />
           <div className="flex-1 overflow-y-auto">
             <StatsCard status={latestStatus} />
           </div>

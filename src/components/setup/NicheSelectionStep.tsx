@@ -203,17 +203,17 @@ const NicheSelectionStep = ({ className }: NicheSelectionStepProps) => {
               className={cn(
                 "relative flex flex-col items-center gap-2 rounded-xl border p-4 text-center transition-all",
                 isSelected
-                  ? "border-[#0891b2] bg-[#0891b2]/5 shadow-sm"
-                  : "border-border hover:border-[#0891b2]/50 hover:bg-muted/50"
+                  ? "border-[#7C3AED] bg-[#7C3AED]/5 shadow-sm"
+                  : "border-border hover:border-[#7C3AED]/50 hover:bg-muted/50"
               )}
             >
               {isSelected && (
-                <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#0891b2]">
+                <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED]">
                   <Check className="h-3 w-3 text-white" />
                 </div>
               )}
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0891b2]/10">
-                <Icon className="h-5 w-5 text-[#0891b2]" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#7C3AED]/10">
+                <Icon className="h-5 w-5 text-[#7C3AED]" />
               </div>
               <div>
                 <h3 className="text-sm font-semibold leading-tight">{cat.title}</h3>
@@ -235,7 +235,7 @@ const NicheSelectionStep = ({ className }: NicheSelectionStepProps) => {
           value={customNiche}
           onChange={(e) => handleCustomNicheChange(e.target.value)}
           placeholder="Type your own niche if it's not listed above..."
-          className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2]/50"
+          className="h-9 w-full rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/50"
         />
       </div>
 
@@ -251,7 +251,7 @@ const NicheSelectionStep = ({ className }: NicheSelectionStepProps) => {
           onChange={(e) => setPersonalContext(e.target.value)}
           placeholder="e.g. I'm a nurse with 15 years in pediatrics..."
           rows={3}
-          className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2]/50"
+          className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/50"
         />
       </div>
 
@@ -296,7 +296,7 @@ const NicheSelectionStep = ({ className }: NicheSelectionStepProps) => {
       <Button
         onClick={handleSubmit}
         disabled={!nicheSlug || isSubmitting}
-        className="w-full bg-[#0891b2] text-white hover:bg-[#0891b2]/90"
+        className="w-full bg-[#7C3AED] text-white hover:bg-[#7C3AED]/90"
         size="lg"
       >
         {isSubmitting ? (

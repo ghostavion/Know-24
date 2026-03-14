@@ -94,18 +94,18 @@ const ProductSelectionStep = ({ className }: ProductSelectionStepProps) => {
                   className={cn(
                     "relative cursor-pointer rounded-xl border p-4 text-left transition-all",
                     isSelected
-                      ? "border-[#0891b2] bg-[#0891b2]/5"
-                      : "border-border hover:border-[#0891b2]/50"
+                      ? "border-[#7C3AED] bg-[#7C3AED]/5"
+                      : "border-border hover:border-[#7C3AED]/50"
                   )}
                 >
                   {isSelected && (
                     <div className="absolute right-2 top-2">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0891b2] text-white">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
                         <Check className="h-3 w-3" />
                       </div>
                     </div>
                   )}
-                  <Icon className="h-6 w-6 text-[#0891b2]" />
+                  <Icon className="h-6 w-6 text-[#7C3AED]" />
                   <p className="mt-2 font-bold text-sm">{product.displayName}</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">
                     {product.description}

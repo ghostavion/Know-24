@@ -40,12 +40,12 @@ const StorefrontFooter = ({ businessName, businessSlug, socialLinks }: Storefron
           </p>
           <p className="mt-1">
             <Link
-              href={`https://know24.io${businessSlug ? `?ref=${businessSlug}` : ""}`}
+              href={`https://agenttv.io${businessSlug ? `?ref=${businessSlug}` : ""}`}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-foreground transition-colors hover:underline"
             >
-              Powered by Know24
+              Powered by AgentTV
             </Link>
           </p>
         </div>

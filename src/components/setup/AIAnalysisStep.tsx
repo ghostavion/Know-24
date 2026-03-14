@@ -131,7 +131,7 @@ const AIAnalysisStep = ({ className }: AIAnalysisStepProps) => {
   if (analysisLoading) {
     return (
       <div className={cn("flex flex-col items-center justify-center gap-6 py-16", className)}>
-        <Loader2 className="h-12 w-12 animate-spin text-[#0891b2]" />
+        <Loader2 className="h-12 w-12 animate-spin text-[#7C3AED]" />
         <div className="text-center">
           <h2 className="text-xl font-semibold">Analyzing your expertise...</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -139,7 +139,7 @@ const AIAnalysisStep = ({ className }: AIAnalysisStepProps) => {
           </p>
         </div>
         <div className="h-2 w-64 overflow-hidden rounded-full bg-muted">
-          <div className="h-full w-2/3 animate-pulse rounded-full bg-[#0891b2]" />
+          <div className="h-full w-2/3 animate-pulse rounded-full bg-[#7C3AED]" />
         </div>
       </div>
     );
@@ -159,7 +159,7 @@ const AIAnalysisStep = ({ className }: AIAnalysisStepProps) => {
 
         {/* Knowledge Summary */}
         <div className="flex items-start gap-4 rounded-xl border border-border p-5">
-          <BookOpen className="mt-0.5 h-6 w-6 shrink-0 text-[#0891b2]" />
+          <BookOpen className="mt-0.5 h-6 w-6 shrink-0 text-[#7C3AED]" />
           <div>
             <h3 className="font-semibold">Knowledge Summary</h3>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -175,7 +175,7 @@ const AIAnalysisStep = ({ className }: AIAnalysisStepProps) => {
             {aiAnalysis.topics.map((topic) => (
               <span
                 key={topic}
-                className="rounded-full bg-[#0891b2]/10 px-3 py-1 text-xs font-medium text-[#0891b2]"
+                className="rounded-full bg-[#7C3AED]/10 px-3 py-1 text-xs font-medium text-[#7C3AED]"
               >
                 {topic}
               </span>
@@ -198,14 +198,14 @@ const AIAnalysisStep = ({ className }: AIAnalysisStepProps) => {
               return (
                 <div
                   key={rec.productTypeSlug}
-                  className="relative rounded-xl border border-[#0891b2] bg-[#0891b2]/5 p-4"
+                  className="relative rounded-xl border border-[#7C3AED] bg-[#7C3AED]/5 p-4"
                 >
                   <div className="absolute right-3 top-3">
-                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#0891b2] text-white">
+                    <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
                       <Check className="h-3 w-3" />
                     </div>
                   </div>
-                  <Icon className="h-8 w-8 text-[#0891b2]" />
+                  <Icon className="h-8 w-8 text-[#7C3AED]" />
                   <p className="mt-2 text-xs font-medium text-muted-foreground">
                     {productType?.displayName ?? rec.productTypeSlug}
                   </p>
@@ -235,7 +235,7 @@ const AIAnalysisStep = ({ className }: AIAnalysisStepProps) => {
   // No analysis yet
   return (
     <div className={cn("flex flex-col items-center justify-center gap-4 py-16", className)}>
-      <Sparkles className="h-12 w-12 text-[#0891b2]" />
+      <Sparkles className="h-12 w-12 text-[#7C3AED]" />
       <div className="text-center">
         <h2 className="text-xl font-semibold">Ready to Analyze</h2>
         <p className="mt-1 text-sm text-muted-foreground">

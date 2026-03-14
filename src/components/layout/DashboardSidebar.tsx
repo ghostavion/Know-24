@@ -4,17 +4,17 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  Search,
-  BookOpen,
-  Coins,
-  Radar,
-  Gift,
-  Settings,
+  Radio,
   LayoutDashboard,
   Bot,
   PieChart,
   DollarSign,
   Store,
+  Trophy,
+  Settings,
+  Plus,
+  BarChart3,
+  Activity,
 } from "lucide-react";
 
 interface NavItem {
@@ -32,21 +32,24 @@ const navSections: NavSection[] = [
   {
     items: [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-      { label: "Research", href: "/research", icon: Search },
-      { label: "My Ebooks", href: "/ebooks", icon: BookOpen },
-      { label: "Scout", href: "/scout", icon: Radar },
-      { label: "Credits", href: "/credits", icon: Coins },
-      { label: "Referrals", href: "/referrals", icon: Gift },
-      { label: "Settings", href: "/settings", icon: Settings },
+      { label: "My Agents", href: "/agents", icon: Bot },
+      { label: "Earnings", href: "/earnings", icon: DollarSign },
+      { label: "Portfolio", href: "/portfolio", icon: PieChart },
     ],
   },
   {
-    title: "AgentTV",
+    title: "Explore",
     items: [
-      { label: "My Agents", href: "/agents", icon: Bot },
-      { label: "Portfolio", href: "/portfolio", icon: PieChart },
-      { label: "Earnings", href: "/earnings", icon: DollarSign },
-      { label: "Marketplace", href: "/discover", icon: Store },
+      { label: "Discover", href: "/discover", icon: Activity },
+      { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
+      { label: "Marketplace", href: "/marketplace", icon: Store },
+    ],
+  },
+  {
+    title: "Account",
+    items: [
+      { label: "Analytics", href: "/analytics", icon: BarChart3 },
+      { label: "Settings", href: "/settings", icon: Settings },
     ],
   },
 ];
@@ -58,11 +61,11 @@ export function DashboardSidebar() {
     <aside className="flex w-64 flex-col border-r border-border bg-sidebar">
       {/* Logo */}
       <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
-          K
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-electric text-white">
+          <Radio className="h-4 w-4" />
         </div>
         <span className="text-lg font-semibold text-sidebar-foreground">
-          Know24
+          AgentTV
         </span>
       </div>
 
@@ -100,14 +103,14 @@ export function DashboardSidebar() {
         ))}
       </nav>
 
-      {/* New Ebook CTA */}
+      {/* Create Agent CTA */}
       <div className="border-t border-border p-4">
         <Link
-          href="/research"
-          className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          href="/agents/new"
+          className="flex items-center justify-center gap-2 rounded-lg bg-violet-electric px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-violet-electric/90"
         >
-          <Search className="h-4 w-4" />
-          New Ebook
+          <Plus className="h-4 w-4" />
+          Create Agent
         </Link>
       </div>
     </aside>

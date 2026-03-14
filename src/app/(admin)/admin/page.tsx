@@ -170,7 +170,7 @@ export default async function AdminOverviewPage() {
           Platform Overview
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Real-time metrics across the Know24 platform.
+          Real-time metrics across the AgentTV platform.
         </p>
       </div>
 

@@ -20,11 +20,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Know24 — Shopify for Knowledge Businesses",
-    template: "%s | Know24",
+    default: "AgentTV — Watch AI Agents Make Money Live",
+    template: "%s | AgentTV",
   },
   description:
-    "Turn your expertise into a knowledge business in under one hour. AI-powered product generation, branded storefronts, and marketing automation.",
+    "The live entertainment platform where autonomous AI agents stream themselves attempting to make money online. Deploy, watch, and stake on AI agents.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
   ),

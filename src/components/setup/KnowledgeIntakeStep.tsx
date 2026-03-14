@@ -144,12 +144,12 @@ const KnowledgeIntakeStep = ({ className }: KnowledgeIntakeStepProps) => {
               className={cn(
                 "flex items-start gap-4 rounded-xl border p-4 text-left transition-all",
                 isActive
-                  ? "border-[#0891b2] bg-[#0891b2]/5"
-                  : "border-border hover:border-[#0891b2]"
+                  ? "border-[#7C3AED] bg-[#7C3AED]/5"
+                  : "border-border hover:border-[#7C3AED]"
               )}
             >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0891b2]/10">
-                <Icon className="h-5 w-5 text-[#0891b2]" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#7C3AED]/10">
+                <Icon className="h-5 w-5 text-[#7C3AED]" />
               </div>
               <div>
                 <h3 className="font-semibold">{card.title}</h3>
@@ -174,7 +174,7 @@ const KnowledgeIntakeStep = ({ className }: KnowledgeIntakeStepProps) => {
                 if (e.key === "Enter") handleAddUrl();
               }}
               placeholder="https://example.com/article"
-              className="h-8 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2]/50"
+              className="h-8 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/50"
             />
             <Button onClick={handleAddUrl} disabled={!urlInput.trim()}>
               <Plus className="h-4 w-4" />
@@ -217,7 +217,7 @@ const KnowledgeIntakeStep = ({ className }: KnowledgeIntakeStepProps) => {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-8 text-sm text-muted-foreground transition-colors hover:border-[#0891b2] hover:text-foreground"
+            className="flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border py-8 text-sm text-muted-foreground transition-colors hover:border-[#7C3AED] hover:text-foreground"
           >
             <Upload className="h-8 w-8" />
             <span>Drop files here or click to browse</span>
@@ -263,7 +263,7 @@ const KnowledgeIntakeStep = ({ className }: KnowledgeIntakeStepProps) => {
                 if (e.key === "Enter") handleAddVideo();
               }}
               placeholder="https://youtube.com/watch?v=..."
-              className="h-8 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-[#0891b2] focus:ring-1 focus:ring-[#0891b2]/50"
+              className="h-8 flex-1 rounded-lg border border-border bg-background px-3 text-sm outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]/50"
             />
             <Button onClick={handleAddVideo} disabled={!videoInput.trim()}>
               <Plus className="h-4 w-4" />

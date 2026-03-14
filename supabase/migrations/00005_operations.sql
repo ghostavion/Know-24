@@ -6,7 +6,7 @@
 -- Support tickets
 -- =========================================================================
 CREATE TABLE public.support_tickets (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   customer_email TEXT NOT NULL,
   customer_name TEXT,
@@ -46,7 +46,7 @@ CREATE POLICY "support_tickets_public_insert" ON public.support_tickets
 -- Support ticket replies
 -- =========================================================================
 CREATE TABLE public.support_ticket_replies (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   ticket_id UUID NOT NULL REFERENCES public.support_tickets (id) ON DELETE CASCADE,
   sender_type TEXT NOT NULL CHECK (sender_type IN ('customer', 'business')),
   sender_name TEXT,
@@ -74,7 +74,7 @@ CREATE POLICY "ticket_replies_public_insert" ON public.support_ticket_replies
 -- Usage events log (detailed tracking beyond org counters)
 -- =========================================================================
 CREATE TABLE public.usage_events (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   event_type TEXT NOT NULL CHECK (event_type IN ('ai_chat', 'social_post', 'scout_scan', 'email_sent', 'blog_generated')),
   quantity INT NOT NULL DEFAULT 1,

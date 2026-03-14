@@ -105,7 +105,7 @@ export function ReferralDashboard() {
     const link = await ensureLink();
     if (!link) return;
     const text = encodeURIComponent(
-      `I've been using Know24 to power my business with AI. Check it out: ${link.url}`
+      `I've been using AgentTV to power my business with AI. Check it out: ${link.url}`
     );
     window.open(`https://x.com/intent/tweet?text=${text}`, "_blank");
   };
@@ -123,7 +123,7 @@ export function ReferralDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="size-6 animate-spin text-[#0891b2]" />
+        <Loader2 className="size-6 animate-spin text-[#7C3AED]" />
       </div>
     );
   }
@@ -160,7 +160,7 @@ export function ReferralDashboard() {
       {/* Referral Link */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <Link2 className="size-5 text-[#0891b2]" />
+          <Link2 className="size-5 text-[#7C3AED]" />
           <h3 className="text-lg font-semibold text-gray-900">
             Your Referral Link
           </h3>
@@ -211,17 +211,17 @@ export function ReferralDashboard() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
-          icon={<MousePointerClick className="size-5 text-[#0891b2]" />}
+          icon={<MousePointerClick className="size-5 text-[#7C3AED]" />}
           label="Total Clicks"
           value={stats.totalClicks}
         />
         <StatCard
-          icon={<Users className="size-5 text-[#0891b2]" />}
+          icon={<Users className="size-5 text-[#7C3AED]" />}
           label="Total Conversions"
           value={stats.totalConversions}
         />
         <StatCard
-          icon={<Trophy className="size-5 text-[#0891b2]" />}
+          icon={<Trophy className="size-5 text-[#7C3AED]" />}
           label="Current Tier"
           value={TIER_LABELS[stats.currentTier]}
         />
@@ -235,7 +235,7 @@ export function ReferralDashboard() {
           </h3>
           <div className="relative h-3 w-full rounded-full bg-gray-100 overflow-hidden">
             <div
-              className="absolute inset-y-0 left-0 rounded-full bg-[#0891b2] transition-all duration-500"
+              className="absolute inset-y-0 left-0 rounded-full bg-[#7C3AED] transition-all duration-500"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
@@ -265,7 +265,7 @@ export function ReferralDashboard() {
                 className={cn(
                   "flex items-center justify-between rounded-lg px-4 py-3 text-sm",
                   isActive
-                    ? "border-2 border-[#0891b2] bg-[#0891b2]/5 font-medium text-gray-900"
+                    ? "border-2 border-[#7C3AED] bg-[#7C3AED]/5 font-medium text-gray-900"
                     : isAchieved
                       ? "border border-green-200 bg-green-50 text-gray-700"
                       : "border border-gray-100 bg-gray-50 text-gray-500"
@@ -295,8 +295,8 @@ export function ReferralDashboard() {
                 className="flex items-center justify-between rounded-lg border border-gray-100 px-4 py-3 text-sm"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex size-8 items-center justify-center rounded-full bg-[#0891b2]/10">
-                    <Users className="size-4 text-[#0891b2]" />
+                  <div className="flex size-8 items-center justify-center rounded-full bg-[#7C3AED]/10">
+                    <Users className="size-4 text-[#7C3AED]" />
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">

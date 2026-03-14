@@ -35,7 +35,7 @@ export function AdminSidebar() {
   return (
     <aside className="flex w-64 flex-col border-r border-border bg-card">
       <div className="flex h-16 items-center gap-2 border-b border-border px-6">
-        <Shield className="h-5 w-5 text-[#0891b2]" />
+        <Shield className="h-5 w-5 text-[#7C3AED]" />
         <span className="text-lg font-semibold">Mission Control</span>
       </div>
       <nav className="flex-1 space-y-1 p-4">

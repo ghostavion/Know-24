@@ -44,11 +44,15 @@ export interface AgentEvent {
 
 export class AgentTVContext {
   private baseUrl: string;
+  private runToken: string;
   private startTime: number;
+  private timeoutMs: number;
 
-  constructor() {
+  constructor(options?: { timeoutMs?: number }) {
     this.baseUrl = process.env.AGENTTV_SIDECAR_URL || "http://localhost:8080";
+    this.runToken = process.env.AGENTTV_RUN_TOKEN || "";
     this.startTime = Date.now();
+    this.timeoutMs = options?.timeoutMs ?? 10_000;
   }
 
   /** Seconds since the context was created. */
@@ -110,11 +114,20 @@ export class AgentTVContext {
       data,
     };
 
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (this.runToken) {
+      headers["Authorization"] = `Bearer ${this.runToken}`;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), this.timeoutMs);
+
     try {
       const res = await fetch(`${this.baseUrl}/emit`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
 
       if (res.status === 403) {
@@ -126,11 +139,17 @@ export class AgentTVContext {
         console.error(`[agenttv] Sidecar responded ${res.status}: ${body}`);
       }
     } catch (err) {
-      // Connection refused = sidecar not running. Don't crash the agent.
-      if (err instanceof TypeError && (err.message.includes("fetch") || err.message.includes("ECONNREFUSED"))) {
+      // Connection refused or timeout = sidecar not running. Log but don't crash.
+      if (
+        err instanceof TypeError ||
+        (err instanceof DOMException && err.name === "AbortError")
+      ) {
+        console.error("[agenttv] Warning: sidecar not reachable, event dropped");
         return;
       }
       throw err;
+    } finally {
+      clearTimeout(timeout);
     }
   }
 }

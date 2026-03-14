@@ -306,7 +306,7 @@ const AIBuildProgress = () => {
               Retry Build
             </button>
             <a
-              href="mailto:support@know24.io"
+              href="mailto:support@agenttv.io"
               className="text-xs font-medium text-amber-700 underline hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200"
             >
               Contact Support
@@ -346,7 +346,7 @@ const AIBuildProgress = () => {
                   <div
                     className={cn(
                       "absolute left-[17px] top-[36px] w-0.5",
-                      stage.status === "completed" ? "bg-[#0891b2]" : "bg-gray-200"
+                      stage.status === "completed" ? "bg-[#7C3AED]" : "bg-gray-200"
                     )}
                     style={{ height: "calc(100% - 20px)" }}
                   />
@@ -359,9 +359,9 @@ const AIBuildProgress = () => {
                     stage.status === "pending" &&
                       "border-gray-200 bg-white text-gray-400",
                     stage.status === "in_progress" &&
-                      "border-[#0891b2] bg-[#0891b2]/10 text-[#0891b2]",
+                      "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]",
                     stage.status === "completed" &&
-                      "border-[#0891b2] bg-[#0891b2] text-white",
+                      "border-[#7C3AED] bg-[#7C3AED] text-white",
                     stage.status === "error" &&
                       "border-red-400 bg-red-50 text-red-500"
                   )}
@@ -409,14 +409,14 @@ const AIBuildProgress = () => {
 
       {/* Research insights */}
       {insights.length > 0 && (
-        <div className="w-full max-w-md rounded-lg border border-[#0891b2]/20 bg-[#0891b2]/5 p-4">
-          <h4 className="mb-2 text-sm font-semibold text-[#0891b2]">
+        <div className="w-full max-w-md rounded-lg border border-[#7C3AED]/20 bg-[#7C3AED]/5 p-4">
+          <h4 className="mb-2 text-sm font-semibold text-[#7C3AED]">
             Research Insights
           </h4>
           <ul className="space-y-1">
             {insights.map((insight, i) => (
               <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-                <Check className="mt-0.5 h-3 w-3 shrink-0 text-[#0891b2]" />
+                <Check className="mt-0.5 h-3 w-3 shrink-0 text-[#7C3AED]" />
                 {insight}
               </li>
             ))}

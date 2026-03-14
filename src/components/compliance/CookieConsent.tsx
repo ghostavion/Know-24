@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-const CONSENT_KEY = "know24_cookie_consent";
+const CONSENT_KEY = "agenttv_cookie_consent";
 
 type ConsentStatus = "accepted" | "rejected" | null;
 
@@ -84,7 +84,7 @@ export function CookieConsent() {
             type="button"
             onClick={handleAccept}
             className="rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90"
-            style={{ backgroundColor: "#0891b2" }}
+            style={{ backgroundColor: "#7C3AED" }}
           >
             Accept
           </button>

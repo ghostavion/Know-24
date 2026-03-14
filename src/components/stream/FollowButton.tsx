@@ -19,10 +19,26 @@ export function FollowButton({
 
   const handleToggle = async () => {
     setLoading(true);
+    const nextState = !following;
+
+    // Optimistic update
+    setFollowing(nextState);
+
     try {
-      // TODO: Wire to /api/agents/[slug]/follow
-      await new Promise((r) => setTimeout(r, 300));
-      setFollowing(!following);
+      const res = await fetch(`/api/agents/${agentSlug}/follow`, {
+        method: nextState ? "POST" : "DELETE",
+      });
+
+      if (!res.ok) {
+        // Revert on failure
+        setFollowing(!nextState);
+        const body = await res.json().catch(() => ({}));
+        console.error("[FollowButton] API error:", body);
+      }
+    } catch (err) {
+      // Revert on network error
+      setFollowing(!nextState);
+      console.error("[FollowButton] Network error:", err);
     } finally {
       setLoading(false);
     }

@@ -230,7 +230,7 @@ export async function runNicheResearch(opts: RunResearchOptions): Promise<NicheR
   }
 
   if (Object.keys(platformData).length > 0) {
-    rawContent += `\n\n## Know24 Platform Data\n${JSON.stringify(platformData, null, 2)}\n`;
+    rawContent += `\n\n## AgentTV Platform Data\n${JSON.stringify(platformData, null, 2)}\n`;
   }
   if (personalAngle) {
     rawContent += `\n\n## Creator's Personal Angle\n${personalAngle}\n`;

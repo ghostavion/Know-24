@@ -97,7 +97,7 @@ export default async function AdminActivityPage({
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-3">
-          <Activity className="h-5 w-5 text-[#0891b2]" />
+          <Activity className="h-5 w-5 text-[#7C3AED]" />
           <h2 className="text-2xl font-semibold text-foreground">
             Activity Log
           </h2>

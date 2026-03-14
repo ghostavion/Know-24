@@ -457,7 +457,7 @@ const SubscriptionSection = () => {
         <h2 className="text-base font-semibold text-foreground">Subscription</h2>
       </div>
       <p className="mt-1 text-sm text-muted-foreground">
-        Manage your Know24 subscription and billing.
+        Manage your AgentTV subscription and billing.
       </p>
 
       <div className="mt-6 space-y-4">

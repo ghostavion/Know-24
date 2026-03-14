@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import type { ApiResponse } from "@/types/api";
 import type { Agent } from "@/types/agenttv";
+import { AGENT_PUBLIC_COLUMNS } from "@/lib/constants/agenttv";
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -33,7 +34,7 @@ export async function GET(
     const { data: agent, error } = await supabase
       .from("agents")
       .select(
-        "id, owner_id, name, slug, description, framework, config, byok_provider, personality_fingerprint, status, tier, total_revenue_cents, follower_count, created_at, updated_at"
+        AGENT_PUBLIC_COLUMNS
       )
       .eq("slug", slug)
       .neq("status", "deleted")
@@ -126,7 +127,7 @@ export async function PATCH(
       .from("agents")
       .update(updates)
       .eq("id", (existing as { id: string }).id)
-      .select()
+      .select(AGENT_PUBLIC_COLUMNS)
       .single();
 
     if (error) {

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Copy, Check, Gift, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const DISMISS_KEY = "know24_referral_banner_dismissed";
+const DISMISS_KEY = "agenttv_referral_banner_dismissed";
 
 export function ReferralBanner() {
   const [dismissed, setDismissed] = useState(true);
@@ -53,14 +53,14 @@ export function ReferralBanner() {
   if (dismissed) return null;
 
   return (
-    <div className="relative flex items-center gap-4 rounded-xl border border-[#0891b2]/20 bg-[#0891b2]/5 px-5 py-4">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#0891b2]/10">
-        <Gift className="size-5 text-[#0891b2]" />
+    <div className="relative flex items-center gap-4 rounded-xl border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-5 py-4">
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#7C3AED]/10">
+        <Gift className="size-5 text-[#7C3AED]" />
       </div>
 
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-gray-900">
-          Share Know24, earn rewards
+          Share AgentTV, earn rewards
         </p>
         <p className="text-xs text-gray-500 mt-0.5">
           Refer 3 users for a free month, 10 for 20% revenue share, 25 for 30%
@@ -69,7 +69,7 @@ export function ReferralBanner() {
 
       <div className="flex items-center gap-2 shrink-0">
         {loading ? (
-          <Loader2 className="size-4 animate-spin text-[#0891b2]" />
+          <Loader2 className="size-4 animate-spin text-[#7C3AED]" />
         ) : referralUrl ? (
           <>
             <span className="hidden sm:block max-w-[200px] truncate rounded border border-gray-200 bg-white px-3 py-1.5 text-xs font-mono text-gray-600">

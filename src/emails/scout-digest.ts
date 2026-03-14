@@ -21,7 +21,7 @@ function getPlatformColor(platform: string): string {
     youtube: "#ff0000",
     hackernews: "#ff6600",
   };
-  return colors[platform.toLowerCase()] ?? "#0891b2";
+  return colors[platform.toLowerCase()] ?? "#7C3AED";
 }
 
 function renderRelevanceBadge(score: number): string {
@@ -91,7 +91,7 @@ export function renderScoutDigestEmail(props: ScoutDigestEmailProps): string {
         <table role="presentation" cellpadding="0" cellspacing="0" width="600" style="max-width: 600px; width: 100%; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
           <!-- Header -->
           <tr>
-            <td style="background-color: #0891b2; padding: 32px 40px; text-align: center;">
+            <td style="background-color: #7C3AED; padding: 32px 40px; text-align: center;">
               <p style="margin: 0 0 4px; color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 500;">
                 ${businessName} Scout
               </p>
@@ -117,7 +117,7 @@ export function renderScoutDigestEmail(props: ScoutDigestEmailProps): string {
               <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
                 <tr>
                   <td align="center" style="padding: 32px 0 0;">
-                    <a href="${dashboardUrl}" style="display: inline-block; background-color: #0891b2; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 6px; line-height: 1;">
+                    <a href="${dashboardUrl}" style="display: inline-block; background-color: #7C3AED; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 600; padding: 14px 32px; border-radius: 6px; line-height: 1;">
                       View All in Dashboard
                     </a>
                   </td>
@@ -129,7 +129,7 @@ export function renderScoutDigestEmail(props: ScoutDigestEmailProps): string {
           <tr>
             <td style="padding: 24px 40px; border-top: 1px solid #e5e7eb; text-align: center;">
               <p style="margin: 0 0 8px; color: #6b7280; font-size: 13px; line-height: 1.5;">
-                Powered by <a href="https://know24.io" style="color: #0891b2; text-decoration: none;">Know24</a>
+                Powered by <a href="https://agenttv.live" style="color: #7C3AED; text-decoration: none;">AgentTV</a>
               </p>
               <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.5;">
                 <a href="{{unsubscribe_url}}" style="color: #9ca3af; text-decoration: underline;">Unsubscribe</a>

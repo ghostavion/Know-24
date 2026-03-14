@@ -5,9 +5,8 @@ import type { ApiResponse } from "@/types/api";
 
 interface SubscriptionStatus {
   active: boolean;
-  tier: "founder" | "standard" | null;
+  tier: "free" | "paid";
   status: string;
-  founderMember: boolean;
 }
 
 export async function GET(): Promise<NextResponse<ApiResponse<SubscriptionStatus>>> {
@@ -21,35 +20,29 @@ export async function GET(): Promise<NextResponse<ApiResponse<SubscriptionStatus
 
   const supabase = createServiceClient();
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("subscription_tier, subscription_status, founding_member")
+  const { data: sub } = await supabase
+    .from("agent_subscriptions")
+    .select("tier, status")
     .eq("user_id", userId)
     .single();
 
-  if (!profile) {
+  if (sub) {
+    const typedSub = sub as { tier: string; status: string };
+    const isPaid = typedSub.tier === "paid" && typedSub.status === "active";
     return NextResponse.json({
       data: {
-        active: false,
-        tier: null,
-        status: "inactive",
-        founderMember: false,
+        active: typedSub.status === "active",
+        tier: isPaid ? "paid" : "free",
+        status: typedSub.status,
       },
     });
   }
 
-  const typedProfile = profile as {
-    subscription_tier: string;
-    subscription_status: string;
-    founding_member: boolean;
-  };
-
   return NextResponse.json({
     data: {
-      active: typedProfile.subscription_status === "active",
-      tier: typedProfile.subscription_tier as "founder" | "standard",
-      status: typedProfile.subscription_status,
-      founderMember: typedProfile.founding_member,
+      active: true,
+      tier: "free",
+      status: "active",
     },
   });
 }

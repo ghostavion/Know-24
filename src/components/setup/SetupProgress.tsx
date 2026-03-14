@@ -30,8 +30,8 @@ const SetupProgress = ({ currentStep }: SetupProgressProps) => {
                 <div
                   className={cn(
                     "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
-                    isCompleted && "bg-[#0891b2] text-white",
-                    isActive && "bg-[#0891b2] text-white",
+                    isCompleted && "bg-[#7C3AED] text-white",
+                    isActive && "bg-[#7C3AED] text-white",
                     isFuture && "border-2 border-gray-300 text-gray-400"
                   )}
                 >
@@ -46,8 +46,8 @@ const SetupProgress = ({ currentStep }: SetupProgressProps) => {
                 <span
                   className={cn(
                     "mt-1.5 hidden text-xs font-medium sm:block",
-                    isCompleted && "text-[#0891b2]",
-                    isActive && "text-[#0891b2]",
+                    isCompleted && "text-[#7C3AED]",
+                    isActive && "text-[#7C3AED]",
                     isFuture && "text-gray-400"
                   )}
                 >
@@ -60,7 +60,7 @@ const SetupProgress = ({ currentStep }: SetupProgressProps) => {
                 <div
                   className={cn(
                     "mx-2 h-0.5 flex-1",
-                    stepNumber < currentStep ? "bg-[#0891b2]" : "bg-gray-300"
+                    stepNumber < currentStep ? "bg-[#7C3AED]" : "bg-gray-300"
                   )}
                 />
               )}

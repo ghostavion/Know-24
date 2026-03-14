@@ -161,7 +161,7 @@ export async function POST(
         ? "Free"
         : `$${((order.amount_cents as number) / 100).toFixed(2)} ${((order.currency as string) ?? "usd").toUpperCase()}`;
 
-    const businessName = (business.name as string) ?? "Know24";
+    const businessName = (business.name as string) ?? "AgentTV";
     const productTitle = product.title as string;
 
     const downloadSection =
@@ -230,7 +230,7 @@ export async function POST(
       <!-- Footer -->
       <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;text-align:center;">
         <p style="margin:0;font-size:12px;color:#9ca3af;">
-          This email was sent by Know24 on behalf of ${businessName}.<br/>
+          This email was sent by AgentTV on behalf of ${businessName}.<br/>
           If you have questions about this purchase, please contact ${businessName} directly.
         </p>
       </div>
@@ -241,7 +241,7 @@ export async function POST(
 
     // Send via Resend
     const { error: sendError } = await resend.emails.send({
-      from: `${businessName} via Know24 <noreply@know24.io>`,
+      from: `${businessName} via AgentTV <noreply@agenttv.io>`,
       to: customerEmail,
       subject: `Order confirmed: ${productTitle}`,
       html: emailHtml,

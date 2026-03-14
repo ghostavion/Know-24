@@ -34,14 +34,14 @@ export const STOREFRONT_THEMES: StorefrontTheme[] = [
     description: "Clean, simple, and versatile. A white canvas that works for any niche.",
     heroLayout: "centered",
     colors: {
-      primary: "#0891b2",
-      primaryHover: "#0e7490",
+      primary: "#7C3AED",
+      primaryHover: "#6D28D9",
       background: "#ffffff",
       surface: "#f8fafc",
       text: "#0f172a",
       textMuted: "#64748b",
       border: "#e2e8f0",
-      accent: "#0891b2",
+      accent: "#7C3AED",
     },
     typography: {
       headingFont: "'Inter', system-ui, sans-serif",

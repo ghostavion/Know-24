@@ -76,7 +76,7 @@ export const AdminCreditActions = ({
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="mb-4 flex items-center gap-2">
-        <Coins className="h-4 w-4 text-[#0891b2]" />
+        <Coins className="h-4 w-4 text-[#7C3AED]" />
         <h3 className="text-sm font-semibold text-foreground">
           Issue Credits
         </h3>
@@ -95,7 +95,7 @@ export const AdminCreditActions = ({
             id="credit-org"
             value={orgId}
             onChange={(e) => setOrgId(e.target.value)}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-[#0891b2] focus:outline-none focus:ring-1 focus:ring-[#0891b2]"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:border-[#7C3AED] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]"
           >
             {organizations.map((org) => (
               <option key={org.id} value={org.id}>
@@ -119,7 +119,7 @@ export const AdminCreditActions = ({
                 className={cn(
                   "rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors",
                   action === at.value
-                    ? "border-[#0891b2] bg-[#0891b2]/10 text-[#0891b2]"
+                    ? "border-[#7C3AED] bg-[#7C3AED]/10 text-[#7C3AED]"
                     : "border-border text-muted-foreground hover:border-foreground/30 hover:text-foreground"
                 )}
               >
@@ -144,7 +144,7 @@ export const AdminCreditActions = ({
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             placeholder={`Enter ${selectedAction?.unit ?? "amount"}...`}
-            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-[#0891b2] focus:outline-none focus:ring-1 focus:ring-[#0891b2]"
+            className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-[#7C3AED] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]"
           />
         </div>
 
@@ -162,7 +162,7 @@ export const AdminCreditActions = ({
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Why are you issuing this credit?"
             rows={2}
-            className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-[#0891b2] focus:outline-none focus:ring-1 focus:ring-[#0891b2]"
+            className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-[#7C3AED] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]"
           />
         </div>
 
@@ -171,7 +171,7 @@ export const AdminCreditActions = ({
           type="button"
           onClick={handleSubmit}
           disabled={!orgId || !amount || !description.trim() || isSubmitting}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#0891b2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0891b2]/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#7C3AED] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#7C3AED]/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
           Issue Credit

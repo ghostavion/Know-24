@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Reaction {
@@ -16,19 +16,56 @@ const INITIAL_REACTIONS: Reaction[] = [
   { emoji: "\uD83D\uDC40", label: "eyes", count: 0 },
 ];
 
-export function ReactionBar() {
+interface ReactionBarProps {
+  agentSlug: string;
+  /** The event ID to react to. If not provided, reactions are local-only. */
+  eventId?: string;
+}
+
+export function ReactionBar({ agentSlug, eventId }: ReactionBarProps) {
   const [reactions, setReactions] = useState<Reaction[]>(INITIAL_REACTIONS);
   const [recentlyClicked, setRecentlyClicked] = useState<string | null>(null);
 
-  const handleReact = (label: string) => {
-    setReactions((prev) =>
-      prev.map((r) =>
-        r.label === label ? { ...r, count: r.count + 1 } : r
-      )
-    );
-    setRecentlyClicked(label);
-    setTimeout(() => setRecentlyClicked(null), 600);
-  };
+  const handleReact = useCallback(
+    async (label: string) => {
+      // Optimistic UI update
+      setReactions((prev) =>
+        prev.map((r) =>
+          r.label === label ? { ...r, count: r.count + 1 } : r
+        )
+      );
+      setRecentlyClicked(label);
+      setTimeout(() => setRecentlyClicked(null), 600);
+
+      // Persist to API if we have an event ID
+      if (eventId) {
+        try {
+          const res = await fetch(`/api/agents/${agentSlug}/reactions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ event_id: eventId, reaction: label }),
+          });
+
+          if (!res.ok) {
+            // Revert on failure
+            setReactions((prev) =>
+              prev.map((r) =>
+                r.label === label ? { ...r, count: Math.max(0, r.count - 1) } : r
+              )
+            );
+          }
+        } catch {
+          // Revert on network error
+          setReactions((prev) =>
+            prev.map((r) =>
+              r.label === label ? { ...r, count: Math.max(0, r.count - 1) } : r
+            )
+          );
+        }
+      }
+    },
+    [agentSlug, eventId]
+  );
 
   return (
     <div className="flex items-center gap-2 p-4">

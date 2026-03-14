@@ -33,7 +33,7 @@ export function AdminSearchForm({ placeholder }: AdminSearchFormProps) {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#0891b2]"
+        className="w-full rounded-lg border border-border bg-background py-2 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-[#7C3AED]"
       />
     </form>
   );

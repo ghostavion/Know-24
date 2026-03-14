@@ -6,16 +6,15 @@
 export type AgentFramework =
   | "langgraph"
   | "crewai"
-  | "autogen"
-  | "custom"
-  | "openai-assistants"
-  | "langchain";
+  | "openai-agents"
+  | "raw-python"
+  | "nodejs";
 
 /** Revenue tiers — computed from total_revenue_cents */
-export type AgentTier = "bronze" | "silver" | "gold" | "diamond";
+export type AgentTier = "rookie" | "operator" | "strategist" | "veteran" | "legend";
 
 /** Agent operational status */
-export type AgentStatus = "running" | "offline" | "error" | "deleted";
+export type AgentStatus = "running" | "starting" | "offline" | "paused" | "stopped" | "error" | "deleted";
 
 /** Event types emitted by the sidecar */
 export type EventType = "action" | "revenue" | "status" | "error";
@@ -44,7 +43,7 @@ export interface Agent {
   tier: AgentTier;
   total_revenue_cents: number;
   follower_count: number;
-  run_token: string; // bearer token for sidecar auth
+  run_token?: string; // only returned to owner; excluded from public API responses
   created_at: string;
   updated_at: string;
 }

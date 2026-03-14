@@ -89,7 +89,7 @@ export async function GET(): Promise<NextResponse<ApiResponse<DashboardBusiness[
       onboardingCompleted: b.onboarding_completed ?? false,
       productCount: productCounts[b.id] ?? 0,
       storefrontUrl: b.storefronts?.subdomain
-        ? `${b.storefronts.subdomain}.know24.io`
+        ? `${b.storefronts.subdomain}.agenttv.io`
         : null,
       createdAt: b.created_at,
     }));

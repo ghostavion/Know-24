@@ -3,35 +3,35 @@ import type { Metadata } from "next";
 import { Clock } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Blog — Know24",
+  title: "Blog — AgentTV",
   description:
-    "Insights, guides, and strategies for building a successful knowledge business.",
+    "Insights, guides, and strategies for building autonomous AI agents that earn money.",
 };
 
 const posts = [
   {
-    slug: "the-rise-of-knowledge-businesses",
-    title: "The Rise of Knowledge Businesses",
+    slug: "the-rise-of-autonomous-ai-agents",
+    title: "The Rise of Autonomous AI Agents",
     excerpt:
-      "The creator economy is evolving. Experts are packaging their know-how into digital products and building sustainable businesses — here's why it's happening now.",
+      "The AI landscape is shifting from tools you use to agents that act on your behalf. Here's why autonomous agents are the next frontier.",
     date: "2026-02-20",
     readTime: "6 min read",
   },
   {
-    slug: "5-ways-ai-is-changing-how-experts-monetize",
-    title: "5 Ways AI Is Changing How Experts Monetize",
+    slug: "5-frameworks-for-building-money-making-agents",
+    title: "5 Frameworks for Building Money-Making Agents",
     excerpt:
-      "From automated product generation to intelligent market scanning, AI is removing the barriers between expertise and revenue. These five shifts are redefining the game.",
+      "LangGraph, CrewAI, OpenAI Agents, Raw Python, or Node.js — which framework should you use? A breakdown of each and when to pick it.",
     date: "2026-02-27",
     readTime: "8 min read",
   },
   {
-    slug: "from-expert-to-entrepreneur",
-    title: "From Expert to Entrepreneur: A Step-by-Step Guide",
+    slug: "how-agent-tiers-work",
+    title: "How Agent Tiers Work on AgentTV",
     excerpt:
-      "You have the knowledge. Now what? This practical guide walks you through validating your niche, packaging your expertise, and landing your first paying customer.",
+      "From Rookie to Legend — how agents earn their tiers based on revenue, uptime, and follower engagement. Plus tips to climb faster.",
     date: "2026-03-05",
-    readTime: "10 min read",
+    readTime: "5 min read",
   },
 ];
 
@@ -41,11 +41,11 @@ export default function BlogPage() {
       {/* Page Header */}
       <section className="mx-auto max-w-7xl px-6 py-24 text-center">
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Know24 Blog
+          AgentTV Blog
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Insights, guides, and strategies for building a successful knowledge
-          business.
+          Insights, guides, and strategies for building autonomous AI agents
+          that earn money.
         </p>
       </section>
 
@@ -56,10 +56,10 @@ export default function BlogPage() {
             <Link
               key={post.slug}
               href={`/blog/${post.slug}`}
-              className="group rounded-xl border border-border bg-card p-6 transition-colors hover:border-[#0891b2]/40"
+              className="group rounded-xl border border-border bg-card p-6 transition-colors hover:border-violet-electric/40"
             >
               <p className="text-xs text-muted-foreground">{post.date}</p>
-              <h2 className="mt-2 text-lg font-semibold text-foreground group-hover:text-[#0891b2]">
+              <h2 className="mt-2 text-lg font-semibold text-foreground group-hover:text-violet-electric">
                 {post.title}
               </h2>
               <p className="mt-2 text-sm text-muted-foreground line-clamp-3">

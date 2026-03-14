@@ -161,7 +161,7 @@ const ReviewAndLaunch = () => {
       if (res.ok && json.data) {
         setSuccess(true);
         setStorefrontUrl(
-          json.data.storefrontUrl ?? `https://${businessSlug}.know24.io`
+          json.data.storefrontUrl ?? `https://${businessSlug}.agenttv.io`
         );
       } else {
         setError(json.error?.message ?? "Failed to publish storefront");
@@ -205,9 +205,9 @@ const ReviewAndLaunch = () => {
       <div className="flex flex-col items-center gap-6 py-16">
         {/* Confetti icon */}
         <div className="relative">
-          <PartyPopper className="h-16 w-16 text-[#0891b2]" />
-          <div className="absolute -right-2 -top-2 h-4 w-4 animate-ping rounded-full bg-[#0891b2]/40" />
-          <div className="absolute -bottom-1 -left-3 h-3 w-3 animate-ping rounded-full bg-[#0891b2]/30 delay-300" />
+          <PartyPopper className="h-16 w-16 text-[#7C3AED]" />
+          <div className="absolute -right-2 -top-2 h-4 w-4 animate-ping rounded-full bg-[#7C3AED]/40" />
+          <div className="absolute -bottom-1 -left-3 h-3 w-3 animate-ping rounded-full bg-[#7C3AED]/30 delay-300" />
         </div>
 
         <div className="text-center">
@@ -219,21 +219,21 @@ const ReviewAndLaunch = () => {
 
         {/* Storefront URL */}
         {storefrontUrl && (
-          <div className="flex items-center gap-2 rounded-lg border border-[#0891b2]/20 bg-[#0891b2]/5 px-4 py-2.5">
-            <Globe className="h-4 w-4 text-[#0891b2]" />
-            <span className="text-sm font-medium text-[#0891b2]">
+          <div className="flex items-center gap-2 rounded-lg border border-[#7C3AED]/20 bg-[#7C3AED]/5 px-4 py-2.5">
+            <Globe className="h-4 w-4 text-[#7C3AED]" />
+            <span className="text-sm font-medium text-[#7C3AED]">
               {storefrontUrl}
             </span>
             <button
               type="button"
               onClick={handleCopyUrl}
-              className="ml-1 rounded p-1 transition-colors hover:bg-[#0891b2]/10"
+              className="ml-1 rounded p-1 transition-colors hover:bg-[#7C3AED]/10"
               title="Copy URL"
             >
               {copied ? (
                 <Check className="h-3.5 w-3.5 text-green-500" />
               ) : (
-                <Copy className="h-3.5 w-3.5 text-[#0891b2]" />
+                <Copy className="h-3.5 w-3.5 text-[#7C3AED]" />
               )}
             </button>
           </div>
@@ -290,7 +290,7 @@ const ReviewAndLaunch = () => {
 
           {/* Price */}
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-bold text-[#0891b2]">
+            <span className="text-2xl font-bold text-[#7C3AED]">
               {formatPrice(product?.price ?? 0)}
             </span>
           </div>
@@ -330,7 +330,7 @@ const ReviewAndLaunch = () => {
             <div className="h-2.5 w-2.5 rounded-full bg-green-400" />
             <div className="ml-3 flex-1 rounded-md bg-white px-3 py-1 dark:bg-gray-700">
               <span className="text-xs text-gray-400">
-                {businessSlug || "your-business"}.know24.io
+                {businessSlug || "your-business"}.agenttv.io
               </span>
             </div>
           </div>
@@ -345,13 +345,13 @@ const ReviewAndLaunch = () => {
           {/* Content area with product card */}
           <div className="flex items-center justify-center bg-white py-10 dark:bg-gray-950">
             <div className="w-64 rounded-lg border border-gray-200 p-4 text-center dark:border-gray-700">
-              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-[#0891b2]/10">
-                <FileText className="h-6 w-6 text-[#0891b2]" />
+              <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-[#7C3AED]/10">
+                <FileText className="h-6 w-6 text-[#7C3AED]" />
               </div>
               <h5 className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                 {product?.title ?? "Your Product"}
               </h5>
-              <p className="mt-1 text-lg font-bold text-[#0891b2]">
+              <p className="mt-1 text-lg font-bold text-[#7C3AED]">
                 {formatPrice(product?.price ?? 0)}
               </p>
             </div>
@@ -362,8 +362,8 @@ const ReviewAndLaunch = () => {
       {/* Section 3: Distribution Opportunities */}
       <section className="rounded-xl border border-border bg-card p-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#0891b2]/10">
-            <Compass className="h-5 w-5 text-[#0891b2]" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#7C3AED]/10">
+            <Compass className="h-5 w-5 text-[#7C3AED]" />
           </div>
           <div>
             <h3 className="text-base font-semibold">Distribution Opportunities</h3>
@@ -407,19 +407,19 @@ const ReviewAndLaunch = () => {
       )}
 
       {/* Section 5: Go Live */}
-      <section className="space-y-4 rounded-xl border border-[#0891b2]/20 bg-gradient-to-b from-[#0891b2]/5 to-transparent p-6 text-center">
+      <section className="space-y-4 rounded-xl border border-[#7C3AED]/20 bg-gradient-to-b from-[#7C3AED]/5 to-transparent p-6 text-center">
         <h3 className="text-lg font-semibold">Ready to Launch</h3>
         <p className="text-sm text-muted-foreground">
           Everything looks great! Your storefront will be live at{" "}
           <span className="font-medium text-foreground">
-            {businessSlug || "your-business"}.know24.io
+            {businessSlug || "your-business"}.agenttv.io
           </span>
         </p>
         <Button
           onClick={handleGoLive}
           disabled={publishing}
           size="lg"
-          className="gap-2 bg-[#0891b2] text-white hover:bg-[#0891b2]/90"
+          className="gap-2 bg-[#7C3AED] text-white hover:bg-[#7C3AED]/90"
         >
           {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
           {publishing ? "Publishing..." : "Go Live"}
@@ -441,8 +441,8 @@ interface BonusCardProps {
 
 const BonusCard = ({ icon: Icon, title, description }: BonusCardProps) => (
   <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-4">
-    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#0891b2]/10">
-      <Icon className="h-4 w-4 text-[#0891b2]" />
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#7C3AED]/10">
+      <Icon className="h-4 w-4 text-[#7C3AED]" />
     </div>
     <div>
       <h4 className="text-sm font-semibold">{title}</h4>

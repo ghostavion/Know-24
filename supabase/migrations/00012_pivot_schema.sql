@@ -8,7 +8,7 @@
 -- ============================================================
 
 CREATE TABLE public.niche_categories (
-  id                 UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                 UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name               TEXT NOT NULL UNIQUE,
   slug               TEXT NOT NULL UNIQUE,
   icon               TEXT,
@@ -128,7 +128,7 @@ CREATE POLICY "niche_categories_public_read" ON public.niche_categories
 -- ============================================================
 
 CREATE TABLE public.research_documents (
-  id                       UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id              UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   niche_category_id        UUID REFERENCES public.niche_categories (id),
   niche_text               TEXT NOT NULL,
@@ -175,7 +175,7 @@ CREATE POLICY "research_documents_rw_business_member" ON public.research_documen
 -- ============================================================
 
 CREATE TABLE public.product_assets (
-  id                    UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                    UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id            UUID NOT NULL REFERENCES public.products (id) ON DELETE CASCADE,
   business_id           UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
 
@@ -212,7 +212,7 @@ CREATE POLICY "product_assets_rw_business_member" ON public.product_assets
 -- ============================================================
 
 CREATE TABLE public.storefront_themes (
-  id                UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name              TEXT NOT NULL UNIQUE,
   slug              TEXT NOT NULL UNIQUE,
   description       TEXT,
@@ -285,7 +285,7 @@ CREATE POLICY "storefront_themes_public_read" ON public.storefront_themes
 -- ============================================================
 
 CREATE TABLE public.voice_memos (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id         UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   r2_key              TEXT,
   transcript          TEXT NOT NULL,
@@ -306,7 +306,7 @@ CREATE POLICY "voice_memos_rw_business_member" ON public.voice_memos
 -- ============================================================
 
 CREATE TABLE public.referral_links (
-  id                      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id                 UUID NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
   code                    TEXT NOT NULL UNIQUE,
   source                  TEXT NOT NULL DEFAULT 'manual',
@@ -337,7 +337,7 @@ CREATE POLICY "referral_links_own" ON public.referral_links
 -- ============================================================
 
 CREATE TABLE public.referral_conversions (
-  id                          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   referral_link_id            UUID NOT NULL REFERENCES public.referral_links (id) ON DELETE CASCADE,
   referrer_user_id            UUID NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
   referred_user_id            UUID NOT NULL REFERENCES public.users (id) ON DELETE CASCADE,
@@ -370,7 +370,7 @@ CREATE POLICY "referral_conversions_referrer" ON public.referral_conversions
 -- ============================================================
 
 CREATE TABLE public.platform_intelligence (
-  id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   niche_slug      TEXT NOT NULL,
   metric_type     TEXT NOT NULL
                     CHECK (metric_type IN (

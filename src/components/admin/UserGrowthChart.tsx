@@ -41,8 +41,8 @@ export const UserGrowthChart = ({ data }: UserGrowthChartProps) => {
           <Area
             type="monotone"
             dataKey="cumulative"
-            stroke="#0891b2"
-            fill="#0891b2"
+            stroke="#7C3AED"
+            fill="#7C3AED"
             fillOpacity={0.1}
             strokeWidth={2}
           />

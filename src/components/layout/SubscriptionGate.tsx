@@ -4,22 +4,34 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Crown, ArrowRight, Loader2 } from "lucide-react";
-import { FOUNDER_PRICE, STANDARD_PRICE, FOUNDER_SLOTS_TOTAL } from "@/data/pricing";
 
-// Pages that don't require an active subscription
-const FREE_PAGES = ["/dashboard", "/settings", "/credits", "/referrals"];
+// Pages accessible on the Free tier (no subscription required)
+const FREE_PAGES = [
+  "/dashboard",
+  "/settings",
+  "/discover",
+  "/leaderboard",
+  "/agents",
+];
+
+type Tier = "free" | "paid";
 
 export function SubscriptionGate({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [status, setStatus] = useState<"loading" | "active" | "inactive">("loading");
+  const [status, setStatus] = useState<"loading" | "loaded">("loading");
+  const [userTier, setUserTier] = useState<Tier>("free");
 
   useEffect(() => {
     fetch("/api/subscription/status")
       .then((r) => r.json())
       .then((json) => {
-        setStatus(json.data?.active ? "active" : "inactive");
+        setUserTier((json.data?.tier as Tier) ?? "free");
+        setStatus("loaded");
       })
-      .catch(() => setStatus("inactive"));
+      .catch(() => {
+        setUserTier("free");
+        setStatus("loaded");
+      });
   }, []);
 
   // Free pages are always accessible
@@ -35,36 +47,30 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (status === "inactive") {
+  if (userTier === "free") {
     return (
       <div className="mx-auto max-w-lg py-20 text-center">
-        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-primary/10">
-          <Crown className="size-8 text-primary" />
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-violet-electric/10">
+          <Crown className="size-8 text-violet-electric" />
         </div>
-        <h2 className="mt-6 text-2xl font-bold">Subscribe to Access</h2>
+        <h2 className="mt-6 text-2xl font-bold">Pro Plan Required</h2>
         <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-          You need an active subscription to use research, ebook generation,
-          scout, and publishing. Choose a plan to get started.
+          Deploy agents, sell on the marketplace, access analytics, and unlock
+          everything AgentTV has to offer.
         </p>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2">
-          <SubscribeCard
-            name="Founder"
-            price={FOUNDER_PRICE}
-            badge="Limited Spots"
-            plan="founder"
-            highlighted
-          />
-          <SubscribeCard
-            name="Standard"
-            price={STANDARD_PRICE}
-            plan="standard"
-          />
-        </div>
+        <SubscribeButton />
 
         <p className="mt-6 text-xs text-muted-foreground">
-          First {FOUNDER_SLOTS_TOTAL} members lock in founder pricing forever.
+          $99/month &middot; Cancel anytime &middot; Bring your own LLM key
         </p>
+
+        <Link
+          href="/pricing"
+          className="mt-3 inline-block text-sm text-violet-electric hover:underline"
+        >
+          View full plan details
+        </Link>
       </div>
     );
   }
@@ -72,21 +78,8 @@ export function SubscriptionGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-function SubscribeCard({
-  name,
-  price,
-  badge,
-  plan,
-  highlighted,
-}: {
-  name: string;
-  price: number;
-  badge?: string;
-  plan: string;
-  highlighted?: boolean;
-}) {
+function SubscribeButton() {
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState<string | null>(null);
 
   const handleSubscribe = async () => {
@@ -96,7 +89,6 @@ function SubscribeCard({
       const res = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
       });
       const json = await res.json();
       if (json.data?.url) {
@@ -112,42 +104,22 @@ function SubscribeCard({
   };
 
   return (
-    <div
-      className={`rounded-xl border p-6 text-left ${
-        highlighted ? "border-primary ring-2 ring-primary/20" : "border-border"
-      }`}
-    >
-      {badge && (
-        <span className="mb-2 inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
-          {badge}
-        </span>
-      )}
-      <p className="text-lg font-bold">{name}</p>
-      <p className="mt-1">
-        <span className="text-2xl font-bold">${price}</span>
-        <span className="text-sm text-muted-foreground">/mo</span>
-      </p>
+    <div className="mt-8">
       <button
         onClick={handleSubscribe}
         disabled={loading}
-        className={`mt-4 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
-          highlighted
-            ? "bg-primary text-primary-foreground hover:bg-primary/90"
-            : "border border-border hover:bg-muted"
-        } disabled:opacity-50`}
+        className="inline-flex items-center gap-2 rounded-lg bg-violet-electric px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-violet-electric/90 disabled:opacity-50"
       >
         {loading ? (
           <Loader2 className="size-4 animate-spin" />
         ) : (
           <>
-            Get Started
+            Go Pro — $99/mo
             <ArrowRight className="size-4" />
           </>
         )}
       </button>
-      {error && (
-        <p className="mt-2 text-xs text-red-500">{error}</p>
-      )}
+      {error && <p className="mt-2 text-xs text-red-500">{error}</p>}
     </div>
   );
 }

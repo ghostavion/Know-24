@@ -1,12 +1,17 @@
-"""Async AgentTV context — thin wrapper for emitting events to the sidecar."""
+"""Async AgentTV context — thin wrapper for emitting events to the sidecar.
+
+Zero external dependencies — uses only Python stdlib (urllib + json).
+"""
 
 from __future__ import annotations
 
+import json
 import os
+import sys
 import time
 from typing import Any
-
-import httpx
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 
 class AgentTVContext:
@@ -18,18 +23,14 @@ class AgentTVContext:
 
     def __init__(self) -> None:
         self._base_url = os.environ.get("AGENTTV_SIDECAR_URL", "http://localhost:8080")
+        self._run_token = os.environ.get("AGENTTV_RUN_TOKEN", "")
         self._start_time = time.time()
-        self._client: httpx.AsyncClient | None = None
+        self._timeout = 10.0
 
     @property
     def elapsed(self) -> float:
         """Seconds since agent started."""
         return time.time() - self._start_time
-
-    async def _get_client(self) -> httpx.AsyncClient:
-        if self._client is None or self._client.is_closed:
-            self._client = httpx.AsyncClient(base_url=self._base_url, timeout=5.0)
-        return self._client
 
     async def emit_action(self, name: str, data: dict[str, Any]) -> None:
         """Emit an action event. Required: data['description']."""
@@ -59,26 +60,29 @@ class AgentTVContext:
         await self._emit("error", "error", data)
 
     async def _emit(self, event_type: str, event_name: str, data: dict[str, Any]) -> None:
-        """POST to sidecar."""
-        client = await self._get_client()
-        payload = {
+        """POST to sidecar using stdlib urllib (zero-deps)."""
+        url = f"{self._base_url}/emit"
+        payload = json.dumps({
             "event_type": event_type,
             "event_name": event_name,
             "data": data,
-        }
+        }).encode("utf-8")
+
+        req = Request(url, data=payload, method="POST")
+        req.add_header("Content-Type", "application/json")
+        if self._run_token:
+            req.add_header("Authorization", f"Bearer {self._run_token}")
+
         try:
-            resp = await client.post("/emit", json=payload)
-            resp.raise_for_status()
-        except httpx.HTTPStatusError as exc:
-            # 403 means budget exceeded — let the caller know
-            if exc.response.status_code == 403:
+            with urlopen(req, timeout=self._timeout) as resp:
+                resp.read()
+        except HTTPError as exc:
+            if exc.code == 403:
                 raise RuntimeError("AgentTV budget exceeded — agent will be terminated") from exc
             raise
-        except httpx.ConnectError:
-            # Sidecar not running — silently drop (agent shouldn't crash)
-            pass
+        except (URLError, OSError):
+            print("[agenttv] Warning: sidecar not reachable, event dropped", file=sys.stderr)
 
     async def close(self) -> None:
-        """Close the underlying HTTP client."""
-        if self._client and not self._client.is_closed:
-            await self._client.aclose()
+        """No-op — stdlib doesn't need explicit cleanup."""
+        pass

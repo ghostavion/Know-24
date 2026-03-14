@@ -3,13 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth, UserButton } from "@clerk/nextjs";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
+  { label: "Discover", href: "/discover" },
+  { label: "Leaderboard", href: "/leaderboard" },
   { label: "Pricing", href: "/pricing" },
-  { label: "Blog", href: "/blog" },
-  { label: "Help", href: "/help" },
 ];
 
 export function MarketingNav() {
@@ -21,10 +21,10 @@ export function MarketingNav() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0891b2] text-white font-bold text-sm">
-            K
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-electric text-white">
+            <Radio className="h-4 w-4" />
           </div>
-          <span className="text-lg font-semibold text-foreground">Know24</span>
+          <span className="text-lg font-semibold text-foreground">AgentTV</span>
         </Link>
 
         {/* Desktop Links */}
@@ -46,7 +46,7 @@ export function MarketingNav() {
             <>
               <Link
                 href="/dashboard"
-                className="rounded-lg bg-[#0891b2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0e7490]"
+                className="rounded-lg bg-violet-electric px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-electric/90"
               >
                 Dashboard
               </Link>
@@ -62,9 +62,9 @@ export function MarketingNav() {
               </Link>
               <Link
                 href="/sign-up"
-                className="rounded-lg bg-[#0891b2] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#0e7490]"
+                className="rounded-lg bg-violet-electric px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-violet-electric/90"
               >
-                Start Free Trial
+                Get Started
               </Link>
             </>
           )}
@@ -104,7 +104,7 @@ export function MarketingNav() {
                 <Link
                   href="/dashboard"
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-lg bg-[#0891b2] px-3 py-2 text-center text-sm font-medium text-white hover:bg-[#0e7490]"
+                  className="rounded-lg bg-violet-electric px-3 py-2 text-center text-sm font-medium text-white hover:bg-violet-electric/90"
                 >
                   Dashboard
                 </Link>
@@ -122,9 +122,9 @@ export function MarketingNav() {
                 </Link>
                 <Link
                   href="/sign-up"
-                  className="rounded-lg bg-[#0891b2] px-3 py-2 text-center text-sm font-medium text-white hover:bg-[#0e7490]"
+                  className="rounded-lg bg-violet-electric px-3 py-2 text-center text-sm font-medium text-white hover:bg-violet-electric/90"
                 >
-                  Start Free Trial
+                  Get Started
                 </Link>
               </>
             )}

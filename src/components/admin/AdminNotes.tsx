@@ -67,7 +67,7 @@ export const AdminNotes = ({ userId, initialNotes }: AdminNotesProps) => {
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <div className="mb-4 flex items-center gap-2">
-        <MessageSquare className="h-4 w-4 text-[#0891b2]" />
+        <MessageSquare className="h-4 w-4 text-[#7C3AED]" />
         <h3 className="text-sm font-semibold text-foreground">Admin Notes</h3>
       </div>
 
@@ -78,13 +78,13 @@ export const AdminNotes = ({ userId, initialNotes }: AdminNotesProps) => {
           onChange={(e) => setContent(e.target.value)}
           placeholder="Add an internal note..."
           rows={3}
-          className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-[#0891b2] focus:outline-none focus:ring-1 focus:ring-[#0891b2]"
+          className="w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-[#7C3AED] focus:outline-none focus:ring-1 focus:ring-[#7C3AED]"
         />
         <button
           type="button"
           onClick={handleSubmit}
           disabled={!content.trim() || isSubmitting}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-[#0891b2] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#0891b2]/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-[#7C3AED] px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-[#7C3AED]/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isSubmitting ? (
             <Loader2 className="h-3 w-3 animate-spin" />

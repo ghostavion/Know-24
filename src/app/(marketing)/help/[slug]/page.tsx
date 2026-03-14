@@ -23,10 +23,10 @@ export async function generateMetadata({
   const { slug } = await params;
   const result = findArticle(slug);
   if (!result) {
-    return { title: "Article Not Found — Know24 Help Center" };
+    return { title: "Article Not Found — AgentTV Help Center" };
   }
   return {
-    title: `${result.article.title} — Know24 Help Center`,
+    title: `${result.article.title} — AgentTV Help Center`,
   };
 }
 
@@ -56,7 +56,7 @@ export default async function HelpArticlePage({
         </Link>
 
         <header className="mt-8">
-          <p className="text-sm font-medium text-[#0891b2]">
+          <p className="text-sm font-medium text-[#7C3AED]">
             {category.name}
           </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight text-foreground">

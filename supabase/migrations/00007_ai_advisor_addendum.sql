@@ -13,7 +13,7 @@
 -- ============================================================
 
 CREATE TABLE public.advisor_rules (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id         UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   rule_type           advisor_rule_type NOT NULL,
   name                TEXT NOT NULL,
@@ -44,7 +44,7 @@ CREATE POLICY "advisor_rules_rw_business_member" ON public.advisor_rules
 -- ============================================================
 
 CREATE TABLE public.advisor_daily_analysis (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id         UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   analysis_date       DATE NOT NULL,
   metrics             JSONB NOT NULL DEFAULT '{}',
@@ -68,7 +68,7 @@ CREATE POLICY "advisor_daily_analysis_rw_business_member" ON public.advisor_dail
 -- ============================================================
 
 CREATE TABLE public.product_health_scores (
-  id                      UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id              UUID NOT NULL REFERENCES public.products (id) ON DELETE CASCADE,
   business_id             UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   score_date              DATE NOT NULL,
@@ -96,7 +96,7 @@ CREATE POLICY "product_health_scores_rw_business_member" ON public.product_healt
 -- ============================================================
 
 CREATE TABLE public.knowledge_gap_queries (
-  id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id         UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   query_text          TEXT NOT NULL,
   frequency           INT NOT NULL DEFAULT 1,

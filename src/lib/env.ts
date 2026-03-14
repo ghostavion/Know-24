@@ -21,7 +21,7 @@ function optional(name: string, fallback?: string): string | undefined {
 // Validated & typed env exports
 // ---------------------------------------------------------------------------
 
-/** Public app URL (e.g. https://know24.io) */
+/** Public app URL (e.g. https://agenttv.live) */
 export const NEXT_PUBLIC_APP_URL = required("NEXT_PUBLIC_APP_URL");
 
 // ── Clerk ──────────────────────────────────────────────────────────────────
@@ -39,20 +39,16 @@ export const STRIPE_SECRET_KEY = required("STRIPE_SECRET_KEY");
 export const NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = required("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY");
 export const STRIPE_WEBHOOK_SECRET = required("STRIPE_WEBHOOK_SECRET");
 
-// ── AI Providers ───────────────────────────────────────────────────────────
-export const GOOGLE_GENERATIVE_AI_API_KEY = required("GOOGLE_GENERATIVE_AI_API_KEY");
-export const ANTHROPIC_API_KEY = required("ANTHROPIC_API_KEY");
+// ── Fly.io (Agent Hosting) ─────────────────────────────────────────────────
+export const FLY_API_TOKEN = optional("FLY_API_TOKEN");
+export const FLY_APP_NAME = optional("FLY_APP_NAME", "agenttv-agents");
 
 // ── Sentry ─────────────────────────────────────────────────────────────────
 export const NEXT_PUBLIC_SENTRY_DSN = optional("NEXT_PUBLIC_SENTRY_DSN");
 
 // ── Resend ─────────────────────────────────────────────────────────────────
-export const RESEND_API_KEY = required("RESEND_API_KEY");
+export const RESEND_API_KEY = optional("RESEND_API_KEY");
 
 // ── Internal ───────────────────────────────────────────────────────────────
 export const INTERNAL_API_SECRET = optional("INTERNAL_API_SECRET");
 export const CRON_SECRET = optional("CRON_SECRET");
-
-// ── Deep Research (optional add-ons) ───────────────────────────────────────
-export const FIRECRAWL_API_KEY = optional("FIRECRAWL_API_KEY");
-export const TAVILY_API_KEY = optional("TAVILY_API_KEY");

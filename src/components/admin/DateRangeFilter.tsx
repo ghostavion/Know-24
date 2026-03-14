@@ -46,7 +46,7 @@ export const DateRangeFilter = ({ basePath }: DateRangeFilterProps) => {
           className={cn(
             "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
             activeRange === p.value
-              ? "bg-[#0891b2]/10 text-[#0891b2]"
+              ? "bg-[#7C3AED]/10 text-[#7C3AED]"
               : "text-muted-foreground hover:bg-accent"
           )}
         >

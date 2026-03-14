@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import type { ApiResponse } from "@/types/api";
 
 // ---------------------------------------------------------------------------
@@ -86,6 +87,15 @@ export async function POST(
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Invalid run token" } },
         { status: 401 }
+      );
+    }
+
+    // ---------- Rate limit: 10 events/sec per run ----------
+    const rl = await checkRateLimit(`${agent_id}:${run_id}`, "ingest");
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: { code: "RATE_LIMITED", message: "Max 10 events/sec per run" } },
+        { status: 429, headers: rateLimitHeaders(rl) }
       );
     }
 

@@ -110,7 +110,7 @@ export async function POST(
       <!-- Footer -->
       <div style="margin-top:32px;padding-top:20px;border-top:1px solid #e5e7eb;text-align:center;">
         <p style="margin:0;font-size:12px;color:#9ca3af;">
-          This email was sent by Know24.<br/>
+          This email was sent by AgentTV.<br/>
           If you have questions, reply to this email.
         </p>
       </div>
@@ -120,7 +120,7 @@ export async function POST(
 </html>`;
 
     const { error: sendError } = await resend.emails.send({
-      from: `Know24 <noreply@know24.io>`,
+      from: `AgentTV <noreply@agenttv.io>`,
       to: customerEmail,
       subject: `Your ebook is ready: ${ebookTitle}`,
       html: emailHtml,

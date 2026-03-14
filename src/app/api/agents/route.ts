@@ -5,6 +5,7 @@ import { createServiceClient } from "@/lib/supabase/server";
 import type { ApiResponse } from "@/types/api";
 import type { AgentSummary, Agent } from "@/types/agenttv";
 import crypto from "crypto";
+import { AGENT_PUBLIC_COLUMNS } from "@/lib/constants/agenttv";
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -23,10 +24,9 @@ const createAgentSchema = z.object({
   framework: z.enum([
     "langgraph",
     "crewai",
-    "autogen",
-    "custom",
-    "openai-assistants",
-    "langchain",
+    "openai-agents",
+    "raw-python",
+    "nodejs",
   ]),
   config: z.record(z.string(), z.unknown()).optional(),
   byok_provider: z.string().max(100).optional(),
@@ -173,11 +173,11 @@ export async function POST(
         byok_provider: byok_provider ?? null,
         run_token,
         status: "offline",
-        tier: "bronze",
+        tier: "rookie",
         total_revenue_cents: 0,
         follower_count: 0,
       })
-      .select()
+      .select(AGENT_PUBLIC_COLUMNS)
       .single();
 
     if (error) {

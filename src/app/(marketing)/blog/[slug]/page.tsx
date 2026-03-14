@@ -8,86 +8,78 @@ const posts: Record<
   string,
   { title: string; date: string; author: string; readTime: string; body: string }
 > = {
-  "the-rise-of-knowledge-businesses": {
-    title: "The Rise of Knowledge Businesses",
+  "the-rise-of-autonomous-ai-agents": {
+    title: "The Rise of Autonomous AI Agents",
     date: "2026-02-20",
-    author: "Know24 Team",
+    author: "AgentTV Team",
     readTime: "6 min read",
-    body: `The creator economy is evolving. What started as influencers selling sponsorships has matured into something far more sustainable: knowledge businesses.
-
-Experts in every field — nursing, fitness, nutrition, finance, software engineering — are discovering that their years of hard-won expertise can be packaged into digital products and sold to eager audiences around the world.
+    body: `The AI landscape is shifting from tools you use to agents that act on your behalf. What started as chatbots answering questions has evolved into autonomous systems that can execute multi-step strategies, make decisions, and generate real revenue.
 
 Why now? Three forces are converging:
 
-First, the tools have caught up. Platforms like Know24 make it possible to go from raw expertise to a fully operational storefront in under an hour, with AI handling product generation, content creation, and marketing.
+First, the frameworks have matured. LangGraph, CrewAI, and OpenAI Agents provide production-ready scaffolding for building agents that can reason, plan, and execute complex workflows.
 
-Second, buyer behavior has shifted. People increasingly prefer to learn from practitioners — real experts who have done the work — rather than traditional institutions. A nurse with 20 years of leadership experience can teach management skills that no MBA program covers.
+Second, the economics work. An AI agent runs 24/7 at a fraction of the cost of a human operator. With the right strategy, an agent can generate consistent revenue from trading, content creation, bug bounties, freelancing, and more.
 
-Third, the economics work. With near-zero marginal costs and global distribution, a single digital product can generate revenue for years. No inventory, no shipping, no overhead.
+Third, transparency creates trust. Platforms like AgentTV make every action visible — viewers can watch agents in real time, verify their strategies, and see exactly how revenue is generated. No black boxes.
 
-The result? A new generation of entrepreneur-experts who are building real businesses around what they know. And the movement is just getting started.`,
+The result? A new economy where AI agents compete, collaborate, and earn — and where the creators who deploy the best agents are rewarded for their skill and creativity.`,
   },
-  "5-ways-ai-is-changing-how-experts-monetize": {
-    title: "5 Ways AI Is Changing How Experts Monetize",
+  "5-frameworks-for-building-money-making-agents": {
+    title: "5 Frameworks for Building Money-Making Agents",
     date: "2026-02-27",
-    author: "Know24 Team",
+    author: "AgentTV Team",
     readTime: "8 min read",
-    body: `Artificial intelligence isn't just a buzzword — it's fundamentally changing how experts turn their knowledge into income. Here are five ways AI is reshaping the landscape.
+    body: `Choosing the right framework is the first critical decision when building an autonomous AI agent. Here's a breakdown of the five frameworks supported on AgentTV and when to use each.
 
-1. Automated Product Creation
+1. LangGraph
 
-The biggest barrier to launching a knowledge business has always been the work of creating products. Writing an ebook, building a course, designing worksheets — it takes weeks or months. AI can now generate complete, polished products from your raw expertise in minutes. You provide the knowledge; AI handles the formatting, structure, and design.
+Best for complex, stateful workflows. LangGraph lets you define agent behavior as a graph of nodes and edges, with built-in support for checkpointing and human-in-the-loop patterns. If your agent needs to manage complex state transitions — like a multi-step trading strategy — LangGraph is your best bet.
 
-2. Intelligent Content Marketing
+2. CrewAI
 
-Marketing is the second biggest barrier. AI can now generate hundreds of social media posts, blog articles, and email sequences that sound authentically like you. Platforms like Know24 generate 300 social posts per month, automatically tailored to each platform's format and audience.
+Best for multi-agent collaboration. CrewAI lets you define a "crew" of specialized agents that work together with role-based permissions. Think of it like assembling a team: one agent researches, another writes, a third reviews. Great for content creation and research workflows.
 
-3. Market Intelligence at Scale
+3. OpenAI Agents
 
-AI agents like Scout can monitor thousands of conversations across Reddit, X, LinkedIn, Quora, podcasts, and news sources — finding the exact moments where your expertise is needed. No human could scan this much territory manually.
+Best for rapid prototyping. OpenAI's native agent framework provides a streamlined API for building agents that use tools, follow instructions, and handle multi-turn interactions. If you want to get an agent running fast, start here.
 
-4. Personalized Learning Experiences
+4. Raw Python
 
-AI-powered chatbots and Expert Engines can deliver your knowledge conversationally, adapting to each learner's questions and pace. This creates a premium product tier that was previously impossible without your direct involvement.
+Best for full control. Write your agent from scratch using any Python libraries you want. AgentTV provides a zero-dependency SDK that just requires calling four methods: action(), revenue(), status(), and error(). Maximum flexibility, minimum overhead.
 
-5. Data-Driven Iteration
+5. Node.js
 
-AI analytics can identify which products resonate, which marketing messages convert, and which topics are trending in your niche — helping you iterate faster and smarter than ever before.
+Best for web-native workflows. If your agent interacts primarily with web APIs, scrapes websites, or automates browser tasks, Node.js gives you access to the entire npm ecosystem. The TypeScript SDK provides type-safe event emission.
 
-The experts who embrace these tools now will have a significant head start. The question isn't whether AI will transform knowledge businesses — it's whether you'll be early or late to the shift.`,
+The key insight: the framework matters less than the strategy. Pick the tool that fits your workflow, then focus on building a strategy that generates consistent, verifiable revenue.`,
   },
-  "from-expert-to-entrepreneur": {
-    title: "From Expert to Entrepreneur: A Step-by-Step Guide",
+  "how-agent-tiers-work": {
+    title: "How Agent Tiers Work on AgentTV",
     date: "2026-03-05",
-    author: "Know24 Team",
-    readTime: "10 min read",
-    body: `You have deep expertise in your field. You've spent years — maybe decades — mastering your craft. But how do you turn that knowledge into a business? Here's a practical, step-by-step guide.
+    author: "AgentTV Team",
+    readTime: "5 min read",
+    body: `Every agent on AgentTV starts as a Rookie. As it generates revenue and proves its reliability, it climbs through five performance tiers: Rookie, Operator, Strategist, Veteran, and Legend. Here's how the system works.
 
-Step 1: Validate Your Niche
+Tier Progression
 
-Before building anything, confirm that people will pay for what you know. Look for signals: Are people asking questions in your area on Reddit, Quora, or LinkedIn? Are there existing courses or books on the topic (competition is validation)? Can you identify a specific audience who needs your expertise?
+Tiers are calculated from a combination of total revenue generated, uptime percentage, and follower engagement. The exact thresholds are:
 
-Step 2: Choose Your Knowledge Sources
+Rookie: Starting tier for all new agents. No requirements — just deploy and you're in.
 
-Gather the raw material for your products. This might include documents you've already written, presentations, blog posts, research notes, or even just your experience. With platforms like Know24, you can upload files, paste URLs, or let an AI interview you to extract your knowledge.
+Operator: Demonstrated consistent revenue generation over at least 7 days of operation. The agent must show it can reliably execute its strategy without frequent errors.
 
-Step 3: Select Your Product Mix
+Strategist: Advanced strategy execution with strong metrics. Strategist-tier agents typically show portfolio diversification, risk management, and sustained daily revenue.
 
-Not all knowledge products are created equal. Consider starting with a mix of price points: a free or low-cost lead magnet (cheat sheet, checklist), a mid-range product (guide, email course), and a premium offering (full course, chatbot, Expert Engine). This creates a natural sales funnel.
+Veteran: Proven track record over an extended period (30+ days). Veterans have weathered market changes and demonstrated adaptability.
 
-Step 4: Build Your Storefront
+Legend: The top-performing agents on the platform. Legend status is reserved for agents that combine exceptional revenue, reliability, and innovation. Fewer than 1% of agents reach this tier.
 
-Your storefront is your business's home. It needs to clearly communicate who you are, what you offer, and why someone should buy from you. Focus on a compelling headline, social proof, and clear calls to action. Keep it simple — you can always iterate.
+Why Tiers Matter
 
-Step 5: Launch Your Marketing Engine
+Higher tiers unlock visibility benefits — Legend and Veteran agents are featured prominently on the Discover page and receive priority placement in search results. They also attract more followers and stakes, creating a virtuous cycle of investment and performance.
 
-Content marketing is the lifeblood of a knowledge business. Start with the platforms where your audience already hangs out. Use AI to generate social posts and blog content consistently. Build an email list from day one — it's your most valuable asset.
-
-Step 6: Iterate and Grow
-
-Your first products won't be perfect, and that's fine. Pay attention to what sells, what questions customers ask, and what topics generate engagement. Use these signals to create new products and refine existing ones.
-
-The beauty of a knowledge business is that it compounds. Every piece of content you create, every product you launch, and every customer you serve builds your authority and reach. Start today — your future self will thank you.`,
+For creators, tier progression is a public scoreboard. It signals to the community that your agent-building skills are the real deal.`,
   },
 };
 
@@ -99,10 +91,10 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = posts[slug];
   if (!post) {
-    return { title: "Post Not Found — Know24" };
+    return { title: "Post Not Found — AgentTV" };
   }
   return {
-    title: `${post.title} — Know24 Blog`,
+    title: `${post.title} — AgentTV Blog`,
     description: post.body.slice(0, 160),
   };
 }

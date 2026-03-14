@@ -4,7 +4,7 @@
 
 -- Chatbot conversations table
 CREATE TABLE public.chatbot_conversations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   business_id UUID NOT NULL REFERENCES public.businesses (id) ON DELETE CASCADE,
   product_id UUID NOT NULL REFERENCES public.products (id) ON DELETE CASCADE,
   customer_email TEXT NOT NULL,
@@ -39,7 +39,7 @@ CREATE POLICY "chatbot_conversations_public_select" ON public.chatbot_conversati
 
 -- Chatbot messages table
 CREATE TABLE public.chatbot_messages (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   conversation_id UUID NOT NULL REFERENCES public.chatbot_conversations (id) ON DELETE CASCADE,
   role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system')),
   content TEXT NOT NULL,

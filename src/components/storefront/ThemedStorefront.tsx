@@ -1009,13 +1009,13 @@ function ThemedFooter({
           </p>
           <p className="mt-1 text-xs" style={{ color: theme.colors.textMuted }}>
             <a
-              href={`https://know24.io?ref=${businessSlug}`}
+              href={`https://agenttv.io?ref=${businessSlug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="transition-opacity hover:opacity-70"
               style={{ color: theme.colors.textMuted }}
             >
-              Powered by Know24
+              Powered by AgentTV
             </a>
           </p>
         </div>
