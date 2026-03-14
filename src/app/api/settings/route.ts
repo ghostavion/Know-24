@@ -12,15 +12,14 @@ import type { ApiResponse } from "@/types/api";
 /* ------------------------------------------------------------------ */
 
 const notificationsSchema = z.object({
-  newSale: z.boolean(),
-  scoutDigest: z.boolean(),
-  weeklyReport: z.boolean(),
+  agentUpdates: z.boolean(),
+  weeklyDigest: z.boolean(),
+  productNews: z.boolean(),
 });
 
 const settingsPayload = z.object({
   firstName: z.string().max(100).optional(),
   lastName: z.string().max(100).optional(),
-  bio: z.string().max(500).optional(),
   timezone: z.string().max(50).optional(),
   notifications: notificationsSchema.optional(),
 });
@@ -37,12 +36,11 @@ interface UserRow {
   last_name: string | null;
   email: string;
   settings: {
-    bio?: string;
     timezone?: string;
     notifications?: {
-      newSale: boolean;
-      scoutDigest: boolean;
-      weeklyReport: boolean;
+      agentUpdates: boolean;
+      weeklyDigest: boolean;
+      productNews: boolean;
     };
   } | null;
 }
@@ -110,12 +108,11 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
         firstName: user.first_name,
         lastName: user.last_name,
         email: user.email,
-        bio: settings.bio ?? "",
         timezone: settings.timezone ?? "America/New_York",
         notifications: settings.notifications ?? {
-          newSale: true,
-          scoutDigest: true,
-          weeklyReport: true,
+          agentUpdates: true,
+          weeklyDigest: true,
+          productNews: false,
         },
       },
     });
@@ -175,7 +172,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
       );
     }
 
-    const { firstName, lastName, bio, timezone, notifications } = parsed.data as SettingsPayload;
+    const { firstName, lastName, timezone, notifications } = parsed.data as SettingsPayload;
 
     // Build updates — profile columns + JSONB settings
     const columnUpdates: Record<string, unknown> = {};
@@ -184,7 +181,6 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
 
     // Merge into settings JSONB
     const settingsUpdate: Record<string, unknown> = {};
-    if (bio !== undefined) settingsUpdate.bio = bio;
     if (timezone !== undefined) settingsUpdate.timezone = timezone;
     if (notifications !== undefined) settingsUpdate.notifications = notifications;
 
@@ -255,52 +251,30 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse
 
     const { supabase, userId, clerkUserId } = result;
 
-    // 1. Fetch businesses owned by this user that have active Stripe subscriptions
-    const { data: businesses } = await supabase!
-      .from("businesses")
-      .select("id, stripe_subscription_id, stripe_customer_id")
-      .eq("owner_id", userId)
-      .is("deleted_at", null);
+    // 1. Cancel any active Stripe subscription
+    const { data: userRow } = await supabase!
+      .from("users")
+      .select("stripe_subscription_id")
+      .eq("id", userId)
+      .single();
 
-    // 2. Cancel any active Stripe subscriptions
-    if (businesses && businesses.length > 0) {
-      const { getStripe } = await import("@/lib/stripe/server");
-      const stripe = getStripe();
-
-      for (const biz of businesses as Array<{
-        id: string;
-        stripe_subscription_id: string | null;
-        stripe_customer_id: string | null;
-      }>) {
-        if (biz.stripe_subscription_id) {
-          try {
-            await stripe.subscriptions.cancel(biz.stripe_subscription_id);
-          } catch {
-            // Subscription may already be canceled — continue
-          }
-        }
+    if (userRow?.stripe_subscription_id) {
+      try {
+        const { getStripe } = await import("@/lib/stripe/server");
+        const stripe = getStripe();
+        await stripe.subscriptions.cancel(userRow.stripe_subscription_id);
+      } catch {
+        // Subscription may already be canceled — continue
       }
-
-      // 3. Soft-delete all businesses
-      const bizIds = businesses.map((b: { id: string }) => b.id);
-      await supabase!
-        .from("businesses")
-        .update({
-          deleted_at: new Date().toISOString(),
-          status: "deleted",
-          subscription_status: "canceled",
-          stripe_subscription_id: null,
-        })
-        .in("id", bizIds);
     }
 
-    // 4. Soft-delete the user record
+    // 2. Soft-delete the user record
     await supabase!
       .from("users")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", userId);
 
-    // 5. Delete the Clerk user account
+    // 3. Delete the Clerk user account
     try {
       const clerkSecretKey = process.env.CLERK_SECRET_KEY;
       if (clerkSecretKey && clerkUserId) {

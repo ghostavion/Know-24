@@ -73,6 +73,17 @@ export async function POST(req: Request) {
         { onConflict: "clerk_user_id" }
       );
 
+      // Ensure a user_profiles row exists so billing/profile endpoints always find one
+      if (evt.type === "user.created") {
+        await supabase.from("user_profiles").upsert(
+          {
+            user_id: id,
+            display_name: [first_name, last_name].filter(Boolean).join(" ") || null,
+          },
+          { onConflict: "user_id" }
+        );
+      }
+
       logPlatformEvent({
         event_category: "AUTH",
         event_type: evt.type as "user.created" | "user.updated",

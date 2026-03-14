@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { Save, Trash2, Loader2, Crown, CreditCard, ExternalLink } from "lucide-react";
+import { Save, Trash2, Loader2, Crown, CreditCard, ExternalLink, Key } from "lucide-react";
 
 interface SettingsFormProps {
   user: {
@@ -14,9 +14,9 @@ interface SettingsFormProps {
 }
 
 interface NotificationPreferences {
-  newSale: boolean;
-  scoutDigest: boolean;
-  weeklyReport: boolean;
+  agentUpdates: boolean;
+  weeklyDigest: boolean;
+  productNews: boolean;
 }
 
 const TIMEZONES = [
@@ -39,15 +39,14 @@ const TIMEZONES = [
 export const SettingsForm = ({ user }: SettingsFormProps) => {
   const [firstName, setFirstName] = useState(user.firstName ?? "");
   const [lastName, setLastName] = useState(user.lastName ?? "");
-  const [bio, setBio] = useState("");
   const [timezone, setTimezone] = useState("America/New_York");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const [notifications, setNotifications] = useState<NotificationPreferences>({
-    newSale: true,
-    scoutDigest: true,
-    weeklyReport: true,
+    agentUpdates: true,
+    weeklyDigest: true,
+    productNews: false,
   });
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -73,7 +72,6 @@ export const SettingsForm = ({ user }: SettingsFormProps) => {
         body: JSON.stringify({
           firstName,
           lastName,
-          bio,
           timezone,
           notifications,
         }),
@@ -114,9 +112,9 @@ export const SettingsForm = ({ user }: SettingsFormProps) => {
 
   return (
     <form onSubmit={handleSave} className="space-y-8">
-      {/* Profile Section */}
+      {/* Account Section */}
       <div className="rounded-xl border border-border bg-card p-6">
-        <h2 className="text-base font-semibold text-foreground">Profile</h2>
+        <h2 className="text-base font-semibold text-foreground">Account</h2>
         <p className="mt-1 text-sm text-muted-foreground">
           Your personal information and preferences.
         </p>
@@ -189,28 +187,6 @@ export const SettingsForm = ({ user }: SettingsFormProps) => {
             </div>
           </div>
 
-          {/* Bio */}
-          <div>
-            <label
-              htmlFor="bio"
-              className="block text-sm font-medium text-foreground"
-            >
-              Bio
-            </label>
-            <textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              placeholder="Tell us about yourself..."
-              rows={3}
-              className={cn(
-                "mt-1.5 w-full rounded-lg border border-border bg-background px-3 py-2",
-                "text-sm text-foreground placeholder:text-muted-foreground resize-none",
-                "focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-              )}
-            />
-          </div>
-
           {/* Timezone */}
           <div>
             <label
@@ -239,6 +215,32 @@ export const SettingsForm = ({ user }: SettingsFormProps) => {
         </div>
       </div>
 
+      {/* Subscription Section */}
+      <SubscriptionSection />
+
+      {/* API Keys Section */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="flex items-center gap-2">
+          <Key className="h-5 w-5 text-primary" />
+          <h2 className="text-base font-semibold text-foreground">API Keys</h2>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Bring your own API keys for supported providers. This allows you to use
+          your own quotas and billing.
+        </p>
+
+        <div className="mt-6 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-8 text-center">
+          <Key className="mx-auto h-8 w-8 text-muted-foreground/50" />
+          <p className="mt-2 text-sm font-medium text-muted-foreground">
+            Coming soon
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            BYOK (Bring Your Own Key) support for OpenAI, Anthropic, and other
+            providers will be available in a future update.
+          </p>
+        </div>
+      </div>
+
       {/* Notifications Section */}
       <div className="rounded-xl border border-border bg-card p-6">
         <h2 className="text-base font-semibold text-foreground">
@@ -250,28 +252,25 @@ export const SettingsForm = ({ user }: SettingsFormProps) => {
 
         <div className="mt-6 space-y-4">
           <NotificationToggle
-            label="New sale"
-            description="Get notified when a customer purchases your product."
-            checked={notifications.newSale}
-            onToggle={() => handleToggle("newSale")}
+            label="Agent updates"
+            description="Get notified when your agents complete tasks or need attention."
+            checked={notifications.agentUpdates}
+            onToggle={() => handleToggle("agentUpdates")}
           />
           <NotificationToggle
-            label="Scout digest"
-            description="Daily summary of Scout-discovered opportunities."
-            checked={notifications.scoutDigest}
-            onToggle={() => handleToggle("scoutDigest")}
+            label="Weekly digest"
+            description="Weekly summary of your agent activity and usage."
+            checked={notifications.weeklyDigest}
+            onToggle={() => handleToggle("weeklyDigest")}
           />
           <NotificationToggle
-            label="Weekly report"
-            description="Weekly performance summary across all your businesses."
-            checked={notifications.weeklyReport}
-            onToggle={() => handleToggle("weeklyReport")}
+            label="Product news"
+            description="Updates about new features, improvements, and tips."
+            checked={notifications.productNews}
+            onToggle={() => handleToggle("productNews")}
           />
         </div>
       </div>
-
-      {/* Subscription Section */}
-      <SubscriptionSection />
 
       {/* Save Button and Message */}
       <div className="flex items-center gap-4">
@@ -408,9 +407,8 @@ interface NotificationToggleProps {
 
 interface SubStatus {
   active: boolean;
-  tier: "founder" | "standard" | null;
+  tier: "free" | "paid" | null;
   status: string;
-  founderMember: boolean;
 }
 
 const SubscriptionSection = () => {
@@ -429,7 +427,7 @@ const SubscriptionSection = () => {
   const openBillingPortal = async () => {
     setPortalLoading(true);
     try {
-      const res = await fetch("/api/billing-portal", { method: "POST" });
+      const res = await fetch("/api/stripe/billing-portal", { method: "POST" });
       const json = await res.json();
       if (json.data?.url) {
         window.location.href = json.data.url;
@@ -464,10 +462,10 @@ const SubscriptionSection = () => {
         {/* Current plan */}
         <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 px-4 py-3">
           <div className="flex items-center gap-3">
-            {sub.founderMember && <Crown className="h-5 w-5 text-amber-500" />}
+            {sub.tier === "paid" && <Crown className="h-5 w-5 text-primary" />}
             <div>
               <p className="text-sm font-semibold text-foreground">
-                {sub.tier === "founder" ? "Founder Plan" : sub.tier === "standard" ? "Standard Plan" : "No Plan"}
+                {sub.tier === "paid" ? "Pro Plan — $99/mo" : "Free Plan"}
               </p>
               <p className="text-xs text-muted-foreground capitalize">
                 Status: {sub.status}
@@ -485,13 +483,6 @@ const SubscriptionSection = () => {
             {sub.active ? "Active" : "Inactive"}
           </span>
         </div>
-
-        {/* Pricing note for founders */}
-        {sub.founderMember && (
-          <p className="text-xs text-amber-600 dark:text-amber-400">
-            You have founder pricing locked in at $79/mo forever.
-          </p>
-        )}
 
         {/* Manage billing */}
         {sub.active ? (
@@ -516,14 +507,14 @@ const SubscriptionSection = () => {
           </button>
         ) : (
           <a
-            href="/api/subscribe"
+            href="/pricing"
             className={cn(
               "inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2",
               "text-sm font-medium text-primary-foreground",
               "hover:bg-primary/90 transition-colors"
             )}
           >
-            Subscribe Now
+            Upgrade to Pro — $99/mo
           </a>
         )}
       </div>
