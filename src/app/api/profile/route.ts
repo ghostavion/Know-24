@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { withApiLogging } from "@/lib/logging/api-logger";
 import type { ApiResponse } from "@/types/api";
 
 interface ProfileData {
@@ -13,7 +14,7 @@ interface ProfileData {
 /**
  * GET /api/profile — Get user profile with subscription info
  */
-export async function GET(): Promise<NextResponse<ApiResponse<ProfileData>>> {
+async function _GET(_req: NextRequest): Promise<NextResponse<ApiResponse<ProfileData>>> {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json(
@@ -58,3 +59,5 @@ export async function GET(): Promise<NextResponse<ApiResponse<ProfileData>>> {
     },
   });
 }
+
+export const GET = withApiLogging(_GET, "api.profile");

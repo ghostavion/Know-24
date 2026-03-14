@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { stripe } from "@/lib/stripe/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { withApiLogging } from "@/lib/logging/api-logger";
 import type { ApiResponse } from "@/types/api";
 
 const STRIPE_PRICE_ID = "price_1TAtQgBiUcig4eGXdPcFxVee";
@@ -10,7 +11,7 @@ interface SubscribeData {
   url: string;
 }
 
-export async function POST(
+async function _POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<SubscribeData>>> {
   void request; // consume unused param
@@ -108,3 +109,5 @@ export async function POST(
     );
   }
 }
+
+export const POST = withApiLogging(_POST, "api.subscribe");

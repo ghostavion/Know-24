@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
+import { ActivityTracker } from "@/components/tracking/ActivityTracker";
 import { CookieConsent } from "@/components/compliance/CookieConsent";
 import "./globals.css";
 
@@ -48,6 +50,9 @@ export default function RootLayout({
             </QueryProvider>
           </ThemeProvider>
           <AnalyticsProvider />
+          <Suspense fallback={null}>
+            <ActivityTracker />
+          </Suspense>
           <CookieConsent />
         </body>
       </html>

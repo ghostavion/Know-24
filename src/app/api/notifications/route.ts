@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { withApiLogging } from "@/lib/logging/api-logger";
 import type { ApiResponse } from "@/types/api";
 
 // ---------------------------------------------------------------------------
@@ -22,7 +23,7 @@ interface NotificationsData {
   unread_count: number;
 }
 
-export async function GET(
+async function _GET(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<NotificationsData>>> {
   const { userId } = await auth();
@@ -77,7 +78,7 @@ const markReadSchema = z.object({
   mark_all_read: z.boolean().optional(),
 });
 
-export async function PATCH(
+async function _PATCH(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<{ updated: number }>>> {
   const { userId } = await auth();
@@ -142,3 +143,6 @@ export async function PATCH(
     { status: 400 }
   );
 }
+
+export const GET = withApiLogging(_GET, "api.notifications.list");
+export const PATCH = withApiLogging(_PATCH, "api.notifications.markRead");

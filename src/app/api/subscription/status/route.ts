@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { createServiceClient } from "@/lib/supabase/server";
+import { withApiLogging } from "@/lib/logging/api-logger";
 import type { ApiResponse } from "@/types/api";
 
 interface SubscriptionStatus {
@@ -9,7 +10,7 @@ interface SubscriptionStatus {
   status: string;
 }
 
-export async function GET(): Promise<NextResponse<ApiResponse<SubscriptionStatus>>> {
+async function _GET(_req: NextRequest): Promise<NextResponse<ApiResponse<SubscriptionStatus>>> {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json(
@@ -46,3 +47,5 @@ export async function GET(): Promise<NextResponse<ApiResponse<SubscriptionStatus
     },
   });
 }
+
+export const GET = withApiLogging(_GET, "api.subscription.status");

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
 import { resolveUserId } from "@/lib/auth/resolve-user";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { withApiLogging } from "@/lib/logging/api-logger";
 import type { ApiResponse } from "@/types/api";
 
 /* ------------------------------------------------------------------ */
@@ -60,7 +61,7 @@ async function authenticateAndResolve() {
 /* GET — fetch current settings                                        */
 /* ------------------------------------------------------------------ */
 
-export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+async function _GET(req: NextRequest): Promise<NextResponse<ApiResponse>> {
   try {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
     const rl = await checkRateLimit(ip, "api");
@@ -129,7 +130,7 @@ export async function GET(req: NextRequest): Promise<NextResponse<ApiResponse>> 
 /* POST — update settings (matches SettingsForm.tsx)                    */
 /* ------------------------------------------------------------------ */
 
-export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+async function _POST(req: NextRequest): Promise<NextResponse<ApiResponse>> {
   try {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
     const rl = await checkRateLimit(ip, "api");
@@ -224,7 +225,7 @@ export async function POST(req: NextRequest): Promise<NextResponse<ApiResponse>>
 /* DELETE — account deletion (GDPR soft-delete)                        */
 /* ------------------------------------------------------------------ */
 
-export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse>> {
+async function _DELETE(req: NextRequest): Promise<NextResponse<ApiResponse>> {
   try {
     const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
     const rl = await checkRateLimit(ip, "auth");
@@ -300,3 +301,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse<ApiResponse
     );
   }
 }
+
+export const GET = withApiLogging(_GET, "api.settings.get");
+export const POST = withApiLogging(_POST, "api.settings.update");
+export const DELETE = withApiLogging(_DELETE, "api.settings.delete");

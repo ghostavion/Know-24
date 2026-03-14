@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { createServiceClient } from "@/lib/supabase/server";
+import { withApiLogging } from "@/lib/logging/api-logger";
 import type { ApiResponse } from "@/types/api";
 import type { AgentSummary, Agent } from "@/types/agenttv";
 import crypto from "crypto";
@@ -41,7 +42,7 @@ interface AgentListData {
   total: number;
 }
 
-export async function GET(
+async function _GET(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<AgentListData>>> {
   try {
@@ -113,7 +114,7 @@ export async function GET(
 // POST /api/agents — create agent (authenticated)
 // ---------------------------------------------------------------------------
 
-export async function POST(
+async function _POST(
   request: NextRequest
 ): Promise<NextResponse<ApiResponse<Agent>>> {
   try {
@@ -198,3 +199,6 @@ export async function POST(
     );
   }
 }
+
+export const GET = withApiLogging(_GET, "api.agents.list");
+export const POST = withApiLogging(_POST, "api.agents.create");
