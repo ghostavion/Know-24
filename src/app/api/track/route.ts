@@ -68,25 +68,35 @@ export async function POST(request: Request) {
   // Extract request metadata
   const meta = extractRequestMeta(request);
 
-  // Log each event (must await — Vercel kills the function after response)
-  await Promise.all(
-    events.map((data) =>
-      logPlatformEventAsync({
-        event_category: "UI",
-        event_type: data.event_type,
-        clerk_user_id: clerkUserId,
-        session_id: data.session_id,
-        ip_address: meta.ip_address,
-        user_agent: meta.user_agent,
-        geo_country: meta.geo_country,
-        geo_city: meta.geo_city,
-        page_url: data.page_url,
-        page_route: data.page_route,
-        status: "success",
-        payload: data.payload ?? {},
-      })
-    )
-  );
+  // Log each event directly with Supabase (await to prevent Vercel kill)
+  const supabase = (await import("@/lib/supabase/server")).createServiceClient();
+
+  const rows = events.map((data) => ({
+    event_category: "UI" as const,
+    event_type: data.event_type,
+    clerk_user_id: clerkUserId,
+    session_id: data.session_id,
+    ip_address: meta.ip_address || null,
+    user_agent: meta.user_agent,
+    geo_country: meta.geo_country,
+    geo_city: meta.geo_city,
+    page_url: data.page_url,
+    page_route: data.page_route,
+    status: "success" as const,
+    payload: data.payload ?? {},
+    environment: process.env.NODE_ENV ?? "production",
+  }));
+
+  const { error: insertError } = await supabase
+    .from("platform_logs")
+    .insert(rows);
+
+  if (insertError) {
+    return NextResponse.json(
+      { ok: false, error: insertError.message, code: insertError.code },
+      { status: 500, headers: rateLimitHeaders(rateLimitResult) }
+    );
+  }
 
   return NextResponse.json(
     { ok: true, processed: events.length },
