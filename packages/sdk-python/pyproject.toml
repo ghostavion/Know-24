@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agenttv"
+version = "0.1.0"
+description = "AgentTV SDK for Python — emit events from your AI agent to the AgentTV dashboard"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+dependencies = [
+    "httpx>=0.25.0",
+]
+
+[project.urls]
+Homepage = "https://agenttv.com"
+Repository = "https://github.com/agenttv/sdk-python"

@@ -1,0 +1,29 @@
+{
+  "name": "@agenttv/sdk",
+  "version": "0.1.0",
+  "description": "AgentTV SDK for Node.js/TypeScript — emit events from your AI agent",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@agenttv/sidecar",
+  "version": "0.1.0",
+  "description": "AgentTV sidecar process — runs alongside agents in Fly.io VMs",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "tsx": "^4.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0"
+  }
+}

@@ -11,43 +11,43 @@ import {
   Gift,
   Settings,
   LayoutDashboard,
+  Bot,
+  PieChart,
+  DollarSign,
+  Store,
 } from "lucide-react";
 
-const navItems = [
+interface NavItem {
+  label: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
+interface NavSection {
+  title?: string;
+  items: NavItem[];
+}
+
+const navSections: NavSection[] = [
   {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
+    items: [
+      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Research", href: "/research", icon: Search },
+      { label: "My Ebooks", href: "/ebooks", icon: BookOpen },
+      { label: "Scout", href: "/scout", icon: Radar },
+      { label: "Credits", href: "/credits", icon: Coins },
+      { label: "Referrals", href: "/referrals", icon: Gift },
+      { label: "Settings", href: "/settings", icon: Settings },
+    ],
   },
   {
-    label: "Research",
-    href: "/research",
-    icon: Search,
-  },
-  {
-    label: "My Ebooks",
-    href: "/ebooks",
-    icon: BookOpen,
-  },
-  {
-    label: "Scout",
-    href: "/scout",
-    icon: Radar,
-  },
-  {
-    label: "Credits",
-    href: "/credits",
-    icon: Coins,
-  },
-  {
-    label: "Referrals",
-    href: "/referrals",
-    icon: Gift,
-  },
-  {
-    label: "Settings",
-    href: "/settings",
-    icon: Settings,
+    title: "AgentTV",
+    items: [
+      { label: "My Agents", href: "/agents", icon: Bot },
+      { label: "Portfolio", href: "/portfolio", icon: PieChart },
+      { label: "Earnings", href: "/earnings", icon: DollarSign },
+      { label: "Marketplace", href: "/discover", icon: Store },
+    ],
   },
 ];
 
@@ -67,25 +67,37 @@ export function DashboardSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              )}
-            >
-              <item.icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 overflow-y-auto p-4">
+        {navSections.map((section, sIdx) => (
+          <div key={sIdx} className={sIdx > 0 ? "mt-6" : ""}>
+            {section.title && (
+              <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+                {section.title}
+              </p>
+            )}
+            <div className="space-y-1">
+              {section.items.map((item) => {
+                const isActive =
+                  pathname === item.href || pathname.startsWith(item.href + "/");
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    )}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* New Ebook CTA */}
