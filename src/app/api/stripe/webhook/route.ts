@@ -191,12 +191,6 @@ async function handleCheckoutCompleted(
     ? parseInt(session.metadata.platform_fee_cents, 10)
     : 0;
 
-  // V1 ebook purchase flow
-  if (session.metadata?.type === "ebook_purchase") {
-    await handleEbookCheckout(session, supabase);
-    return;
-  }
-
   if (!productId || !businessId || !customerId) {
     // Not an AgentTV-originated session — skip silently
     return;
@@ -380,6 +374,15 @@ async function handleInvoicePaymentFailed(
       attempt_count: invoice.attempt_count,
     },
   });
+
+  // Also mark agent_subscriptions as past_due
+  await supabase
+    .from("agent_subscriptions")
+    .update({
+      status: "past_due",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("stripe_subscription_id", subscriptionId);
 }
 
 async function handleSubscriptionDeleted(
@@ -431,6 +434,24 @@ async function handleSubscriptionDeleted(
       subscription_id: subscription.id,
     },
   });
+
+  // Also cancel in agent_subscriptions and downgrade user to free tier
+  const { data: agentSub } = await supabase
+    .from("agent_subscriptions")
+    .update({
+      status: "canceled",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("stripe_subscription_id", subscription.id)
+    .select("user_id")
+    .single();
+
+  if (agentSub) {
+    await supabase
+      .from("user_profiles")
+      .update({ tier: "free" })
+      .eq("user_id", (agentSub as { user_id: string }).user_id);
+  }
 }
 
 async function handleSubscriptionUpdated(
@@ -513,6 +534,33 @@ async function handleSubscriptionUpdated(
       },
     });
   }
+
+  // Also update agent_subscriptions for AgentTV model
+  let agentSubStatus: string;
+  switch (subscription.status) {
+    case "active":
+    case "trialing":
+      agentSubStatus = "active";
+      break;
+    case "canceled":
+      agentSubStatus = "canceled";
+      break;
+    case "past_due":
+    case "unpaid":
+      agentSubStatus = "past_due";
+      break;
+    default:
+      agentSubStatus = "inactive";
+      break;
+  }
+
+  await supabase
+    .from("agent_subscriptions")
+    .update({
+      status: agentSubStatus,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("stripe_subscription_id", subscription.id);
 }
 
 // ---------------------------------------------------------------------------
@@ -554,73 +602,4 @@ async function handleUserSubscriptionCreated(
       monthly_price_cents: tierInfo.price_cents,
     })
     .eq("user_id", clerkUserId);
-}
-
-// ---------------------------------------------------------------------------
-// V1 Ebook purchase checkout handler
-// ---------------------------------------------------------------------------
-
-async function handleEbookCheckout(
-  session: Stripe.Checkout.Session,
-  supabase: ReturnType<typeof createServiceClient>
-): Promise<void> {
-  const ebookId = session.metadata?.ebook_id;
-  if (!ebookId) return;
-
-  const amountCents = session.amount_total ?? 0;
-  const customerEmail =
-    typeof session.customer_details?.email === "string"
-      ? session.customer_details.email
-      : session.customer_email ?? null;
-
-  // Update the pending order to completed
-  const { data: updatedOrder } = await supabase
-    .from("orders")
-    .update({
-      status: "completed",
-      completed_at: new Date().toISOString(),
-      stripe_payment_intent_id:
-        session.payment_intent ?? null,
-    })
-    .eq("stripe_checkout_session_id", session.id)
-    .select("id, download_token")
-    .single();
-
-  // Send purchase confirmation email with download link
-  if (customerEmail && updatedOrder) {
-    const typedOrder = updatedOrder as { id: string; download_token: string };
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://agenttv.io";
-    const downloadUrl = `${appUrl}/api/orders/download?token=${typedOrder.download_token}`;
-
-    // Fetch ebook title for email
-    const { data: ebook } = await supabase
-      .from("ebooks")
-      .select("title")
-      .eq("id", ebookId)
-      .single();
-
-    const ebookTitle = (ebook as { title: string } | null)?.title ?? "Your Ebook";
-
-    // Send email via Resend (reuse existing email infrastructure)
-    const internalSecret = process.env.INTERNAL_API_SECRET;
-    if (internalSecret) {
-      fetch(`${appUrl}/api/email/send-ebook-purchase`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${internalSecret}`,
-        },
-        body: JSON.stringify({
-          orderId: typedOrder.id,
-          customerEmail,
-          ebookId,
-          ebookTitle,
-          amountCents,
-          downloadUrl,
-        }),
-      }).catch(() => {
-        // Best-effort
-      });
-    }
-  }
 }
