@@ -87,27 +87,20 @@ export async function POST(request: Request) {
     environment: process.env.NODE_ENV ?? "production",
   }));
 
-  const { data: inserted, error: insertError } = await supabase
+  const { error: insertError } = await supabase
     .from("platform_logs")
-    .insert(rows)
-    .select("id, event_type, timestamp");
+    .insert(rows);
 
   if (insertError) {
+    console.error("[track] Insert failed:", insertError.message, insertError.code);
     return NextResponse.json(
-      {
-        ok: false,
-        error: insertError.message,
-        code: insertError.code,
-        hint: insertError.hint,
-        details: insertError.details,
-        supabase_url: process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(0, 30),
-      },
+      { ok: false, error: "Failed to log events" },
       { status: 500, headers: rateLimitHeaders(rateLimitResult) }
     );
   }
 
   return NextResponse.json(
-    { ok: true, processed: events.length, inserted: inserted?.length ?? 0, ids: inserted?.map((r: { id: string }) => r.id), db: process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(8, 40) },
+    { ok: true, processed: events.length },
     { headers: rateLimitHeaders(rateLimitResult) }
   );
 }

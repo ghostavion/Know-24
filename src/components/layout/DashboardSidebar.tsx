@@ -15,6 +15,7 @@ import {
   Plus,
   BarChart3,
   Activity,
+  MessageSquare,
 } from "lucide-react";
 
 interface NavItem {
@@ -49,6 +50,7 @@ const navSections: NavSection[] = [
     title: "Account",
     items: [
       { label: "Analytics", href: "/analytics", icon: BarChart3 },
+      { label: "Feedback", href: "/feedback", icon: MessageSquare },
       { label: "Settings", href: "/settings", icon: Settings },
     ],
   },

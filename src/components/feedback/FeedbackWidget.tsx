@@ -11,23 +11,7 @@ interface ElementInfo {
   className: string;
 }
 
-type Category = "bug" | "ux" | "feature" | "general";
-type Severity = "low" | "medium" | "high" | "critical";
-type SubmitState = "idle" | "submitting" | "success" | "error";
-
-const CATEGORIES: { value: Category; label: string }[] = [
-  { value: "bug", label: "Bug" },
-  { value: "ux", label: "UX Issue" },
-  { value: "feature", label: "Feature Request" },
-  { value: "general", label: "General" },
-];
-
-const SEVERITIES: { value: Severity; label: string }[] = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-  { value: "critical", label: "Critical" },
-];
+type SubmitState = "idle" | "capturing" | "submitting" | "success" | "error";
 
 export function FeedbackWidget() {
   // Context menu state
@@ -37,15 +21,35 @@ export function FeedbackWidget() {
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [elementInfo, setElementInfo] = useState<ElementInfo | null>(null);
-  const [category, setCategory] = useState<Category>("general");
-  const [severity, setSeverity] = useState<Severity>("medium");
   const [message, setMessage] = useState("");
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [screenshotUrl, setScreenshotUrl] = useState<string | null>(null);
+  const screenshotDataRef = useRef<string | null>(null);
 
   // Ref to the last right-click event for re-dispatching default menu
   const lastContextEvent = useRef<MouseEvent | null>(null);
   const suppressNextContext = useRef(false);
+
+  // ------ Screenshot capture ------
+  const captureScreenshot = useCallback(async (): Promise<string | null> => {
+    try {
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(document.body, {
+        logging: false,
+        useCORS: true,
+        scale: 0.5, // Half resolution to keep size reasonable
+        ignoreElements: (el) => {
+          // Don't capture the feedback widget itself
+          return el.id === "feedback-widget-root";
+        },
+      });
+      return canvas.toDataURL("image/webp", 0.7);
+    } catch (err) {
+      console.warn("[FeedbackWidget] Screenshot capture failed:", err);
+      return null;
+    }
+  }, []);
 
   // ------ Context menu interception ------
 
@@ -105,14 +109,20 @@ export function FeedbackWidget() {
 
   // ------ Actions ------
 
-  const openModal = () => {
+  const openModal = async () => {
     setMenuOpen(false);
-    setCategory("general");
-    setSeverity("medium");
     setMessage("");
-    setSubmitState("idle");
+    setSubmitState("capturing");
     setErrorMsg("");
+    setScreenshotUrl(null);
+    screenshotDataRef.current = null;
     setModalOpen(true);
+
+    // Capture screenshot immediately when modal opens (before it renders over the page)
+    const dataUrl = await captureScreenshot();
+    screenshotDataRef.current = dataUrl;
+    setScreenshotUrl(dataUrl);
+    setSubmitState("idle");
   };
 
   const showDefaultMenu = () => {
@@ -139,6 +149,11 @@ export function FeedbackWidget() {
 
   const closeModal = () => {
     setModalOpen(false);
+    // Clean up object URL if we created one
+    if (screenshotUrl) {
+      setScreenshotUrl(null);
+      screenshotDataRef.current = null;
+    }
   };
 
   // Dismiss modal on Escape
@@ -171,8 +186,8 @@ export function FeedbackWidget() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: message.trim(),
-          category,
-          severity,
+          category: "general",
+          severity: "medium",
           page_url: window.location.href,
           page_route: window.location.pathname,
           element_tag: elementInfo?.tag ?? null,
@@ -182,6 +197,7 @@ export function FeedbackWidget() {
           session_id: getSessionId(),
           context_logs: contextLogs,
           browser_info: browserInfo,
+          screenshot_base64: screenshotDataRef.current ?? null,
         }),
       });
 
@@ -204,7 +220,7 @@ export function FeedbackWidget() {
   };
 
   return (
-    <>
+    <div id="feedback-widget-root">
       {/* Custom context menu */}
       {menuOpen && (
         <div
@@ -292,50 +308,26 @@ export function FeedbackWidget() {
                   </div>
                 )}
 
-                {/* Current URL */}
-                <div className="text-xs text-muted-foreground mb-4 truncate">
-                  Page: {typeof window !== "undefined" ? window.location.href : ""}
-                </div>
-
-                {/* Category & Severity row */}
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                      Category
-                    </label>
-                    <select
-                      value={category}
-                      onChange={(e) =>
-                        setCategory(e.target.value as Category)
-                      }
-                      className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
-                    >
-                      {CATEGORIES.map((c) => (
-                        <option key={c.value} value={c.value}>
-                          {c.label}
-                        </option>
-                      ))}
-                    </select>
+                {/* Screenshot preview */}
+                {submitState === "capturing" && (
+                  <div className="mb-4 rounded-md border border-border bg-muted flex items-center justify-center h-32">
+                    <p className="text-xs text-muted-foreground animate-pulse">
+                      Capturing screenshot...
+                    </p>
                   </div>
-                  <div>
-                    <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                      Severity
-                    </label>
-                    <select
-                      value={severity}
-                      onChange={(e) =>
-                        setSeverity(e.target.value as Severity)
-                      }
-                      className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
-                    >
-                      {SEVERITIES.map((s) => (
-                        <option key={s.value} value={s.value}>
-                          {s.label}
-                        </option>
-                      ))}
-                    </select>
+                )}
+                {screenshotUrl && submitState !== "capturing" && (
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground mb-1">
+                      Screenshot captured
+                    </p>
+                    <img
+                      src={screenshotUrl}
+                      alt="Page screenshot"
+                      className="w-full rounded-md border border-border max-h-40 object-cover object-top"
+                    />
                   </div>
-                </div>
+                )}
 
                 {/* Message */}
                 <textarea
@@ -344,6 +336,7 @@ export function FeedbackWidget() {
                   placeholder="Describe what happened..."
                   rows={4}
                   className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground resize-none mb-4 focus:outline-none focus:ring-2 focus:ring-ring"
+                  autoFocus
                 />
 
                 {/* Error message */}
@@ -365,7 +358,9 @@ export function FeedbackWidget() {
                     type="button"
                     onClick={handleSubmit}
                     disabled={
-                      !message.trim() || submitState === "submitting"
+                      !message.trim() ||
+                      submitState === "submitting" ||
+                      submitState === "capturing"
                     }
                     className="px-4 py-2 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
@@ -379,6 +374,6 @@ export function FeedbackWidget() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

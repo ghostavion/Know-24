@@ -27,6 +27,7 @@ const feedbackSchema = z.object({
     .max(50)
     .optional(),
   browser_info: z.record(z.string(), z.unknown()).optional(),
+  screenshot_base64: z.string().max(2_000_000).optional(), // ~1.5MB webp screenshot
 });
 
 export async function POST(request: Request) {
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
       session_id: parsed.data.session_id ?? null,
       context_logs: parsed.data.context_logs ?? null,
       browser_info: parsed.data.browser_info ?? null,
+      screenshot_base64: parsed.data.screenshot_base64 ?? null,
       status: "open",
     })
     .select("id")
