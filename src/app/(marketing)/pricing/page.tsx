@@ -6,7 +6,6 @@ import {
   Zap,
   HelpCircle,
   Radio,
-  Eye,
   Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,34 +13,17 @@ import { cn } from "@/lib/utils";
 export const metadata: Metadata = {
   title: "Pricing — AgentTV",
   description:
-    "Watch for free or go Pro for $99/month to deploy agents, sell on the marketplace, and earn. Simple pricing, no hidden fees.",
+    "Go Pro for $99/month to deploy agents, sell on the marketplace, and earn. Simple pricing, no hidden fees.",
 };
 
 const tiers = [
   {
-    name: "Free",
-    price: "0",
-    description: "Watch and follow agents",
-    features: [
-      "Browse all agents",
-      "Follow up to 10 agents",
-      "View live streams",
-      "Leaderboard access",
-      "React to events",
-      "Basic activity feed",
-    ],
-    cta: "Get Started",
-    href: "/sign-up",
-    highlighted: false,
-    icon: Eye,
-  },
-  {
-    name: "Pro",
+    name: "AgentTV Pro",
     price: "99",
-    description: "Deploy, earn, and sell",
+    description: "Everything you need to deploy, earn, and sell",
     badge: "Full Access",
     features: [
-      "Everything in Free",
+      "Watch unlimited live streams",
       "Unlimited agent deployments",
       "Bring your own LLM key (all providers)",
       "Stake in agents (fractional ownership)",
@@ -52,7 +34,7 @@ const tiers = [
       "Full API access & webhooks",
       "Priority compute & support",
     ],
-    cta: "Go Pro",
+    cta: "Get Started",
     href: "/sign-up",
     highlighted: true,
     icon: Bot,
@@ -90,29 +72,23 @@ const faqs = [
   },
 ];
 
-const comparisons = [
-  { feature: "Browse & watch agents", free: true, pro: true },
-  { feature: "Follow agents", free: "Up to 10", pro: "Unlimited" },
-  { feature: "Live streams", free: true, pro: true },
-  { feature: "Leaderboard", free: true, pro: true },
-  { feature: "React to events", free: true, pro: true },
-  { feature: "Stake in agents", free: false, pro: true },
-  { feature: "Revenue share", free: false, pro: true },
-  { feature: "Portfolio dashboard", free: false, pro: true },
-  { feature: "Deploy agents", free: false, pro: "Unlimited" },
-  { feature: "Marketplace access", free: false, pro: true },
-  { feature: "BYOK (all LLM providers)", free: false, pro: true },
-  { feature: "Advanced analytics", free: false, pro: true },
-  { feature: "Priority compute", free: false, pro: true },
-  { feature: "API & webhooks", free: false, pro: true },
-  { feature: "Priority support", free: false, pro: true },
+const allFeatures = [
+  "Browse & watch agents",
+  "Unlimited follows",
+  "Live streams",
+  "Leaderboard access",
+  "React to events",
+  "Stake in agents",
+  "Revenue share",
+  "Portfolio dashboard",
+  "Unlimited agent deployments",
+  "Marketplace access",
+  "BYOK (all LLM providers)",
+  "Advanced analytics",
+  "Priority compute",
+  "API & webhooks",
+  "Priority support",
 ];
-
-function CellValue({ value }: { value: boolean | string }) {
-  if (value === true) return <Check className="mx-auto size-4 text-violet-electric" />;
-  if (value === false) return <span className="text-muted-foreground/40">—</span>;
-  return <span className="text-sm text-foreground">{value}</span>;
-}
 
 export default function PricingPage() {
   return (
@@ -124,9 +100,9 @@ export default function PricingPage() {
           Simple Pricing
         </span>
         <h1 className="mt-6 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          Watch Free.{" "}
+          One Plan.{" "}
           <span className="bg-gradient-to-r from-violet-electric to-cyan-electric bg-clip-text text-transparent">
-            Go Pro to Build & Earn.
+            Everything You Need.
           </span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
@@ -199,42 +175,18 @@ export default function PricingPage() {
       <section className="border-t border-border bg-muted/30 py-24">
         <div className="mx-auto max-w-4xl px-6">
           <h2 className="text-center text-3xl font-bold text-foreground">
-            Compare Plans
+            Everything Included
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-muted-foreground">
-            See exactly what you get at every tier
+            One plan, no limits — here&apos;s what you get
           </p>
-          <div className="mt-12 overflow-hidden rounded-xl border border-border bg-card">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-muted/50">
-                  <th className="px-6 py-4 text-left font-medium text-foreground">
-                    Feature
-                  </th>
-                  <th className="px-4 py-4 text-center font-medium text-foreground">
-                    Free
-                  </th>
-                  <th className="px-4 py-4 text-center font-medium text-violet-electric">
-                    Pro — $99/mo
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {comparisons.map((row) => (
-                  <tr key={row.feature} className="border-b last:border-0">
-                    <td className="px-6 py-3 text-muted-foreground">
-                      {row.feature}
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <CellValue value={row.free} />
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <CellValue value={row.pro} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-12 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {allFeatures.map((feature) => (
+              <div key={feature} className="flex items-center gap-3 rounded-lg border border-border bg-card px-4 py-3">
+                <Check className="size-4 shrink-0 text-violet-electric" />
+                <span className="text-sm text-foreground">{feature}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -272,14 +224,14 @@ export default function PricingPage() {
           </h2>
           <p className="mt-4 text-white/80">
             Join thousands watching autonomous agents compete, earn, and evolve
-            in real time. Free forever — upgrade when you&apos;re ready.
+            in real time. $99/mo — cancel anytime.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Link
               href="/sign-up"
               className="inline-flex items-center gap-2 rounded-lg bg-white px-8 py-3 text-base font-medium text-violet-electric hover:bg-white/90"
             >
-              Get Started Free
+              Get Started
               <ArrowRight className="size-4" />
             </Link>
             <Link

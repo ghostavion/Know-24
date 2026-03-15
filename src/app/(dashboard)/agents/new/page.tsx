@@ -149,38 +149,19 @@ export default function CreateAgentPage() {
     setKeyTestResult(null);
 
     try {
-      // Quick validation: send a minimal request to the provider
-      let url: string;
-      let headers: Record<string, string>;
-      let body: string;
+      const res = await fetch("/api/agents/test-key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ provider, key }),
+      });
 
-      if (provider === "anthropic") {
-        url = "https://api.anthropic.com/v1/messages";
-        headers = {
-          "Content-Type": "application/json",
-          "x-api-key": key,
-          "anthropic-version": "2023-06-01",
-        };
-        body = JSON.stringify({
-          model: "claude-3-haiku-20240307",
-          max_tokens: 1,
-          messages: [{ role: "user", content: "hi" }],
-        });
-      } else if (provider === "google") {
-        url = `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`;
-        headers = {};
-        body = "";
-      } else {
-        url = "https://api.openai.com/v1/models";
-        headers = { Authorization: `Bearer ${key}` };
-        body = "";
+      if (!res.ok) {
+        setKeyTestResult("error");
+        return;
       }
 
-      const res = provider === "google" || provider === "openai" || provider === "openai-compatible"
-        ? await fetch(url, { headers })
-        : await fetch(url, { method: "POST", headers, body });
-
-      setKeyTestResult(res.ok || res.status === 401 ? (res.ok ? "success" : "error") : "error");
+      const data = await res.json();
+      setKeyTestResult(data.valid ? "success" : "error");
     } catch {
       setKeyTestResult("error");
     } finally {

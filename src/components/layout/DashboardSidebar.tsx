@@ -62,14 +62,14 @@ export function DashboardSidebar() {
   return (
     <aside className="flex w-64 flex-col border-r border-border bg-sidebar">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-2 border-b border-border px-6">
+      <Link href="/" className="flex h-16 items-center gap-2 border-b border-border px-6 hover:bg-sidebar-accent transition-colors">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-electric text-white">
           <Radio className="h-4 w-4" />
         </div>
         <span className="text-lg font-semibold text-sidebar-foreground">
           AgentTV
         </span>
-      </div>
+      </Link>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-4">
