@@ -13,8 +13,10 @@ import {
   Users,
   DollarSign,
   Clock,
+  Terminal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { AgentSummary, AgentFramework } from "@/types/agenttv";
 
 const FRAMEWORK_LABELS: Record<AgentFramework, { label: string; color: string }> = {
@@ -85,6 +87,7 @@ export default function AgentsPage() {
             a.slug === slug ? { ...a, status: finalStatus as AgentSummary["status"] } : a
           )
         );
+        toast.success(isRunning ? "Agent stopped" : "Agent started");
       } else {
         // Revert on failure
         setAgents((prev) =>
@@ -93,7 +96,7 @@ export default function AgentsPage() {
           )
         );
         const json = await res.json().catch(() => ({}));
-        console.error("[agents] Toggle failed:", json.error?.message);
+        toast.error(json.error?.message ?? `Failed to ${endpoint} agent`);
       }
     } catch (err) {
       // Revert on error
@@ -102,6 +105,7 @@ export default function AgentsPage() {
           a.slug === slug ? { ...a, status: currentStatus as AgentSummary["status"] } : a
         )
       );
+      toast.error(`Failed to ${endpoint} agent`);
       console.error("[agents] Toggle failed:", err);
     }
   }
@@ -165,7 +169,7 @@ export default function AgentsPage() {
               >
                 {/* Status + Name */}
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2.5">
+                  <Link href={`/agents/${agent.slug}/monitor`} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity">
                     <div
                       className={`size-2.5 rounded-full ${
                         agent.status === "running"
@@ -176,7 +180,7 @@ export default function AgentsPage() {
                       }`}
                     />
                     <h3 className="font-semibold">{agent.name}</h3>
-                  </div>
+                  </Link>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${fw.color}`}>
                     {fw.label}
                   </span>
@@ -226,30 +230,27 @@ export default function AgentsPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => toggleAgent(agent.slug, agent.status)}
-                    className="flex-1"
                   >
                     {agent.status === "running" ? (
-                      <>
-                        <Square className="size-3" />
-                        Stop
-                      </>
+                      <Square className="size-3" />
                     ) : (
-                      <>
-                        <Play className="size-3" />
-                        Start
-                      </>
+                      <Play className="size-3" />
                     )}
                   </Button>
-                  <Link href={`/agents/${agent.slug}/edit`} className="flex-1">
+                  <Link href={`/agents/${agent.slug}/monitor`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
-                      <Pencil className="size-3" />
-                      Edit
+                      <Terminal className="size-3" />
+                      Monitor
                     </Button>
                   </Link>
-                  <Link href={`/agent/${agent.slug}`} className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full">
+                  <Link href={`/agents/${agent.slug}/edit`}>
+                    <Button variant="ghost" size="sm">
+                      <Pencil className="size-3" />
+                    </Button>
+                  </Link>
+                  <Link href={`/agent/${agent.slug}`}>
+                    <Button variant="ghost" size="sm">
                       <Eye className="size-3" />
-                      Stream
                     </Button>
                   </Link>
                 </div>

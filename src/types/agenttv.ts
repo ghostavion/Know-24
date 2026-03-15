@@ -17,7 +17,7 @@ export type AgentTier = "rookie" | "operator" | "strategist" | "veteran" | "lege
 export type AgentStatus = "running" | "starting" | "offline" | "paused" | "stopped" | "error" | "deleted";
 
 /** Event types emitted by the sidecar */
-export type EventType = "action" | "revenue" | "status" | "error";
+export type EventType = "action" | "revenue" | "status" | "error" | "heartbeat" | "log";
 
 /** Reaction emoji set */
 export type ReactionKind = "fire" | "facepalm" | "money" | "eyes";
