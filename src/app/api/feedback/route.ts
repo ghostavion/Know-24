@@ -16,18 +16,19 @@ const feedbackSchema = z.object({
     .optional()
     .default("medium"),
   page_url: z.string().min(1).max(2048),
-  page_route: z.string().max(500).optional(),
-  element_tag: z.string().max(100).optional(),
-  element_text: z.string().max(200).optional(),
-  element_id: z.string().max(200).optional(),
-  element_class: z.string().max(300).optional(),
-  session_id: z.string().optional(),
+  page_route: z.string().max(500).nullable().optional(),
+  element_tag: z.string().max(100).nullable().optional(),
+  element_text: z.string().max(500).nullable().optional(),
+  element_id: z.string().max(200).nullable().optional(),
+  element_class: z.string().max(1000).nullable().optional(),
+  session_id: z.string().nullable().optional(),
   context_logs: z
     .array(z.record(z.string(), z.unknown()))
     .max(50)
+    .nullable()
     .optional(),
-  browser_info: z.record(z.string(), z.unknown()).optional(),
-  screenshot_base64: z.string().max(2_000_000).optional(), // ~1.5MB webp screenshot
+  browser_info: z.record(z.string(), z.unknown()).nullable().optional(),
+  screenshot_base64: z.string().max(5_000_000).nullable().optional(),
 });
 
 export async function POST(request: Request) {
