@@ -22,6 +22,7 @@ import {
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 // ---------------------------------------------------------------------------
 // Schema
@@ -208,11 +209,11 @@ export default function CreateAgentPage() {
       } else {
         const json = await res.json();
         console.error("[create-agent] Error:", json.error);
-        alert(json.error?.message ?? "Failed to create agent");
+        toast.error(json.error?.message ?? "Failed to create agent");
       }
     } catch (err) {
       console.error("[create-agent] Error:", err);
-      alert("Failed to create agent");
+      toast.error("Failed to create agent");
     } finally {
       setSubmitting(false);
     }

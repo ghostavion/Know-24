@@ -246,7 +246,7 @@ export default function AgentsPage() {
                       Edit
                     </Button>
                   </Link>
-                  <Link href={`/watch/${agent.slug}`} className="flex-1">
+                  <Link href={`/agent/${agent.slug}`} className="flex-1">
                     <Button variant="outline" size="sm" className="w-full">
                       <Eye className="size-3" />
                       Stream

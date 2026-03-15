@@ -15,6 +15,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import type { Agent } from "@/types/agenttv";
 
 // ---------------------------------------------------------------------------
@@ -106,11 +107,11 @@ export default function EditAgentPage() {
         reset(data);
       } else {
         const json = await res.json();
-        alert(json.error?.message ?? "Failed to save");
+        toast.error(json.error?.message ?? "Failed to save");
       }
     } catch (err) {
       console.error("[edit-agent] Save failed:", err);
-      alert("Failed to save changes");
+      toast.error("Failed to save changes");
     } finally {
       setSaving(false);
     }
@@ -129,7 +130,7 @@ export default function EditAgentPage() {
           setAgent({ ...agent, status: "offline" } as Agent);
         } else {
           const json = await res.json();
-          alert(json.error?.message ?? "Failed to stop agent");
+          toast.error(json.error?.message ?? "Failed to stop agent");
         }
       } else {
         // Start agent via dedicated endpoint
@@ -146,12 +147,12 @@ export default function EditAgentPage() {
           setAgent({ ...agent, status: "running" } as Agent);
         } else {
           const json = await res.json();
-          alert(json.error?.message ?? "Failed to start agent");
+          toast.error(json.error?.message ?? "Failed to start agent");
         }
       }
     } catch (err) {
       console.error("[edit-agent] Toggle failed:", err);
-      alert("Network error while toggling agent");
+      toast.error("Network error while toggling agent");
     } finally {
       setToggling(false);
     }
@@ -165,11 +166,11 @@ export default function EditAgentPage() {
         router.push("/agents");
       } else {
         const json = await res.json();
-        alert(json.error?.message ?? "Failed to delete");
+        toast.error(json.error?.message ?? "Failed to delete");
       }
     } catch (err) {
       console.error("[edit-agent] Delete failed:", err);
-      alert("Failed to delete agent");
+      toast.error("Failed to delete agent");
     } finally {
       setDeleting(false);
     }

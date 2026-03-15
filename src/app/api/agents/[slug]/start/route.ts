@@ -231,7 +231,7 @@ export async function POST(
 
     if (!flyRes.ok) {
       const flyErr = await flyRes.text();
-      console.error("[agents/start] Fly.io error:", flyErr);
+      console.error("[agents/start] Fly.io error:", flyRes.status, flyErr);
 
       // Clean up the run record
       await supabase
@@ -239,8 +239,15 @@ export async function POST(
         .update({ status: "crashed", error_message: `Fly.io: ${flyRes.status}`, ended_at: new Date().toISOString() })
         .eq("id", runId);
 
+      const userMessage =
+        flyRes.status === 404
+          ? "Agent compute infrastructure is not yet configured. The Fly.io app needs to be created first."
+          : flyRes.status === 400
+            ? "Agent compute infrastructure is not ready. Fly.io returned a configuration error — this usually means the app or Docker images haven't been set up yet."
+            : `Compute provider error (${flyRes.status}). Please try again later.`;
+
       return NextResponse.json(
-        { error: { code: "FLY_ERROR", message: `Failed to create machine: ${flyRes.status}` } },
+        { error: { code: "FLY_ERROR", message: userMessage } },
         { status: 502 }
       );
     }
