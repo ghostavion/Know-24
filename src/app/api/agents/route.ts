@@ -50,6 +50,7 @@ async function _GET(
     const sort = searchParams.get("sort") ?? "newest";
     const status = searchParams.get("status");
     const framework = searchParams.get("framework");
+    const owner = searchParams.get("owner");
     const limit = Math.min(Number(searchParams.get("limit") ?? 20), 100);
     const offset = Math.max(Number(searchParams.get("offset") ?? 0), 0);
 
@@ -62,6 +63,18 @@ async function _GET(
         { count: "exact" }
       )
       .neq("status", "deleted");
+
+    // Filter to current user's agents
+    if (owner === "me") {
+      const { userId } = await auth();
+      if (!userId) {
+        return NextResponse.json(
+          { error: { code: "UNAUTHORIZED", message: "Not signed in" } },
+          { status: 401 }
+        );
+      }
+      query = query.eq("owner_id", userId);
+    }
 
     if (status) {
       query = query.eq("status", status);

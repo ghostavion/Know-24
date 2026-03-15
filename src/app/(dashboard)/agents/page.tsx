@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useAuth } from "@clerk/nextjs";
 import {
   Bot,
   Plus,
@@ -16,7 +15,6 @@ import {
   Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { createAuthenticatedBrowserClient } from "@/lib/supabase/client";
 import type { AgentSummary, AgentFramework } from "@/types/agenttv";
 
 const FRAMEWORK_LABELS: Record<AgentFramework, { label: string; color: string }> = {
@@ -41,24 +39,16 @@ function formatUptime(createdAt: string): string {
 }
 
 export default function AgentsPage() {
-  const { getToken } = useAuth();
   const [agents, setAgents] = useState<AgentSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const supabase = await createAuthenticatedBrowserClient(getToken);
-        const { data, error } = await supabase
-          .from("agents")
-          .select(
-            "id, name, slug, description, framework, status, tier, total_revenue_cents, follower_count, created_at"
-          )
-          .neq("status", "deleted")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        setAgents((data ?? []) as AgentSummary[]);
+        const res = await fetch("/api/agents?owner=me&limit=100");
+        if (!res.ok) throw new Error("Failed to load agents");
+        const json = await res.json();
+        setAgents((json.data?.agents ?? []) as AgentSummary[]);
       } catch (err) {
         console.error("[agents] Failed to load:", err);
       } finally {
@@ -66,7 +56,7 @@ export default function AgentsPage() {
       }
     }
     load();
-  }, [getToken]);
+  }, []);
 
   async function toggleAgent(slug: string, currentStatus: string) {
     const isRunning = currentStatus === "running" || currentStatus === "starting";
